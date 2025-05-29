@@ -142,6 +142,11 @@ export default function Dashboard() {
     router.push(`/preview/${documentId}`)
   }
 
+  const handleLiveView = (documentId) => {
+    // Open live view in new tab
+    window.open(`/live/${documentId}`, '_blank')
+  }
+
   const handleDuplicate = async (documentId) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/api/documents/${documentId}/duplicate`)
@@ -440,6 +445,17 @@ export default function Dashboard() {
                                     >
                                       <Eye className="w-4 h-4 mr-2" />
                                       Preview
+                                    </button>
+                                    
+                                    <button
+                                      onClick={() => {
+                                        handleLiveView(document.id)
+                                        setShowDropdown(null)
+                                      }}
+                                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                    >
+                                      <FileText className="w-4 h-4 mr-2" />
+                                      Live View
                                     </button>
                                     
                                     <button

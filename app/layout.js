@@ -1,17 +1,23 @@
 import './globals.css'
 import { Toaster } from 'react-hot-toast'
+import Header from './components/Header'
+import Footer from './components/Footer'
 
 export const metadata = {
-  title: 'SignApp - Document Signing Made Easy',
-  description: 'A modern document signing application like DocuSign',
+  title: 'SignFlow - Professional Document Signing',
+  description: 'Professional document signing made simple. Create, share, and sign documents with ease.',
 }
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <div className="min-h-screen bg-gray-50">
-          {children}
+        <div className="min-h-screen bg-gray-50 flex flex-col">
+          <Header />
+          <main className="flex-1">
+            {children}
+          </main>
+          <Footer />
         </div>
         <Toaster 
           position="top-right"

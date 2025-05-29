@@ -24,7 +24,8 @@ import {
   ZoomIn,
   ZoomOut,
   User,
-  Mail
+  Mail,
+  Users
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import axios from 'axios'
@@ -437,6 +438,17 @@ export default function NewDocumentEditor() {
     )
   }
 
+  // Toggle field mandatory status
+  const toggleFieldMandatory = (fieldId) => {
+    setFields(prev => prev.map(field => 
+      field.id === fieldId 
+        ? { ...field, required: !field.required }
+        : field
+    ))
+    const field = fields.find(f => f.id === fieldId)
+    toast.success(`Field marked as ${field?.required ? 'optional' : 'mandatory'}`)
+  }
+
   const handleSignatureSave = (fieldId, signatureDataUrl) => {
     setFieldSignatures(prev => ({
       ...prev,
@@ -480,28 +492,28 @@ export default function NewDocumentEditor() {
           return {
             ...baseStyles,
             background: fieldColors[field.id] || field.backgroundColor || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            border: `2px solid ${isSelected ? '#667eea' : isDraggedField ? '#5a67d8' : '#e2e8f0'}`,
+            border: `2px solid ${isSelected ? '#667eea' : isDraggedField ? '#5a67d8' : field.required ? '#ef4444' : '#e2e8f0'}`,
             borderRadius: '8px',
           }
         case 'text':
           return {
             ...baseStyles,
             background: fieldColors[field.id] || field.backgroundColor || '#ffffff',
-            border: `2px solid ${isSelected ? '#3b82f6' : isDraggedField ? '#2563eb' : '#e2e8f0'}`,
+            border: `2px solid ${isSelected ? '#3b82f6' : isDraggedField ? '#2563eb' : field.required ? '#ef4444' : '#e2e8f0'}`,
             borderRadius: '6px',
           }
         case 'checkbox':
           return {
             ...baseStyles,
             background: fieldColors[field.id] || field.backgroundColor || '#f8fafc',
-            border: `2px solid ${isSelected ? '#10b981' : isDraggedField ? '#059669' : '#e2e8f0'}`,
+            border: `2px solid ${isSelected ? '#10b981' : isDraggedField ? '#059669' : field.required ? '#ef4444' : '#e2e8f0'}`,
             borderRadius: '6px',
           }
         case 'date':
           return {
             ...baseStyles,
             background: fieldColors[field.id] || field.backgroundColor || '#fefefe',
-            border: `2px solid ${isSelected ? '#f59e0b' : isDraggedField ? '#d97706' : '#e2e8f0'}`,
+            border: `2px solid ${isSelected ? '#f59e0b' : isDraggedField ? '#d97706' : field.required ? '#ef4444' : '#e2e8f0'}`,
             borderRadius: '6px',
           }
         default:
@@ -661,6 +673,24 @@ export default function NewDocumentEditor() {
             >
               <X className="w-3 h-3" />
             </button>
+            
+            <div className="w-px h-4 bg-gray-600"></div>
+            
+            {/* Mandatory Toggle Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                toggleFieldMandatory(field.id)
+              }}
+              className={`p-1 rounded transition-colors text-xs font-medium ${
+                field.required 
+                  ? 'bg-red-600 text-white hover:bg-red-700' 
+                  : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+              }`}
+              title={field.required ? 'Mark as optional' : 'Mark as mandatory'}
+            >
+              {field.required ? 'REQ' : 'OPT'}
+            </button>
           </div>
         )}
 
@@ -679,6 +709,13 @@ export default function NewDocumentEditor() {
             <div className="w-6 h-6 bg-white rounded-full shadow-lg flex items-center justify-center border border-gray-200">
               <Icon className="w-3 h-3 text-gray-600" />
             </div>
+          </div>
+        )}
+
+        {/* Mandatory Field Indicator */}
+        {field.required && (
+          <div className="absolute -top-1 -left-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg z-10">
+            *
           </div>
         )}
 
@@ -1085,13 +1122,43 @@ export default function NewDocumentEditor() {
               <span className="hidden sm:inline text-sm text-gray-500">
                 {fields.length} fields, {signers.length} signers
               </span>
+              
+              {/* Share Button */}
+              <button
+                onClick={() => router.push(`/share/${documentFile?.id || 'new'}`)}
+                className="btn-secondary flex items-center space-x-2 text-sm md:text-base px-3 md:px-4 py-2"
+              >
+                <Users className="w-4 h-4" />
+                <span className="hidden sm:inline">Share</span>
+              </button>
+              
+              {/* Live View Button */}
+              <button
+                onClick={() => {
+                  // Create a temporary document for live view
+                  const tempDoc = {
+                    name: documentFile.name,
+                    fields: fields,
+                    data: documentFile.data || documentFile.url,
+                    id: 'preview'
+                  }
+                  sessionStorage.setItem('liveViewDocument', JSON.stringify(tempDoc))
+                  window.open(`/live/preview`, '_blank')
+                }}
+                className="btn-secondary flex items-center space-x-2 text-sm md:text-base px-3 md:px-4 py-2"
+                title="Preview how this document will look to signers"
+              >
+                <Eye className="w-4 h-4" />
+                <span className="hidden sm:inline">Live View</span>
+              </button>
+              
               <button
                 onClick={() => setShowSignerModal(true)}
                 disabled={uploading}
                 className="btn-primary flex items-center space-x-2 text-sm md:text-base px-3 md:px-4 py-2"
               >
                 {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                <span className="hidden sm:inline">{uploading ? 'Uploading...' : 'Upload & Send'}</span>
+                <span className="hidden sm:inline">{uploading ? 'Uploading...' : 'Quick Send'}</span>
                 <span className="sm:hidden">{uploading ? '...' : 'Send'}</span>
               </button>
             </div>
@@ -1247,6 +1314,7 @@ export default function NewDocumentEditor() {
           </div>
         </div>
 
+        sidebarOpen && (
         {sidebarOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden sidebar-overlay" onClick={() => setSidebarOpen(false)} />
         )}

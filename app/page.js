@@ -2,16 +2,14 @@
 
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Upload, FileText, ArrowRight, X, Loader2 } from 'lucide-react'
+import { Upload, FileText, Zap, Shield, Users, ArrowRight, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function HomePage() {
   const router = useRouter()
-  const [selectedFile, setSelectedFile] = useState(null)
-  const [filePreview, setFilePreview] = useState(null)
   const [isProcessing, setIsProcessing] = useState(false)
 
-  // Handle file drop
+  // Handle file drop - directly navigate to editor
   const onDrop = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0]
     if (!file) return
@@ -47,22 +45,20 @@ export default function HomePage() {
     reader.onload = (e) => {
       const fileData = e.target.result
       
-      setSelectedFile({
+      const selectedFile = {
         name: file.name,
         size: file.size,
         type: file.type,
         data: fileData
-      })
-
-      // Create preview for images
-      if (file.type.startsWith('image/')) {
-        setFilePreview(fileData)
-      } else {
-        setFilePreview(null)
       }
 
-      setIsProcessing(false)
+      // Store file in sessionStorage
+      sessionStorage.setItem('pendingDocument', JSON.stringify(selectedFile))
+      
       toast.success('Document loaded successfully!')
+      
+      // Navigate directly to editor
+      router.push('/editor/new')
     }
 
     reader.onerror = () => {
@@ -71,7 +67,7 @@ export default function HomePage() {
     }
 
     reader.readAsDataURL(file)
-  }, [])
+  }, [router])
 
   // Handle file input change
   const handleFileChange = (e) => {
@@ -81,187 +77,176 @@ export default function HomePage() {
     }
   }
 
-  // Proceed to editor
-  const proceedToEditor = () => {
-    if (!selectedFile) return
-
-    // Store file in sessionStorage
-    sessionStorage.setItem('pendingDocument', JSON.stringify(selectedFile))
-    
-    // Navigate to editor
-    router.push('/editor/new')
+  // Handle drag events
+  const handleDragOver = (e) => {
+    e.preventDefault()
   }
 
-  // Clear selection
-  const clearSelection = () => {
-    setSelectedFile(null)
-    setFilePreview(null)
-  }
-
-  // Format file size
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
-
-  // Get file type display name
-  const getFileTypeDisplay = (type) => {
-    const typeMap = {
-      'application/pdf': 'PDF Document',
-      'image/jpeg': 'JPEG Image',
-      'image/jpg': 'JPG Image',
-      'image/png': 'PNG Image',
-      'image/gif': 'GIF Image',
-      'image/webp': 'WebP Image',
-      'application/msword': 'Word Document',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Word Document',
-      'text/plain': 'Text Document',
-      'application/rtf': 'RTF Document'
+  const handleDrop = (e) => {
+    e.preventDefault()
+    const files = Array.from(e.dataTransfer.files)
+    if (files.length > 0) {
+      onDrop(files)
     }
-    return typeMap[type] || 'Document'
   }
+
+  const features = [
+    {
+      icon: Zap,
+      title: 'Lightning Fast',
+      description: 'Upload and start editing documents in seconds'
+    },
+    {
+      icon: Shield,
+      title: 'Secure & Compliant',
+      description: 'Bank-level security with legal compliance'
+    },
+    {
+      icon: Users,
+      title: 'Multi-Signer Support',
+      description: 'Add multiple signers with custom workflows'
+    }
+  ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-gray-900">SignApp</h1>
+    <div className="bg-white">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+              Professional Document
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                Signing Made Simple
+              </span>
+            </h1>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
+              Upload any document and transform it into a professional signing experience. 
+              Add fields, manage signers, and track progress all in one place.
+            </p>
+
+            {/* Upload Area */}
+            <div className="max-w-2xl mx-auto mb-16">
+              <div
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                className="relative group"
+              >
+                <label
+                  htmlFor="file-upload"
+                  className="block w-full p-16 border-2 border-dashed border-gray-300 rounded-2xl hover:border-blue-400 hover:bg-blue-50/30 transition-all duration-300 cursor-pointer group-hover:scale-[1.02]"
+                >
+                  <div className="text-center">
+                    {isProcessing ? (
+                      <div className="flex flex-col items-center">
+                        <Loader2 className="w-16 h-16 text-blue-500 animate-spin mb-4" />
+                        <span className="text-xl font-medium text-blue-600">Processing document...</span>
+                        <p className="text-gray-500 mt-2">Please wait while we prepare your document</p>
+                      </div>
+                    ) : (
+                      <>
+                        <Upload className="w-16 h-16 text-gray-400 group-hover:text-blue-500 mx-auto mb-6 transition-colors" />
+                        <span className="text-2xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors block mb-2">
+                          Drop your document here
+                        </span>
+                        <span className="text-lg text-gray-600 block mb-4">
+                          or click to browse files
+                        </span>
+                        <div className="inline-flex items-center space-x-2 text-sm text-gray-500 bg-gray-100 px-4 py-2 rounded-full">
+                          <FileText className="w-4 h-4" />
+                          <span>PDF, Images, Word, Text files up to 50MB</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <input
+                    id="file-upload"
+                    type="file"
+                    className="sr-only"
+                    accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.txt,.rtf"
+                    onChange={handleFileChange}
+                    disabled={isProcessing}
+                  />
+                </label>
+              </div>
             </div>
-            
-            <div className="flex items-center space-x-4">
+
+            {/* Quick Action */}
+            <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
               <button
                 onClick={() => router.push('/dashboard')}
-                className="btn-secondary flex items-center space-x-2"
+                className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
               >
-                <FileText className="w-4 h-4" />
-                <span>Dashboard</span>
+                <span>View existing documents</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {!selectedFile ? (
-          /* File Upload Section */
-          <div className="text-center">
-            <div className="mb-8">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                Upload Your Document
-              </h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Upload any document to add signature fields, text boxes, and more. 
-                Supports PDF, images, Word documents, and text files.
-              </p>
-            </div>
+      {/* Features Section */}
+      <div className="bg-gray-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Why Choose SignFlow?
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Built for professionals who need reliable, secure, and efficient document signing
+            </p>
+          </div>
 
-            {/* Upload Area */}
-            <div className="max-w-xl mx-auto">
-              <label
-                htmlFor="file-upload"
-                className="group relative block w-full p-12 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-400 hover:bg-blue-50/50 transition-all duration-200 cursor-pointer"
-              >
-                <div className="text-center">
-                  <Upload className="w-12 h-12 text-gray-400 group-hover:text-blue-500 mx-auto mb-4 transition-colors" />
-                  <span className="text-lg font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
-                    Click to upload or drag and drop
-                  </span>
-                  <p className="text-sm text-gray-500 mt-2">
-                    PDF, Images, Word, Text files up to 50MB
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((feature, index) => {
+              const Icon = feature.icon
+              return (
+                <div
+                  key={index}
+                  className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mb-6">
+                    <Icon className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600">
+                    {feature.description}
                   </p>
                 </div>
-                <input
-                  id="file-upload"
-                  type="file"
-                  className="sr-only"
-                  accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.txt,.rtf"
-                  onChange={handleFileChange}
-                  disabled={isProcessing}
-                />
-              </label>
-
-              {isProcessing && (
-                <div className="mt-4 flex items-center justify-center space-x-2 text-blue-600">
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Processing document...</span>
-                </div>
-              )}
-            </div>
+              )
+            })}
           </div>
-        ) : (
-          /* Document Preview Section */
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              {/* Preview Header */}
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">Document Ready</h3>
-                  <button
-                    onClick={clearSelection}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <X className="w-5 h-5 text-gray-500" />
-                  </button>
-                </div>
-              </div>
+        </div>
+      </div>
 
-              {/* File Preview */}
-              <div className="p-6">
-                {filePreview ? (
-                  <div className="mb-6">
-                    <img
-                      src={filePreview}
-                      alt="Document preview"
-                      className="w-full h-64 object-contain bg-gray-50 rounded-lg border"
-                    />
-                  </div>
-                ) : (
-                  <div className="mb-6 h-64 bg-gray-50 rounded-lg border flex items-center justify-center">
-                    <div className="text-center">
-                      <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 font-medium">Document Preview</p>
-                      <p className="text-sm text-gray-500 mt-1">
-                        {getFileTypeDisplay(selectedFile.type)}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* File Details */}
-                <div className="space-y-3 mb-6">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-gray-700">File Name:</span>
-                    <span className="text-sm text-gray-900 truncate max-w-xs">{selectedFile.name}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-gray-700">File Size:</span>
-                    <span className="text-sm text-gray-900">{formatFileSize(selectedFile.size)}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-gray-700">File Type:</span>
-                    <span className="text-sm text-gray-900">{getFileTypeDisplay(selectedFile.type)}</span>
-                  </div>
-                </div>
-
-                {/* Action Button */}
-                <button
-                  onClick={proceedToEditor}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center justify-center space-x-2"
-                >
-                  <span>Continue to Editor</span>
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
+      {/* CTA Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 py-16">
+        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-white mb-4">
+            Ready to streamline your document workflow?
+          </h2>
+          <p className="text-xl text-blue-100 mb-8">
+            Join thousands of professionals who trust SignFlow for their document signing needs
+          </p>
+          <label
+            htmlFor="cta-file-upload"
+            className="inline-flex items-center space-x-3 bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
+          >
+            <Upload className="w-5 h-5" />
+            <span>Upload Your First Document</span>
+            <input
+              id="cta-file-upload"
+              type="file"
+              className="sr-only"
+              accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.txt,.rtf"
+              onChange={handleFileChange}
+              disabled={isProcessing}
+            />
+          </label>
+        </div>
+      </div>
     </div>
   )
 } 
