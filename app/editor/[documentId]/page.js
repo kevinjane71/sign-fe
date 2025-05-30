@@ -3,97 +3,46 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { 
+  ArrowLeft, 
+  Menu, 
+  X, 
   Type, 
-  PenTool, 
   CheckSquare, 
-  Calendar,
+  Calendar, 
+  PenTool, 
+  ZoomIn, 
+  ZoomOut, 
+  Eye, 
   Save,
-  Send,
-  Eye,
-  Trash2,
-  Plus,
-  X,
+  Send, 
+  ArrowRight,
   Loader2,
-  ArrowLeft,
-  Menu,
-  ZoomIn,
-  ZoomOut,
-  Move,
-  RotateCw
+  Plus,
+  Trash2
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-
-// Field type configurations
-const FIELD_TYPES = {
-  TEXT: 'text',
-  SIGNATURE: 'signature', 
-  CHECKBOX: 'checkbox',
-  DATE: 'date'
-}
-
-const FIELD_CONFIGS = {
-  [FIELD_TYPES.TEXT]: {
-    icon: Type,
-    label: 'Text Field',
-    color: '#3b82f6',
-    bgColor: '#eff6ff',
-    minWidth: 80,
-    minHeight: 28,
-    defaultWidth: 140,
-    defaultHeight: 32
-  },
-  [FIELD_TYPES.SIGNATURE]: {
-    icon: PenTool,
-    label: 'Signature',
-    color: '#10b981',
-    bgColor: '#f0fdf4',
-    minWidth: 100,
-    minHeight: 40,
-    defaultWidth: 160,
-    defaultHeight: 50
-  },
-  [FIELD_TYPES.CHECKBOX]: {
-    icon: CheckSquare,
-    label: 'Checkbox',
-    color: '#8b5cf6',
-    bgColor: '#faf5ff',
-    minWidth: 20,
-    minHeight: 20,
-    defaultWidth: 24,
-    defaultHeight: 24
-  },
-  [FIELD_TYPES.DATE]: {
-    icon: Calendar,
-    label: 'Date Field',
-    color: '#f59e0b',
-    bgColor: '#fffbeb',
-    minWidth: 90,
-    minHeight: 28,
-    defaultWidth: 120,
-    defaultHeight: 32
-  }
-}
+import { DocumentConfiguration, FIELD_CONFIGS, FIELD_TYPES } from '../../components/DocumentEditor'
 
 // Document Viewer Component
 const DocumentViewer = ({ documentFile, zoom, onZoomChange, children, onDocumentClick, documentId }) => {
   const [pages, setPages] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [originalPages, setOriginalPages] = useState([]) // Store original high-quality renders
   const containerRef = useRef(null)
 
-  // Load document based on type - render at high quality once
+  // Load document based on type
   const loadDocument = useCallback(async () => {
-    if (!documentFile) return
+    if (!documentId) return
 
     setLoading(true)
     setError(null)
 
     try {
-      if (documentFile.type === 'application/pdf') {
-        await loadPdfDocument(documentFile.url)
-      } else if (documentFile.type.startsWith('image/')) {
-        await loadImageDocument(documentFile.url)
+      // Always load via API endpoint when we have documentId
+      if (documentFile?.type === 'application/pdf' || !documentFile?.type) {
+        await loadPdfDocument()
+      } else if (documentFile?.type.startsWith('image/')) {
+        await loadImageDocument()
       } else {
         setError('Unsupported file type')
       }
@@ -103,100 +52,91 @@ const DocumentViewer = ({ documentFile, zoom, onZoomChange, children, onDocument
     } finally {
       setLoading(false)
     }
-  }, [documentFile, documentId])
+  }, [documentId, documentFile?.type])
 
-  // Load PDF document
-  const loadPdfDocument = async (url) => {
+  // Load PDF using PDF.js
+  const loadPdfDocument = async () => {
     try {
-      setLoading(true);
-      
-      // Use backend file serving endpoint directly
-      const documentUrl = `http://localhost:5002/api/documents/${documentId}/file`;
-      
       const pdfjsLib = await import('pdfjs-dist')
       pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`
       
-      const loadingTask = pdfjsLib.getDocument(documentUrl);
-      const pdf = await loadingTask.promise;
-      const page = await pdf.getPage(1);
+      const documentUrl = `http://localhost:5002/api/documents/${documentId}/file`
+      const pdf = await pdfjsLib.getDocument(documentUrl).promise
+      const pagePromises = []
       
-      const canvas = document.createElement('canvas')
-      const context = canvas.getContext('2d')
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        pagePromises.push(renderPdfPage(pdf, pageNum))
+      }
       
-      const viewport = page.getViewport({ scale: zoom })
-      canvas.height = viewport.height
-      canvas.width = viewport.width
-      
-      setOriginalPages([{
-        pageNumber: 1,
-        canvas,
-        width: viewport.width,
-        height: viewport.height,
-        originalWidth: viewport.width,
-        originalHeight: viewport.height
-      }])
-      setPages([{
-        pageNumber: 1,
-        canvas,
-        width: viewport.width,
-        height: viewport.height,
-        originalWidth: viewport.width,
-        originalHeight: viewport.height
-      }])
-      
-      await page.render({
-        canvasContext: context,
-        viewport: viewport
-      }).promise
-      
-      setLoading(false);
+      const renderedPages = await Promise.all(pagePromises)
+      setPages(renderedPages)
     } catch (error) {
-      console.error('Error loading PDF:', error);
-      setLoading(false);
+      throw new Error('Failed to load PDF')
     }
-  };
+  }
+
+  // Render PDF page to canvas
+  const renderPdfPage = async (pdf, pageNum) => {
+    const page = await pdf.getPage(pageNum)
+    const canvas = document.createElement('canvas')
+    const context = canvas.getContext('2d')
+    
+    const scale = 2.0
+    const viewport = page.getViewport({ scale })
+    
+    canvas.width = viewport.width
+    canvas.height = viewport.height
+    
+    await page.render({
+      canvasContext: context,
+      viewport: viewport
+    }).promise
+    
+    return {
+      pageNumber: pageNum,
+      canvas,
+      width: viewport.width,
+      height: viewport.height,
+      originalWidth: viewport.width / scale,
+      originalHeight: viewport.height / scale
+    }
+  }
 
   // Load image document
-  const loadImageDocument = async (url) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas')
-      const context = canvas.getContext('2d')
+  const loadImageDocument = async () => {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
       
-      canvas.width = img.width;
-      canvas.height = img.height;
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const context = canvas.getContext('2d')
+        
+        const scale = 2.0
+        canvas.width = img.width * scale
+        canvas.height = img.height * scale
+        
+        context.drawImage(img, 0, 0, canvas.width, canvas.height)
+        
+        const pageData = [{
+          pageNumber: 1,
+          canvas,
+          width: canvas.width,
+          height: canvas.height,
+          originalWidth: img.width,
+          originalHeight: img.height
+        }]
+        
+        setPages(pageData)
+        resolve()
+      }
       
-      setOriginalPages([{
-        pageNumber: 1,
-        canvas,
-        width: img.width,
-        height: img.height,
-        originalWidth: img.width,
-        originalHeight: img.height
-      }])
-      setPages([{
-        pageNumber: 1,
-        canvas,
-        width: img.width,
-        height: img.height,
-        originalWidth: img.width,
-        originalHeight: img.height
-      }])
+      img.onerror = () => reject(new Error('Failed to load image'))
       
-      context.drawImage(img, 0, 0);
-      setLoading(false);
-    };
-    
-    img.onerror = (error) => {
-      console.error('Error loading image:', error);
-      setLoading(false);
-    };
-    
-    // Use backend file serving endpoint directly
-    const documentUrl = `http://localhost:5002/api/documents/${documentId}/file`;
-    
-    img.src = documentUrl;
-  };
+      // Always use API endpoint when we have documentId
+      img.src = `http://localhost:5002/api/documents/${documentId}/file`
+    })
+  }
 
   useEffect(() => {
     loadDocument()
@@ -232,18 +172,15 @@ const DocumentViewer = ({ documentFile, zoom, onZoomChange, children, onDocument
       style={{ scrollBehavior: 'smooth' }}
     >
       {pages.map((page) => {
-        // Calculate display dimensions to use full available width when zoomed
         const isMobile = window.innerWidth < 768
         
-        // Use full available width, accounting for sidebar
         let availableWidth
         if (isMobile) {
-          availableWidth = window.innerWidth - 16 // Small margin
+          availableWidth = window.innerWidth - 16
         } else {
-          availableWidth = window.innerWidth - 320 - 16 // Sidebar + small margin
+          availableWidth = window.innerWidth - 320 - 16
         }
         
-        // Calculate display width based on zoom and available space
         const baseWidth = Math.min(page.originalWidth, availableWidth / zoom)
         const displayWidth = baseWidth * zoom
         const displayHeight = (page.originalHeight / page.originalWidth) * displayWidth
@@ -256,10 +193,9 @@ const DocumentViewer = ({ documentFile, zoom, onZoomChange, children, onDocument
             style={{
               width: displayWidth,
               height: displayHeight,
-              maxWidth: 'none' // Allow full width usage
+              maxWidth: 'none'
             }}
           >
-            {/* Document Canvas */}
             <canvas
               width={page.width}
               height={page.height}
@@ -267,7 +203,7 @@ const DocumentViewer = ({ documentFile, zoom, onZoomChange, children, onDocument
               style={{
                 width: '100%',
                 height: '100%',
-                imageRendering: 'crisp-edges' // Maintain sharpness
+                imageRendering: 'crisp-edges'
               }}
               ref={(canvas) => {
                 if (canvas && page.canvas) {
@@ -278,7 +214,6 @@ const DocumentViewer = ({ documentFile, zoom, onZoomChange, children, onDocument
               }}
             />
             
-            {/* Field Overlay Container */}
             <div className="absolute inset-0 pointer-events-none">
               {React.Children.map(children, (child) => {
                 if (React.isValidElement(child) && child.props.pageNumber === page.pageNumber) {
@@ -313,7 +248,6 @@ const FieldComponent = ({
   const Icon = config.icon
   const isMobile = window.innerWidth < 768
   
-  // Calculate responsive position and size
   const fieldStyle = {
     position: 'absolute',
     left: `${field.leftPercent}%`,
@@ -337,7 +271,6 @@ const FieldComponent = ({
         : '0 1px 3px rgba(0,0,0,0.05)'
   }
 
-  // Calculate responsive font size based on field size
   const fieldWidth = (containerWidth * field.widthPercent) / 100
   const fieldHeight = (containerHeight * field.heightPercent) / 100
   const baseFontSize = Math.max(10, Math.min(14, fieldHeight * 0.4))
@@ -354,7 +287,7 @@ const FieldComponent = ({
     onSelect(field.id)
     onDragStart(e, field)
   }
-
+    
   return (
     <div
       data-field-id={field.id}
@@ -366,7 +299,6 @@ const FieldComponent = ({
         onSelect(field.id)
       }}
     >
-      {/* Field Content */}
       <div className="w-full h-full flex items-center justify-center p-1">
         {field.type === FIELD_TYPES.TEXT && (
           <input
@@ -390,12 +322,10 @@ const FieldComponent = ({
             onChange={(e) => onValueChange(field.id, e.target.checked)}
             onClick={(e) => e.stopPropagation()}
             style={{ 
-              width: `${Math.min(fieldWidth * 0.4, fieldHeight * 0.4, 20)}px`,
-              height: `${Math.min(fieldWidth * 0.4, fieldHeight * 0.4, 20)}px`,
-              minWidth: '14px',
-              minHeight: '14px',
-              maxWidth: '20px',
-              maxHeight: '20px'
+              width: `${Math.min(fieldWidth * 0.8, fieldHeight * 0.8)}px`,
+              height: `${Math.min(fieldWidth * 0.8, fieldHeight * 0.8)}px`,
+              minWidth: '16px',
+              minHeight: '16px'
             }}
           />
         )}
@@ -430,8 +360,7 @@ const FieldComponent = ({
           </div>
         )}
       </div>
-
-      {/* Field Toolbar */}
+      
       {isSelected && (
         <div className="absolute -top-8 left-0 bg-gray-900 text-white px-2 py-1 rounded text-xs flex items-center space-x-1 z-60">
           <Icon className="w-3 h-3" />
@@ -457,7 +386,6 @@ const MobileFloatingButton = ({ onFieldTypeSelect, selectedFieldType }) => {
 
   return (
     <div className="fixed bottom-6 right-6 z-50 md:hidden">
-      {/* Field Type Options */}
       {isOpen && (
         <div className="absolute bottom-16 right-0 bg-white rounded-2xl shadow-xl border p-2 space-y-2 min-w-[200px]">
           {Object.entries(FIELD_CONFIGS).map(([type, config]) => {
@@ -499,7 +427,6 @@ const MobileFloatingButton = ({ onFieldTypeSelect, selectedFieldType }) => {
         </div>
       )}
 
-      {/* Main FAB */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`
@@ -527,6 +454,7 @@ export default function ExistingDocumentEditor() {
   
   // State
   const [documentFile, setDocumentFile] = useState(null)
+  const [documentData, setDocumentData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [fields, setFields] = useState([])
   const [selectedField, setSelectedField] = useState(null)
@@ -535,11 +463,15 @@ export default function ExistingDocumentEditor() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   
+  // 2-Step Process State
+  const [currentStep, setCurrentStep] = useState(1) // 1 = Editor, 2 = Configuration
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  
   // Drag state
   const [isDragging, setIsDragging] = useState(false)
   const [draggedField, setDraggedField] = useState(null)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
-  const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 })
 
   // Detect mobile
   useEffect(() => {
@@ -552,69 +484,57 @@ export default function ExistingDocumentEditor() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Load existing document from backend
+  // Load existing document data
   useEffect(() => {
-    const loadExistingDocument = async () => {
-      if (!documentId) {
-        toast.error('No document ID provided')
-        router.push('/')
-        return
-      }
-
-    try {
-      setLoading(true)
+    const loadDocumentData = async () => {
+      try {
+        setLoading(true)
+        console.log('Loading document data for ID:', documentId)
         
-        // Fetch document data from backend
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'}/api/documents/${documentId}`)
+        // Fetch document metadata
+        const response = await fetch(`http://localhost:5002/api/documents/${documentId}`)
+        console.log('API response status:', response.status)
         
         if (!response.ok) {
           throw new Error('Failed to load document')
         }
         
-        const result = await response.json()
+        const apiResponse = await response.json()
+        console.log('API response data:', apiResponse)
         
-        if (result.success && result.document) {
-          const doc = result.document
-          
-          // Set document file data
-          setDocumentFile({
-            name: doc.title || doc.name || 'Document',
-            type: doc.mimeType || 'application/pdf',
-            size: doc.size || 0,
-            data: doc.fileData || doc.data, // Base64 data
-            url: doc.fileUrl || doc.url // Fallback URL
-          })
-          
-          // Set existing fields (convert from backend format to frontend format)
-          if (doc.fields && Array.isArray(doc.fields)) {
-            const convertedFields = doc.fields.map(field => ({
-              id: field.id || `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-              type: field.type,
-              leftPercent: field.leftPercent || field.x || 0,
-              topPercent: field.topPercent || field.y || 0,
-              widthPercent: field.widthPercent || field.width || 10,
-              heightPercent: field.heightPercent || field.height || 5,
-              pageNumber: field.pageNumber || 1,
-              value: field.value || '',
-              required: field.required || false
-            }))
-            setFields(convertedFields)
-          }
-          
-          toast.success('Document loaded successfully')
-      } else {
-          throw new Error('Document not found')
-      }
-    } catch (error) {
+        // Extract document data from the API response structure
+        const data = apiResponse.success ? apiResponse.document : apiResponse
+        setDocumentData(data)
+        console.log('Document data set:', data)
+        
+        // Set document file info for viewer (just metadata for UI display)
+        setDocumentFile({
+          name: data.title || data.originalName,
+          type: data.mimeType,
+          size: data.size
+        })
+        
+        // Load existing fields - ensure we have the correct structure
+        if (data.fields && Array.isArray(data.fields)) {
+          console.log('Loading existing fields:', data.fields)
+          setFields(data.fields)
+        } else {
+          console.log('No fields found in document data')
+          setFields([])
+        }
+        
+      } catch (error) {
         console.error('Error loading document:', error)
-      toast.error('Failed to load document')
-        router.push('/')
-    } finally {
-      setLoading(false)
+        toast.error('Failed to load document')
+        router.push('/dashboard')
+      } finally {
+        setLoading(false)
+      }
     }
-  }
 
-    loadExistingDocument()
+    if (documentId) {
+      loadDocumentData()
+    }
   }, [documentId, router])
 
   // Add field to document
@@ -622,7 +542,6 @@ export default function ExistingDocumentEditor() {
     const config = FIELD_CONFIGS[type]
     const fieldId = `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
-    // Get actual container dimensions
     const pageElement = document.querySelector(`[data-page-number="${pageNumber || 1}"]`)
     if (!pageElement) return
     
@@ -630,22 +549,18 @@ export default function ExistingDocumentEditor() {
     const containerHeight = pageElement.offsetHeight
     const isMobile = window.innerWidth < 768
     
-    // Calculate responsive field dimensions based on container and screen size
     let width = config.defaultWidth
     let height = config.defaultHeight
     
-    // Scale factor based on document size and screen
-    const documentScale = Math.min(containerWidth / 800, containerHeight / 1000) // Assume standard doc is 800x1000
-    const responsiveScale = isMobile ? 0.7 : 1.0 // Smaller on mobile
-    const zoomScale = 1 / zoom // Compensate for zoom level
+    const documentScale = Math.min(containerWidth / 800, containerHeight / 1000)
+    const responsiveScale = isMobile ? 0.7 : 1.0
+    const zoomScale = 1 / zoom
     
     const finalScale = documentScale * responsiveScale * zoomScale
     
-    // Apply scaling with bounds
     width = Math.max(config.minWidth, Math.min(width * finalScale, containerWidth * 0.4))
     height = Math.max(config.minHeight, Math.min(height * finalScale, containerHeight * 0.15))
     
-    // Convert to percentages for responsive positioning
     const leftPercent = Math.max(0, Math.min(95, (position.x / containerWidth) * 100))
     const topPercent = Math.max(0, Math.min(95, (position.y / containerHeight) * 100))
     const widthPercent = Math.max(2, Math.min(40, (width / containerWidth) * 100))
@@ -676,7 +591,7 @@ export default function ExistingDocumentEditor() {
     
     const pageElement = e.target.closest('[data-page-number]')
     if (!pageElement) return
-
+    
     const pageNumber = parseInt(pageElement.getAttribute('data-page-number'))
     const rect = pageElement.getBoundingClientRect()
     
@@ -693,9 +608,7 @@ export default function ExistingDocumentEditor() {
     
     setIsDragging(true)
     setDraggedField(field)
-    setDragStartPos({ x: clientX, y: clientY })
     
-    // Calculate offset from field's top-left corner
     const fieldElement = e.target.closest('[data-field-id]')
     if (fieldElement) {
       const rect = fieldElement.getBoundingClientRect()
@@ -712,19 +625,16 @@ export default function ExistingDocumentEditor() {
     const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX
     const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY
     
-    // Find the page element under the cursor
     const pageElement = document.elementFromPoint(clientX, clientY)?.closest('[data-page-number]')
-      if (!pageElement) return
-
-      const pageRect = pageElement.getBoundingClientRect()
+    if (!pageElement) return
+    
+    const pageRect = pageElement.getBoundingClientRect()
     const newX = clientX - pageRect.left - dragOffset.x
     const newY = clientY - pageRect.top - dragOffset.y
     
-    // Convert to percentages
     const leftPercent = Math.max(0, Math.min(95, (newX / pageRect.width) * 100))
     const topPercent = Math.max(0, Math.min(95, (newY / pageRect.height) * 100))
     
-    // Update field position
     setFields(prev => prev.map(field => 
       field.id === draggedField.id 
         ? { ...field, leftPercent, topPercent }
@@ -791,55 +701,39 @@ export default function ExistingDocumentEditor() {
 
   // Preview handler
   const handlePreview = () => {
-    if (!documentFile) {
-      toast.error('Please upload a document first')
+    if (!documentId) {
+      toast.error('Document not loaded')
       return
     }
 
-    if (fields.length === 0) {
-      toast.error('Please add at least one field to preview')
-      return
-    }
-
-    // Store preview data in sessionStorage
     const previewData = {
-      title: documentFile.name,
+      title: documentFile?.name || 'Document',
       document: {
-        name: documentFile.name,
-        type: documentFile.type,
-        size: documentFile.size,
-        data: documentFile.data, // Include the actual file data
-        url: documentFile.url
+        name: documentFile?.name || 'Document',
+        type: documentFile?.type || 'application/pdf',
+        size: documentFile?.size || 0,
+        url: `http://localhost:5002/api/documents/${documentId}/file`
       },
       fields: fields
     }
 
     sessionStorage.setItem('previewDocument', JSON.stringify(previewData))
-    
-    // Open preview in new tab
     window.open('/live/preview', '_blank')
   }
 
-  // Save handler (update existing document)
-  const handleSave = useCallback(async () => {
-    if (!documentFile || !documentId) {
-      toast.error('No document to save')
-      return
-    }
-
+  // Save handler (Step 1 - Save fields only)
+  const handleSave = async () => {
     try {
+      setIsSaving(true)
       toast.loading('Saving document...', { id: 'saving' })
 
-      // Update document fields via API
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'}/api/documents/${documentId}`, {
+      const response = await fetch(`http://localhost:5002/api/documents/${documentId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          title: documentFile.name,
-          fields: fields,
-          mimeType: documentFile.type
+          fields: fields
         })
       })
 
@@ -847,24 +741,74 @@ export default function ExistingDocumentEditor() {
         throw new Error('Failed to save document')
       }
 
-      const result = await response.json()
-      
       toast.success('Document saved successfully!', { id: 'saving' })
-      
     } catch (error) {
       console.error('Error saving document:', error)
       toast.error('Failed to save document', { id: 'saving' })
+    } finally {
+      setIsSaving(false)
     }
-  }, [documentFile, documentId, fields])
+  }
 
-  // Send handler (redirect to live view)
-  const handleSend = useCallback(async () => {
-    // First save the document
-    await handleSave()
-    
-    // Then redirect to live view
-    router.push(`/live/${documentId}`)
-  }, [handleSave, documentId, router])
+  // Step navigation
+  const handleNextStep = () => {
+    if (!documentId) {
+      toast.error('Document not loaded')
+      return
+    }
+    setCurrentStep(2)
+  }
+
+  const handleBackToEditor = () => {
+    setCurrentStep(1)
+  }
+
+  // Send handler (final step)
+  const handleSend = useCallback(async (config) => {
+    try {
+      setIsSubmitting(true)
+      toast.loading('Sending document...', { id: 'sending' })
+
+      const response = await fetch(`http://localhost:5002/api/documents/${documentId}/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fields: fields,
+          signers: config.signers,
+          subject: config.subject,
+          message: config.message,
+          configuration: {
+            requireAuthentication: config.requireAuthentication,
+            allowDelegation: config.allowDelegation,
+            allowComments: config.allowComments,
+            sendReminders: config.sendReminders,
+            reminderFrequency: config.reminderFrequency,
+            expirationEnabled: config.expirationEnabled,
+            expirationDays: config.expirationDays,
+            signingOrder: config.signingOrder,
+            requireAllSigners: config.requireAllSigners,
+            allowPrinting: config.allowPrinting,
+            allowDownload: config.allowDownload
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send document')
+      }
+
+      toast.success('Document sent successfully!', { id: 'sending' })
+      router.push(`/live/${documentId}`)
+      
+    } catch (error) {
+      console.error('Error sending document:', error)
+      toast.error('Failed to send document', { id: 'sending' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [documentId, fields, router])
 
   if (loading) {
     return (
@@ -877,31 +821,54 @@ export default function ExistingDocumentEditor() {
     )
   }
 
+  // Step 2: Document Configuration
+  if (currentStep === 2) {
     return (
+      <DocumentConfiguration
+        documentFile={documentFile}
+        fields={fields}
+        onBack={handleBackToEditor}
+        onSend={handleSend}
+        isLoading={isSubmitting}
+        initialConfig={{
+          signers: documentData?.signers || [],
+          subject: documentData?.subject || '',
+          message: documentData?.message || '',
+          ...documentData?.configuration
+        }}
+      />
+    )
+  }
+
+  // Step 1: Document Editor
+  return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <button 
-              onClick={() => router.push('/')}
-              className="p-2 hover:bg-gray-100 rounded-lg"
+              onClick={() => router.push('/dashboard')}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
+              <ArrowLeft className="w-5 h-5" />
+            </button>
             
             <button 
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="md:hidden p-2 hover:bg-gray-100 rounded-lg"
+              className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
-                <Menu className="w-5 h-5" />
-              </button>
+              <Menu className="w-5 h-5" />
+            </button>
             
-            <h1 className="text-lg font-semibold text-gray-900 truncate">
-              {documentFile?.name || 'Document Editor'}
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900 truncate">
+                {documentFile?.name || 'Document Editor'}
               </h1>
+              <p className="text-sm text-gray-500">Step 1 of 2 - Edit fields and layout</p>
             </div>
-            
+          </div>
+          
           <div className="flex items-center space-x-2">
             {/* Desktop Zoom Controls */}
             <div className="hidden md:flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
@@ -926,33 +893,39 @@ export default function ExistingDocumentEditor() {
               </button>
             </div>
             
-              <span className="hidden sm:inline text-sm text-gray-500">
+            <span className="hidden sm:inline text-sm text-gray-500">
               {fields.length} fields
-              </span>
+            </span>
             
-              <button
+            <button
               onClick={handlePreview}
               className="btn-secondary flex items-center space-x-2"
-              >
+            >
               <Eye className="w-4 h-4" />
               <span className="hidden sm:inline">Preview</span>
-              </button>
-            
-              <button
+            </button>
+
+            <button
               onClick={handleSave}
+              disabled={isSaving}
               className="btn-secondary flex items-center space-x-2"
             >
-              <Save className="w-4 h-4" />
+              {isSaving ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
               <span className="hidden sm:inline">Save</span>
             </button>
             
-            <button 
-              onClick={handleSend}
+            <button
+              onClick={handleNextStep}
               className="btn-primary flex items-center space-x-2"
-              >
-                <Send className="w-4 h-4" />
-              <span className="hidden sm:inline">Send</span>
-              </button>
+            >
+              <span className="hidden sm:inline">Next: Configure</span>
+              <span className="sm:hidden">Next</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </header>
@@ -971,28 +944,28 @@ export default function ExistingDocumentEditor() {
                 onClick={() => setSidebarOpen(false)}
                 className="p-2 hover:bg-gray-100 rounded-lg"
               >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-          
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
             {/* Field Types */}
             <div className="space-y-3">
               <h3 className="text-sm font-medium text-gray-700 mb-3">Add Fields</h3>
-          
+              
               {Object.entries(FIELD_CONFIGS).map(([type, config]) => {
-              const Icon = config.icon
+                const Icon = config.icon
                 const isActive = selectedFieldType === type
                 
-              return (
-                <button
-                  key={type}
+                return (
+                  <button
+                    key={type}
                     onClick={() => {
                       setSelectedFieldType(isActive ? null : type)
                       if (!isActive) {
                         toast.info(`Tap on document to place ${config.label}`)
                       }
                     }}
-                  className={`
+                    className={`
                       w-full p-3 rounded-lg border-2 transition-all text-left
                       ${isActive 
                         ? 'border-blue-500 bg-blue-50 shadow-sm' 
@@ -1016,35 +989,35 @@ export default function ExistingDocumentEditor() {
                         </div>
                       </div>
                     </div>
-                </button>
-              )
-            })}
-          </div>
-
+                  </button>
+                )
+              })}
+            </div>
+            
             {/* Mobile Zoom Controls */}
             <div className="mt-8 pt-6 border-t md:hidden">
               <h3 className="text-sm font-medium text-gray-700 mb-3">Zoom</h3>
               <div className="flex items-center space-x-2">
-              <button
+                <button
                   onClick={handleZoomOut}
                   className="p-2 hover:bg-gray-100 rounded-lg"
                   disabled={zoom <= 0.5}
-              >
+                >
                   <ZoomOut className="w-4 h-4" />
-              </button>
+                </button>
                 
                 <span className="text-sm font-medium px-3 py-1 bg-gray-100 rounded flex-1 text-center">
                   {Math.round(zoom * 100)}%
                 </span>
                 
-                  <button
+                <button
                   onClick={handleZoomIn}
                   className="p-2 hover:bg-gray-100 rounded-lg"
                   disabled={zoom >= 3}
-                  >
+                >
                   <ZoomIn className="w-4 h-4" />
-                  </button>
-                </div>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1058,33 +1031,31 @@ export default function ExistingDocumentEditor() {
         )}
 
         {/* Main Content */}
-          <div className="flex-1 overflow-hidden">
-          {documentFile && (
-                <DocumentViewer
-              documentFile={documentFile}
-                  zoom={zoom}
-                  onZoomChange={setZoom}
-              onDocumentClick={handleDocumentClick}
-              documentId={documentId}
-            >
-              {fields.map((field) => (
-                <FieldComponent
-                        key={field.id}
-                  field={field}
-                        pageNumber={field.pageNumber}
-                  isSelected={selectedField === field.id}
-                  isDragging={isDragging && draggedField?.id === field.id}
-                  onSelect={handleFieldSelect}
-                  onDragStart={handleDragStart}
-                  onDelete={handleFieldDelete}
-                  onValueChange={handleFieldValueChange}
-                />
-              ))}
-                </DocumentViewer>
-          )}
+        <div className="flex-1 overflow-hidden">
+          <DocumentViewer
+            documentFile={documentFile}
+            documentId={documentId}
+            zoom={zoom}
+            onZoomChange={setZoom}
+            onDocumentClick={handleDocumentClick}
+          >
+            {fields.map((field) => (
+              <FieldComponent
+                key={field.id}
+                field={field}
+                pageNumber={field.pageNumber}
+                isSelected={selectedField === field.id}
+                isDragging={isDragging && draggedField?.id === field.id}
+                onSelect={handleFieldSelect}
+                onDragStart={handleDragStart}
+                onDelete={handleFieldDelete}
+                onValueChange={handleFieldValueChange}
+              />
+            ))}
+          </DocumentViewer>
         </div>
       </div>
-
+      
       {/* Mobile Floating Action Button */}
       <MobileFloatingButton 
         onFieldTypeSelect={setSelectedFieldType}
