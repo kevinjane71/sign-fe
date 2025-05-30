@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
+  Upload, 
   Type, 
   PenTool, 
   CheckSquare, 
@@ -15,11 +16,21 @@ import {
   X,
   Loader2,
   ArrowLeft,
+  ArrowRight,
   Menu,
   ZoomIn,
   ZoomOut,
-  Move,
-  RotateCw
+  Users,
+  Settings,
+  Clock,
+  Shield,
+  Mail,
+  MessageSquare,
+  Bell,
+  FileText,
+  CheckCircle,
+  AlertCircle,
+  Info
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -72,6 +83,475 @@ const FIELD_CONFIGS = {
     defaultWidth: 120,
     defaultHeight: 32
   }
+}
+
+// Document Configuration Component (Step 2)
+function DocumentConfiguration({ documentFile, fields, onBack, onSend, isLoading }) {
+  const [signers, setSigners] = useState([])
+  const [subject, setSubject] = useState('')
+  const [message, setMessage] = useState('')
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  
+  // Advanced settings
+  const [requireAuthentication, setRequireAuthentication] = useState(false)
+  const [allowDelegation, setAllowDelegation] = useState(true)
+  const [allowComments, setAllowComments] = useState(true)
+  const [sendReminders, setSendReminders] = useState(true)
+  const [reminderFrequency, setReminderFrequency] = useState(3) // days
+  const [expirationEnabled, setExpirationEnabled] = useState(false)
+  const [expirationDays, setExpirationDays] = useState(30)
+  const [signingOrder, setSigningOrder] = useState('any') // 'any' or 'sequential'
+  const [requireAllSigners, setRequireAllSigners] = useState(true)
+  const [allowPrinting, setAllowPrinting] = useState(true)
+  const [allowDownload, setAllowDownload] = useState(true)
+
+  // Initialize with default values
+  useEffect(() => {
+    setSubject(`Please sign: ${documentFile?.name || 'Document'}`)
+    setMessage('Please review and sign this document at your earliest convenience.')
+    
+    // Add a default signer if none exist
+    if (signers.length === 0) {
+      setSigners([{
+        id: Date.now(),
+        name: '',
+        email: '',
+        role: 'Signer'
+      }])
+    }
+  }, [documentFile?.name, signers.length])
+
+  const addSigner = () => {
+    const newSigner = {
+      id: Date.now(),
+      name: '',
+      email: '',
+      role: 'Signer'
+    }
+    setSigners(prev => [...prev, newSigner])
+  }
+
+  const updateSigner = (id, field, value) => {
+    setSigners(prev => prev.map(signer => 
+      signer.id === id ? { ...signer, [field]: value } : signer
+    ))
+  }
+
+  const removeSigner = (id) => {
+    if (signers.length > 1) {
+      setSigners(prev => prev.filter(signer => signer.id !== id))
+    } else {
+      toast.error('At least one signer is required')
+    }
+  }
+
+  const handleSend = () => {
+    // Validation
+    if (signers.length === 0) {
+      toast.error('At least one signer is required')
+      return
+    }
+
+    for (const signer of signers) {
+      if (!signer.name.trim()) {
+        toast.error('All signers must have a name')
+        return
+      }
+      if (!signer.email.trim()) {
+        toast.error('All signers must have an email')
+        return
+      }
+      if (!/\S+@\S+\.\S+/.test(signer.email)) {
+        toast.error('Please enter valid email addresses')
+        return
+      }
+    }
+
+    if (!subject.trim()) {
+      toast.error('Subject is required')
+      return
+    }
+
+    // Prepare configuration
+    const config = {
+      signers,
+      subject,
+      message,
+      requireAuthentication,
+      allowDelegation,
+      allowComments,
+      sendReminders,
+      reminderFrequency,
+      expirationEnabled,
+      expirationDays,
+      signingOrder,
+      requireAllSigners,
+      allowPrinting,
+      allowDownload
+    }
+
+    onSend(config)
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b sticky top-0 z-40">
+        <div className="px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <button 
+              onClick={onBack}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900">
+                Configure Document
+              </h1>
+              <p className="text-sm text-gray-500">Step 2 of 2 - Add signers and configure settings</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-500">
+              {fields.length} fields • {signers.length} signers
+            </span>
+            
+            <button
+              onClick={handleSend}
+              disabled={isLoading}
+              className="btn-primary flex items-center space-x-2"
+            >
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
+              <span>Send Document</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Content */}
+      <div className="max-w-4xl mx-auto p-6 space-y-8">
+        {/* Document Summary */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h2 className="text-lg font-semibold mb-4 flex items-center">
+            <Settings className="w-5 h-5 mr-2" />
+            Document Summary
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div>
+              <span className="text-gray-500">Document:</span>
+              <p className="font-medium">{documentFile?.name}</p>
+            </div>
+            <div>
+              <span className="text-gray-500">Fields:</span>
+              <p className="font-medium">{fields.length} fields added</p>
+            </div>
+            <div>
+              <span className="text-gray-500">Type:</span>
+              <p className="font-medium">{documentFile?.type}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Signers */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold flex items-center">
+              <Users className="w-5 h-5 mr-2" />
+              Signers
+            </h2>
+            <button
+              onClick={addSigner}
+              className="btn-secondary flex items-center space-x-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Signer</span>
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {signers.map((signer, index) => (
+              <div key={signer.id} className="border rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-medium">Signer {index + 1}</h3>
+                  {signers.length > 1 && (
+                    <button
+                      onClick={() => removeSigner(signer.id)}
+                      className="text-red-600 hover:text-red-700 p-1"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={signer.name}
+                      onChange={(e) => updateSigner(signer.id, 'name', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter full name"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      value={signer.email}
+                      onChange={(e) => updateSigner(signer.id, 'email', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter email address"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Email Configuration */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h2 className="text-lg font-semibold mb-4 flex items-center">
+            <Mail className="w-5 h-5 mr-2" />
+            Email Configuration
+          </h2>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Subject *
+              </label>
+              <input
+                type="text"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter email subject"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Message
+              </label>
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter a message for the signers"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Advanced Settings */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <button
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full flex items-center justify-between text-lg font-semibold mb-4"
+          >
+            <span className="flex items-center">
+              <Shield className="w-5 h-5 mr-2" />
+              Advanced Settings
+            </span>
+            <ArrowRight className={`w-5 h-5 transition-transform ${showAdvanced ? 'rotate-90' : ''}`} />
+          </button>
+
+          {showAdvanced && (
+            <div className="space-y-6 pt-4 border-t">
+              {/* Security Settings */}
+              <div>
+                <h3 className="font-medium mb-3">Security & Authentication</h3>
+                <div className="space-y-3">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={requireAuthentication}
+                      onChange={(e) => setRequireAuthentication(e.target.checked)}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm">Require authentication to sign</span>
+                  </label>
+                  
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={allowDelegation}
+                      onChange={(e) => setAllowDelegation(e.target.checked)}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm">Allow signers to delegate to others</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Signing Settings */}
+              <div>
+                <h3 className="font-medium mb-3">Signing Process</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Signing Order
+                    </label>
+                    <select
+                      value={signingOrder}
+                      onChange={(e) => setSigningOrder(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="any">Any order</option>
+                      <option value="sequential">Sequential order</option>
+                    </select>
+                  </div>
+                  
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={requireAllSigners}
+                      onChange={(e) => setRequireAllSigners(e.target.checked)}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm">Require all signers to complete</span>
+                  </label>
+                  
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={allowComments}
+                      onChange={(e) => setAllowComments(e.target.checked)}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm">Allow comments and notes</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Reminders & Expiration */}
+              <div>
+                <h3 className="font-medium mb-3">Reminders & Expiration</h3>
+                <div className="space-y-3">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={sendReminders}
+                      onChange={(e) => setSendReminders(e.target.checked)}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm">Send automatic reminders</span>
+                  </label>
+                  
+                  {sendReminders && (
+                    <div className="ml-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Reminder frequency (days)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="30"
+                        value={reminderFrequency}
+                        onChange={(e) => setReminderFrequency(parseInt(e.target.value))}
+                        className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  )}
+                  
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={expirationEnabled}
+                      onChange={(e) => setExpirationEnabled(e.target.checked)}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm">Set expiration date</span>
+                  </label>
+                  
+                  {expirationEnabled && (
+                    <div className="ml-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Expires after (days)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="365"
+                        value={expirationDays}
+                        onChange={(e) => setExpirationDays(parseInt(e.target.value))}
+                        className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Document Permissions */}
+              <div>
+                <h3 className="font-medium mb-3">Document Permissions</h3>
+                <div className="space-y-3">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={allowPrinting}
+                      onChange={(e) => setAllowPrinting(e.target.checked)}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm">Allow printing</span>
+                  </label>
+                  
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={allowDownload}
+                      onChange={(e) => setAllowDownload(e.target.checked)}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm">Allow download</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-between">
+          <button
+            onClick={onBack}
+            className="btn-secondary flex items-center space-x-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Editor</span>
+          </button>
+          
+          <button
+            onClick={handleSend}
+            disabled={isLoading}
+            className="btn-primary flex items-center space-x-2"
+          >
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Send className="w-4 h-4" />
+            )}
+            <span>Send Document</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 // Document Viewer Component
@@ -523,6 +1003,10 @@ export default function NewDocumentEditor() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   
+  // 2-Step Process State
+  const [currentStep, setCurrentStep] = useState(1) // 1 = Editor, 2 = Configuration
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
   // Drag state
   const [isDragging, setIsDragging] = useState(false)
   const [draggedField, setDraggedField] = useState(null)
@@ -767,20 +1251,29 @@ export default function NewDocumentEditor() {
     window.open('/live/preview', '_blank')
   }
 
-  // Send/Save handler
-  const handleSend = useCallback(async () => {
+  // Step navigation
+  const handleNextStep = () => {
     if (!documentFile) {
-      toast.error('No document to save')
+      toast.error('Please upload a document first')
       return
     }
+    setCurrentStep(2)
+  }
 
-    if (fields.length === 0) {
-      toast.error('Please add some fields before saving')
+  const handleBackToEditor = () => {
+    setCurrentStep(1)
+  }
+
+  // Send handler (final step)
+  const handleSend = useCallback(async (config) => {
+    if (!documentFile) {
+      toast.error('Please upload a document first')
       return
     }
 
     try {
-      toast.loading('Saving document...', { id: 'saving' })
+      setIsSubmitting(true)
+      toast.loading('Sending document...', { id: 'sending' })
 
       // Create FormData for file upload
       const formData = new FormData()
@@ -800,10 +1293,26 @@ export default function NewDocumentEditor() {
         formData.append('document', blob, documentFile.name)
       }
       
-      // Add document metadata as separate fields
+      // Add document metadata and configuration
       formData.append('title', documentFile.name || 'Untitled Document')
       formData.append('fields', JSON.stringify(fields))
       formData.append('mimeType', documentFile.type)
+      formData.append('signers', JSON.stringify(config.signers))
+      formData.append('subject', config.subject)
+      formData.append('message', config.message)
+      formData.append('configuration', JSON.stringify({
+        requireAuthentication: config.requireAuthentication,
+        allowDelegation: config.allowDelegation,
+        allowComments: config.allowComments,
+        sendReminders: config.sendReminders,
+        reminderFrequency: config.reminderFrequency,
+        expirationEnabled: config.expirationEnabled,
+        expirationDays: config.expirationDays,
+        signingOrder: config.signingOrder,
+        requireAllSigners: config.requireAllSigners,
+        allowPrinting: config.allowPrinting,
+        allowDownload: config.allowDownload
+      }))
 
       // Save to backend using the correct endpoint
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'}/api/documents/upload`, {
@@ -812,19 +1321,24 @@ export default function NewDocumentEditor() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to save document')
+        throw new Error('Failed to send document')
       }
 
       const result = await response.json()
       
-      toast.success('Document saved successfully!', { id: 'saving' })
+      toast.success('Document sent successfully!', { id: 'sending' })
+      
+      // Clear session storage
+      sessionStorage.removeItem('pendingDocument')
       
       // Redirect to live view
       router.push(`/live/${result.documentId}`)
       
     } catch (error) {
-      console.error('Error saving document:', error)
-      toast.error('Failed to save document', { id: 'saving' })
+      console.error('Error sending document:', error)
+      toast.error('Failed to send document', { id: 'sending' })
+    } finally {
+      setIsSubmitting(false)
     }
   }, [documentFile, fields, router])
 
@@ -839,6 +1353,20 @@ export default function NewDocumentEditor() {
     )
   }
 
+  // Step 2: Document Configuration
+  if (currentStep === 2) {
+    return (
+      <DocumentConfiguration
+        documentFile={documentFile}
+        fields={fields}
+        onBack={handleBackToEditor}
+        onSend={handleSend}
+        isLoading={isSubmitting}
+      />
+    )
+  }
+
+  // Step 1: Document Editor
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
@@ -859,11 +1387,14 @@ export default function NewDocumentEditor() {
                 <Menu className="w-5 h-5" />
               </button>
             
-            <h1 className="text-lg font-semibold text-gray-900 truncate">
-              {documentFile?.name || 'Document Editor'}
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900 truncate">
+                {documentFile?.name || 'Document Editor'}
               </h1>
+              <p className="text-sm text-gray-500">Step 1 of 2 - Add fields and configure layout</p>
             </div>
-            
+          </div>
+          
           <div className="flex items-center space-x-2">
             {/* Desktop Zoom Controls */}
             <div className="hidden md:flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
@@ -901,11 +1432,12 @@ export default function NewDocumentEditor() {
               </button>
               
               <button
-              onClick={handleSend}
+              onClick={handleNextStep}
               className="btn-primary flex items-center space-x-2"
               >
-              <Send className="w-4 h-4" />
-              <span className="hidden sm:inline">Send</span>
+              <span className="hidden sm:inline">Next: Configure</span>
+              <span className="sm:hidden">Next</span>
+              <ArrowRight className="w-4 h-4" />
               </button>
           </div>
         </div>
@@ -1014,10 +1546,10 @@ export default function NewDocumentEditor() {
         {/* Main Content */}
         <div className="flex-1 overflow-hidden">
           {documentFile && (
-              <DocumentViewer
+            <DocumentViewer
               documentFile={documentFile}
-                zoom={zoom}
-                onZoomChange={setZoom}
+              zoom={zoom}
+              onZoomChange={setZoom}
               onDocumentClick={handleDocumentClick}
             >
               {fields.map((field) => (
@@ -1033,11 +1565,11 @@ export default function NewDocumentEditor() {
                   onValueChange={handleFieldValueChange}
                 />
               ))}
-              </DocumentViewer>
-            )}
-          </div>
-              </div>
-              
+            </DocumentViewer>
+          )}
+        </div>
+      </div>
+      
       {/* Mobile Floating Action Button */}
       <MobileFloatingButton 
         onFieldTypeSelect={setSelectedFieldType}
