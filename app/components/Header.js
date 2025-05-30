@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, usePathname } from 'next/navigation'
-import { FileText, Home, Settings, User, Bell, Search, Plus, Menu, X } from 'lucide-react'
+import { FileText, Home, Settings, User, Search, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 
 export default function Header() {
@@ -9,6 +9,68 @@ export default function Header() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+  // Check if we're on home page
+  const isHomePage = pathname === '/'
+
+  // If not on home page, show minimal header
+  if (!isHomePage) {
+    return (
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div className="px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-12">
+            {/* Logo Section */}
+            <div className="flex items-center">
+              <button
+                onClick={() => router.push('/')}
+                className="flex items-center space-x-3 hover:opacity-80 transition-opacity group"
+              >
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
+                  <FileText className="w-5 h-5 text-white" />
+                </div>
+                <div className="hidden sm:block">
+                  <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    SignFlow
+                  </span>
+                </div>
+              </button>
+            </div>
+
+            {/* Navigation */}
+            <nav className="hidden md:flex items-center space-x-2">
+              <button
+                onClick={() => router.push('/')}
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+              >
+                <Home className="w-4 h-4" />
+                <span>Home</span>
+              </button>
+              <button
+                onClick={() => router.push('/dashboard')}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  pathname === '/dashboard'
+                    ? 'text-blue-600 bg-blue-50 shadow-sm border border-blue-100'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                <FileText className="w-4 h-4" />
+                <span>Documents</span>
+              </button>
+            </nav>
+
+            {/* User Profile */}
+            <button className="flex items-center space-x-2 px-3 py-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200 hover:border-gray-300">
+              <div className="w-8 h-8 bg-gradient-to-br from-gray-400 to-gray-600 rounded-full flex items-center justify-center">
+                <User className="w-4 h-4 text-white" />
+              </div>
+              <span className="hidden lg:block text-sm font-medium text-gray-700">John Doe</span>
+            </button>
+          </div>
+        </div>
+      </header>
+    )
+  }
+
+  // Full header for home page
   const navigation = [
     { name: 'Home', href: '/', icon: Home },
     { name: 'Documents', href: '/dashboard', icon: FileText },
@@ -16,9 +78,9 @@ export default function Header() {
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
+      <div className="w-full px-6 lg:px-8">
+        <div className="flex justify-between items-center h-14">
+          {/* Logo Section */}
           <div className="flex items-center">
             <button
               onClick={() => router.push('/')}
@@ -31,63 +93,47 @@ export default function Header() {
                 <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   SignFlow
                 </span>
-                <div className="text-xs text-gray-500 -mt-1">Professional Signing</div>
+                <div className="text-xs text-gray-500 -mt-1 font-medium">Professional Document Signing</div>
               </div>
             </button>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
-            {navigation.map((item) => {
-              const Icon = item.icon
-              const isActive = pathname === item.href
-              return (
-                <button
-                  key={item.name}
-                  onClick={() => router.push(item.href)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    isActive
-                      ? 'text-blue-600 bg-blue-50 shadow-sm border border-blue-100'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.name}</span>
-                </button>
-              )
-            })}
-          </nav>
+          {/* Search Bar - Left/Middle */}
+          <div className="hidden md:flex flex-1 max-w-md mx-8">
+            <div className="relative w-full">
+              <button className="w-full flex items-center space-x-3 px-4 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200 hover:border-gray-300">
+                <Search className="w-4 h-4" />
+                <span className="text-sm font-medium">Search documents...</span>
+              </button>
+            </div>
+          </div>
 
-          {/* Right Side Actions */}
-          <div className="flex items-center space-x-3">
-            {/* Search */}
-            <button className="hidden lg:flex items-center space-x-2 px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-              <Search className="w-4 h-4" />
-              <span className="text-sm">Search</span>
-            </button>
-
-            {/* Create New */}
-            <button 
-              onClick={() => router.push('/editor/new')}
-              className="hidden sm:flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium"
-            >
-              <Plus className="w-4 h-4" />
-              <span>New Document</span>
-            </button>
-
-            {/* Notifications */}
-            <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-            </button>
-
-            {/* Settings */}
-            <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-              <Settings className="w-5 h-5" />
-            </button>
+          {/* Right Side - Navigation and User */}
+          <div className="flex items-center space-x-4">
+            {/* Navigation - Moved to right */}
+            <nav className="hidden md:flex items-center space-x-2">
+              {navigation.map((item) => {
+                const Icon = item.icon
+                const isActive = pathname === item.href
+                return (
+                  <button
+                    key={item.name}
+                    onClick={() => router.push(item.href)}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      isActive
+                        ? 'text-blue-600 bg-blue-50 shadow-sm border border-blue-100'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{item.name}</span>
+                  </button>
+                )
+              })}
+            </nav>
 
             {/* User Profile */}
-            <button className="flex items-center space-x-2 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+            <button className="flex items-center space-x-2 px-3 py-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200 hover:border-gray-300">
               <div className="w-8 h-8 bg-gradient-to-br from-gray-400 to-gray-600 rounded-full flex items-center justify-center">
                 <User className="w-4 h-4 text-white" />
               </div>
@@ -97,17 +143,25 @@ export default function Header() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+              className="md:hidden p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200 hover:border-gray-300"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - Enhanced */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4">
-            <div className="space-y-2">
+          <div className="md:hidden border-t border-gray-200 py-6">
+            <div className="space-y-3">
+              {/* Mobile Search */}
+              <div className="px-6">
+                <button className="w-full flex items-center space-x-3 px-4 py-3 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-xl transition-colors border border-gray-200">
+                  <Search className="w-5 h-5" />
+                  <span className="text-sm font-medium">Search documents...</span>
+                </button>
+              </div>
+
               {navigation.map((item) => {
                 const Icon = item.icon
                 const isActive = pathname === item.href
@@ -118,28 +172,25 @@ export default function Header() {
                       router.push(item.href)
                       setMobileMenuOpen(false)
                     }}
-                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                    className={`w-full flex items-center space-x-4 px-6 py-4 rounded-xl text-left transition-colors ${
                       isActive
-                        ? 'text-blue-600 bg-blue-50'
+                        ? 'text-blue-600 bg-blue-50 border border-blue-100'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                     }`}
                   >
-                    <Icon className="w-5 h-5" />
-                    <span className="font-medium">{item.name}</span>
+                    <Icon className="w-6 h-6" />
+                    <span className="font-medium text-base">{item.name}</span>
                   </button>
                 )
               })}
-              
-              {/* Mobile Create Button */}
+
+              {/* Mobile Settings */}
               <button 
-                onClick={() => {
-                  router.push('/editor/new')
-                  setMobileMenuOpen(false)
-                }}
-                className="w-full flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full flex items-center space-x-4 px-6 py-4 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors"
               >
-                <Plus className="w-5 h-5" />
-                <span>New Document</span>
+                <Settings className="w-6 h-6" />
+                <span className="font-medium text-base">Settings</span>
               </button>
             </div>
           </div>

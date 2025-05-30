@@ -1077,7 +1077,7 @@ export default function LiveView() {
               </>
                   )}
                 </button>
-        </div>
+            </div>
         </div>
 
       {/* Main Content */}

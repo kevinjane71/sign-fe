@@ -140,7 +140,7 @@ function DocumentConfiguration({ documentFile, fields, onBack, onSend, isLoading
   const removeSigner = (id) => {
     if (signers.length > 1) {
       setSigners(prev => prev.filter(signer => signer.id !== id))
-    } else {
+          } else {
       toast.error('At least one signer is required')
     }
   }
@@ -574,7 +574,7 @@ const DocumentViewer = ({ documentFile, zoom, onZoomChange, children, onDocument
         await loadPdfDocument()
       } else if (documentFile.type.startsWith('image/')) {
         await loadImageDocument()
-          } else {
+    } else {
         setError('Unsupported file type')
       }
     } catch (err) {
@@ -1393,8 +1393,8 @@ export default function NewDocumentEditor() {
               </h1>
               <p className="text-sm text-gray-500">Step 1 of 2 - Add fields and configure layout</p>
             </div>
-          </div>
-          
+            </div>
+            
           <div className="flex items-center space-x-2">
             {/* Desktop Zoom Controls */}
             <div className="hidden md:flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
@@ -1546,10 +1546,10 @@ export default function NewDocumentEditor() {
         {/* Main Content */}
         <div className="flex-1 overflow-hidden">
           {documentFile && (
-            <DocumentViewer
+              <DocumentViewer
               documentFile={documentFile}
-              zoom={zoom}
-              onZoomChange={setZoom}
+                zoom={zoom}
+                onZoomChange={setZoom}
               onDocumentClick={handleDocumentClick}
             >
               {fields.map((field) => (
@@ -1565,11 +1565,11 @@ export default function NewDocumentEditor() {
                   onValueChange={handleFieldValueChange}
                 />
               ))}
-            </DocumentViewer>
-          )}
-        </div>
-      </div>
-      
+              </DocumentViewer>
+            )}
+          </div>
+              </div>
+              
       {/* Mobile Floating Action Button */}
       <MobileFloatingButton 
         onFieldTypeSelect={setSelectedFieldType}
