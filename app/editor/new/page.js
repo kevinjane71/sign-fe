@@ -261,396 +261,386 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b sticky top-0 z-40">
-        <div className="px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <button 
-              onClick={onBack}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            
-            <div>
-              <h1 className="text-lg font-semibold text-gray-900">
-                Configure Document
-              </h1>
-              <p className="text-sm text-gray-500">Step 2 of 2 </p>
+      {/* Compact Header */}
+      <header className="bg-white border-b border-gray-200 fixed top-20 left-0 right-0 z-30 shadow-sm">
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <button 
+                onClick={onBack}
+                className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4 text-gray-600" />
+              </button>
+              
+              <div className="flex items-center space-x-2">
+                <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                  <Settings className="w-3.5 h-3.5 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-sm font-bold text-gray-900">Configure Document</h1>
+                  <div className="flex items-center space-x-2 text-xs text-gray-500">
+                    <span>Step 2 of 2</span>
+                    <span>•</span>
+                    <span>{fields.length} fields</span>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            {/* <span className="text-sm text-gray-500">
-              {fields.length} fields • {signers.length} signers
-            </span> */}
             
             <button
               onClick={handleSend}
               disabled={isLoading}
-              className="btn-primary flex items-center space-x-2"
+              className="flex items-center space-x-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-xs font-semibold shadow-sm disabled:opacity-50"
             >
               {isLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <Send className="w-4 h-4" />
               )}
-              <span>Share</span>
+              <span>Send Document</span>
             </button>
           </div>
         </div>
       </header>
 
-      {/* Content */}
-      <div className="max-w-4xl mx-auto p-6 space-y-8">
-        {/* Document Summary */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center">
-            <Settings className="w-5 h-5 mr-2" />
-            Document Summary
-          </h2>
-          
-          {documents && documents.length > 1 ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-500">Documents:</span>
-                  <p className="font-medium">{documents.length} documents</p>
-                </div>
-                <div>
-                  <span className="text-gray-500">Total Fields:</span>
-                  <p className="font-medium">{fields.length} fields added</p>
-                </div>
-                <div>
-                  <span className="text-gray-500">Status:</span>
-                  <p className="font-medium">Ready to send</p>
-                </div>
-              </div>
-              
-              <div className="border-t pt-4">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">Document List:</h3>
-                <div className="space-y-2">
-                  {documents.map((doc, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                      <div className="flex items-center space-x-2">
-                        <FileText className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm font-medium">{doc.name}</span>
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {allFields[index]?.length || 0} fields
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-              <div>
-                <span className="text-gray-500">Document:</span>
-                <p className="font-medium">{documentFile?.name}</p>
-              </div>
-              <div>
-                <span className="text-gray-500">Fields:</span>
-                <p className="font-medium">{fields.length} fields added</p>
-              </div>
-              <div>
-                <span className="text-gray-500">Type:</span>
-                <p className="font-medium">{documentFile?.type}</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Signers */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold flex items-center">
-              <Users className="w-5 h-5 mr-2" />
-              Signers
-            </h2>
-            <button
-              onClick={addSigner}
-              className="btn-secondary flex items-center space-x-2"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Signer</span>
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {signers.map((signer, index) => (
-              <div key={signer.id} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-medium">Signer {index + 1}</h3>
-                  {signers.length > 1 && (
-                    <button
-                      onClick={() => removeSigner(signer.id)}
-                      className="text-red-600 hover:text-red-700 p-1"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
+      {/* Compact Content */}
+      <div className="pt-24 px-4 pb-6">
+        <div className="max-w-2xl mx-auto space-y-4">
+          {/* Document Summary - Compact */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <h2 className="text-sm font-semibold text-gray-900 mb-3">Document Summary</h2>
+            
+            {documents && documents.length > 1 ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-3 gap-4 text-xs">
+                  <div>
+                    <span className="text-gray-500">Documents</span>
+                    <p className="font-medium text-gray-900">{documents.length}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Fields</span>
+                    <p className="font-medium text-gray-900">{fields.length}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Status</span>
+                    <p className="font-medium text-green-600">Ready</p>
+                  </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={signer.name}
-                      onChange={(e) => updateSigner(signer.id, 'name', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter full name"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email Address *
-                    </label>
-                    <input
-                      type="email"
-                      value={signer.email}
-                      onChange={(e) => updateSigner(signer.id, 'email', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter email address"
-                    />
+                <div className="border-t pt-3">
+                  <div className="space-y-1.5">
+                    {documents.slice(0, 2).map((doc, index) => (
+                      <div key={index} className="flex items-center justify-between text-xs">
+                        <span className="text-gray-700 truncate">{doc.name}</span>
+                        <span className="text-gray-500">{allFields[index]?.length || 0} fields</span>
+                      </div>
+                    ))}
+                    {documents.length > 2 && (
+                      <div className="text-xs text-gray-500">+{documents.length - 2} more documents</div>
+                    )}
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Email Configuration */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center">
-            <Mail className="w-5 h-5 mr-2" />
-            Email Configuration
-          </h2>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Subject *
-              </label>
-              <input
-                type="text"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter email subject"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Message
-              </label>
-              <textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter a message for the signers"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Advanced Settings */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <button
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="w-full flex items-center justify-between text-lg font-semibold mb-4"
-          >
-            <span className="flex items-center">
-              <Shield className="w-5 h-5 mr-2" />
-              Advanced Settings
-            </span>
-            <ArrowRight className={`w-5 h-5 transition-transform ${showAdvanced ? 'rotate-90' : ''}`} />
-          </button>
-
-          {showAdvanced && (
-            <div className="space-y-6 pt-4 border-t">
-              {/* Security Settings */}
-              <div>
-                <h3 className="font-medium mb-3">Security & Authentication</h3>
-                <div className="space-y-3">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={requireAuthentication}
-                      onChange={(e) => setRequireAuthentication(e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="ml-2 text-sm">Require authentication to sign</span>
-                  </label>
-                  
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={allowDelegation}
-                      onChange={(e) => setAllowDelegation(e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="ml-2 text-sm">Allow signers to delegate to others</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Signing Settings */}
-              <div>
-                <h3 className="font-medium mb-3">Signing Process</h3>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Signing Order
-                    </label>
-                    <select
-                      value={signingOrder}
-                      onChange={(e) => setSigningOrder(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="any">Any order</option>
-                      <option value="sequential">Sequential order</option>
-                    </select>
-                  </div>
-                  
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={requireAllSigners}
-                      onChange={(e) => setRequireAllSigners(e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="ml-2 text-sm">Require all signers to complete</span>
-                  </label>
-                  
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={allowComments}
-                      onChange={(e) => setAllowComments(e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="ml-2 text-sm">Allow comments and notes</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Reminders & Expiration */}
-              <div>
-                <h3 className="font-medium mb-3">Reminders & Expiration</h3>
-                <div className="space-y-3">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={sendReminders}
-                      onChange={(e) => setSendReminders(e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="ml-2 text-sm">Send automatic reminders</span>
-                  </label>
-                  
-                  {sendReminders && (
-                    <div className="ml-6">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Reminder frequency (days)
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="30"
-                        value={reminderFrequency}
-                        onChange={(e) => setReminderFrequency(parseInt(e.target.value))}
-                        className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  )}
-                  
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={expirationEnabled}
-                      onChange={(e) => setExpirationEnabled(e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="ml-2 text-sm">Set expiration date</span>
-                  </label>
-                  
-                  {expirationEnabled && (
-                    <div className="ml-6">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Expires after (days)
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="365"
-                        value={expirationDays}
-                        onChange={(e) => setExpirationDays(parseInt(e.target.value))}
-                        className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Document Permissions */}
-              <div>
-                <h3 className="font-medium mb-3">Document Permissions</h3>
-                <div className="space-y-3">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={allowPrinting}
-                      onChange={(e) => setAllowPrinting(e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="ml-2 text-sm">Allow printing</span>
-                  </label>
-                  
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={allowDownload}
-                      onChange={(e) => setAllowDownload(e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="ml-2 text-sm">Allow download</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-between">
-          <button
-            onClick={onBack}
-            className="btn-secondary flex items-center space-x-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to Editor</span>
-          </button>
-          
-          <button
-            onClick={handleSend}
-            disabled={isLoading}
-            className="btn-primary flex items-center space-x-2"
-          >
-            {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <Send className="w-4 h-4" />
+              <div className="grid grid-cols-3 gap-4 text-xs">
+                <div>
+                  <span className="text-gray-500">Document</span>
+                  <p className="font-medium text-gray-900 truncate">{documentFile?.name}</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Fields</span>
+                  <p className="font-medium text-gray-900">{fields.length}</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Type</span>
+                  <p className="font-medium text-gray-900">{documentFile?.type?.split('/')[1]?.toUpperCase()}</p>
+                </div>
+              </div>
             )}
-            <span>Send Document</span>
-          </button>
+          </div>
+
+          {/* Signers - Compact */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-gray-900">Signers</h2>
+              <button
+                onClick={addSigner}
+                className="flex items-center space-x-1 px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+              >
+                <Plus className="w-3 h-3" />
+                <span>Add</span>
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {signers.map((signer, index) => (
+                <div key={signer.id} className="border border-gray-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-700">Signer {index + 1}</span>
+                    {signers.length > 1 && (
+                      <button
+                        onClick={() => removeSigner(signer.id)}
+                        className="text-red-500 hover:text-red-600 p-0.5"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={signer.name}
+                        onChange={(e) => updateSigner(signer.id, 'name', e.target.value)}
+                        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter full name"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        value={signer.email}
+                        onChange={(e) => updateSigner(signer.id, 'email', e.target.value)}
+                        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter email address"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Email Configuration - Compact */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <h2 className="text-sm font-semibold text-gray-900 mb-3">Email Configuration</h2>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Subject *
+                </label>
+                <input
+                  type="text"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter email subject"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Message
+                </label>
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  rows={3}
+                  className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter a message for the signers"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Advanced Settings - Compact */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <button
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 mb-3"
+            >
+              <span>Advanced Settings</span>
+              <ArrowRight className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-90' : ''}`} />
+            </button>
+
+            {showAdvanced && (
+              <div className="space-y-4 pt-3 border-t border-gray-200">
+                {/* Security Settings */}
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-700 mb-2">Security & Authentication</h3>
+                  <div className="space-y-2">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={requireAuthentication}
+                        onChange={(e) => setRequireAuthentication(e.target.checked)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-3 h-3"
+                      />
+                      <span className="ml-2 text-xs text-gray-700">Require authentication to sign</span>
+                    </label>
+                    
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={allowDelegation}
+                        onChange={(e) => setAllowDelegation(e.target.checked)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-3 h-3"
+                      />
+                      <span className="ml-2 text-xs text-gray-700">Allow signers to delegate to others</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Signing Settings */}
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-700 mb-2">Signing Process</h3>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Signing Order
+                      </label>
+                      <select
+                        value={signingOrder}
+                        onChange={(e) => setSigningOrder(e.target.value)}
+                        className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="any">Any order</option>
+                        <option value="sequential">Sequential order</option>
+                      </select>
+                    </div>
+                    
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={requireAllSigners}
+                        onChange={(e) => setRequireAllSigners(e.target.checked)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-3 h-3"
+                      />
+                      <span className="ml-2 text-xs text-gray-700">Require all signers to complete</span>
+                    </label>
+                    
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={allowComments}
+                        onChange={(e) => setAllowComments(e.target.checked)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-3 h-3"
+                      />
+                      <span className="ml-2 text-xs text-gray-700">Allow comments and notes</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Reminders & Expiration */}
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-700 mb-2">Reminders & Expiration</h3>
+                  <div className="space-y-2">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={sendReminders}
+                        onChange={(e) => setSendReminders(e.target.checked)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-3 h-3"
+                      />
+                      <span className="ml-2 text-xs text-gray-700">Send automatic reminders</span>
+                    </label>
+                    
+                    {sendReminders && (
+                      <div className="ml-5">
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Reminder frequency (days)
+                        </label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="30"
+                          value={reminderFrequency}
+                          onChange={(e) => setReminderFrequency(parseInt(e.target.value))}
+                          className="w-20 px-2 py-1 text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                    )}
+                    
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={expirationEnabled}
+                        onChange={(e) => setExpirationEnabled(e.target.checked)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-3 h-3"
+                      />
+                      <span className="ml-2 text-xs text-gray-700">Set expiration date</span>
+                    </label>
+                    
+                    {expirationEnabled && (
+                      <div className="ml-5">
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Expires after (days)
+                        </label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="365"
+                          value={expirationDays}
+                          onChange={(e) => setExpirationDays(parseInt(e.target.value))}
+                          className="w-20 px-2 py-1 text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Document Permissions */}
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-700 mb-2">Document Permissions</h3>
+                  <div className="space-y-2">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={allowPrinting}
+                        onChange={(e) => setAllowPrinting(e.target.checked)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-3 h-3"
+                      />
+                      <span className="ml-2 text-xs text-gray-700">Allow printing</span>
+                    </label>
+                    
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={allowDownload}
+                        onChange={(e) => setAllowDownload(e.target.checked)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-3 h-3"
+                      />
+                      <span className="ml-2 text-xs text-gray-700">Allow download</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Action Buttons - Compact */}
+          <div className="flex justify-between pt-2">
+            <button
+              onClick={onBack}
+              className="flex items-center space-x-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md transition-colors text-xs font-semibold text-gray-700"
+            >
+              <ArrowLeft className="w-3 h-3" />
+              <span>Back to Editor</span>
+            </button>
+            
+            <button
+              onClick={handleSend}
+              disabled={isLoading}
+              className="flex items-center space-x-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-xs font-semibold shadow-sm disabled:opacity-50"
+            >
+              {isLoading ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Send className="w-3 h-3" />
+              )}
+              <span>Send Document</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1824,20 +1814,6 @@ export default function NewDocumentEditor() {
           <div className="flex items-center justify-between">
             {/* Left Section */}
             <div className="flex items-center space-x-3">
-            <button 
-                onClick={() => router.push('/')}
-                className="hidden md:flex p-1.5 hover:bg-white/80 rounded-lg transition-colors"
-            >
-                <ArrowLeft className="w-4 h-4 text-gray-600" />
-            </button>
-            
-              <button 
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="hidden p-1.5 hover:bg-white/80 rounded-lg transition-colors"
-              >
-                <Menu className="w-4 h-4 text-gray-600" />
-              </button>
-              
               {/* Document Info */}
               <div className="flex items-center space-x-2">
                 <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
@@ -1921,11 +1897,20 @@ export default function NewDocumentEditor() {
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
           md:translate-x-0 fixed md:fixed z-30 w-72 md:w-72 bg-white border-r border-gray-200
           transition-transform duration-300 ease-in-out h-full md:h-[calc(100vh-112px)] overflow-y-auto
-          top-28 left-0 pt-4 flex flex-col
+          top-28 left-0 pt-4 flex flex-col shadow-lg
         `}>
           
           {/* Field Palette - Top */}
           <div className="p-4 flex-1">
+            {/* Back Button */}
+            <button 
+              onClick={() => router.push('/')}
+              className="w-full flex items-center space-x-2 p-2.5 mb-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4 text-gray-600" />
+              <span className="text-sm font-medium text-gray-900">Back to Dashboard</span>
+            </button>
+
             {/* Mobile Close Button */}
             <div className="flex justify-between items-center mb-4 md:hidden">
               <h3 className="text-lg font-semibold text-gray-900">Add Fields</h3>
@@ -1937,17 +1922,26 @@ export default function NewDocumentEditor() {
               </button>
             </div>
             
-            {/* Add Fields Header - Desktop */}
-            <div className="hidden md:flex items-center space-x-3 mb-6">
-              <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
-              <h3 className="text-lg font-semibold text-gray-900">Add Fields</h3>
-            </div>
-            
-            {/* Field List - Compact Buttons */}
+            {/* Field List - Updated to match design */}
             <div className="space-y-2">
               {Object.entries(FIELD_CONFIGS).map(([type, config]) => {
                 const Icon = config.icon
                 const isActive = selectedFieldType === type
+                
+                // Define light background colors that match the icons
+                const getLightBgColor = (fieldType) => {
+                  switch(fieldType) {
+                    case FIELD_TYPES.SIGNATURE: return 'bg-blue-50'
+                    case FIELD_TYPES.TEXT: return 'bg-orange-50'
+                    case FIELD_TYPES.DATE: return 'bg-green-50'
+                    case FIELD_TYPES.CHECKBOX: return 'bg-gray-50'
+                    case FIELD_TYPES.STAMP: return 'bg-purple-50'
+                    case FIELD_TYPES.NAME: return 'bg-emerald-50'
+                    case FIELD_TYPES.EMAIL: return 'bg-amber-50'
+                    case FIELD_TYPES.PHONE: return 'bg-cyan-50'
+                    default: return 'bg-gray-50'
+                  }
+                }
                 
                 return (
                   <button
@@ -1962,29 +1956,34 @@ export default function NewDocumentEditor() {
                       }
                     }}
                     className={`
-                      w-full flex items-center justify-between p-2.5 rounded-lg border transition-all duration-200
+                      w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition-all duration-200 border
                       ${isActive 
-                        ? 'border-blue-500 bg-blue-50 shadow-sm' 
-                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                        ? `${getLightBgColor(type)} border-blue-200 shadow-sm` 
+                        : `${getLightBgColor(type)} hover:shadow-sm border-gray-200`
                       }
                     `}
-                    style={{
-                      backgroundColor: isActive ? '#eff6ff' : config.bgColor
-                    }}
                   >
-                    <div className="flex items-center space-x-2.5">
-                      <div 
-                        className="w-8 h-8 rounded-lg flex items-center justify-center"
-                        style={{ backgroundColor: config.color }}
-                      >
-                        <Icon className="w-4 h-4 text-white" />
-                      </div>
-                      <span className="text-sm font-medium text-gray-900">
-                        {config.label}
-                      </span>
+                    <div 
+                      className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+                        type === FIELD_TYPES.SIGNATURE ? 'bg-blue-500' :
+                        type === FIELD_TYPES.TEXT ? 'bg-orange-500' :
+                        type === FIELD_TYPES.DATE ? 'bg-green-500' :
+                        type === FIELD_TYPES.CHECKBOX ? 'bg-gray-500' :
+                        type === FIELD_TYPES.STAMP ? 'bg-purple-500' :
+                        type === FIELD_TYPES.NAME ? 'bg-emerald-500' :
+                        type === FIELD_TYPES.EMAIL ? 'bg-amber-500' :
+                        type === FIELD_TYPES.PHONE ? 'bg-cyan-500' : 'bg-gray-500'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5 text-white" />
                     </div>
-                    <div className="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center">
-                      <Plus className="w-3 h-3 text-gray-400" />
+                    <span className="text-sm font-medium text-gray-900 flex-1 text-left">
+                      {config.label}
+                    </span>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      isActive ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
+                    }`}>
+                      <Plus className={`w-2.5 h-2.5 ${isActive ? 'text-white' : 'text-gray-400'}`} />
                     </div>
                   </button>
                 )
@@ -1992,7 +1991,7 @@ export default function NewDocumentEditor() {
             </div>
             
             {/* Quick Tip Section */}
-            <div className="mt-8 p-4 bg-blue-50 rounded-xl border border-blue-200">
+            <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
               <div className="flex items-start space-x-2">
                 <div className="text-lg">💡</div>
                 <div>
@@ -2049,29 +2048,33 @@ export default function NewDocumentEditor() {
         )}
 
         {/* Main Content - Adjusted for compact sidebar */}
-        <div className="flex-1 overflow-hidden md:ml-72">
+        <div className="flex-1 overflow-hidden md:ml-72 bg-gray-100">
           {documents.length > 0 && (
-            <DocumentViewer
-              documents={documents}
-              zoom={zoom}
-              onZoomChange={setZoom}
-              onDocumentClick={handleDocumentClick}
-            >
-              {getAllFields().map((field) => (
-                <FieldComponent
-                  key={field.id}
-                  field={field}
-                  pageNumber={field.pageNumber}
-                  documentIndex={field.documentIndex}
-                  isSelected={selectedField === field.id}
-                  isDragging={isDragging && draggedField?.id === field.id}
-                  onSelect={handleFieldSelect}
-                  onDragStart={handleDragStart}
-                  onDelete={handleFieldDelete}
-                  onValueChange={handleFieldValueChange}
-                />
-              ))}
-            </DocumentViewer>
+            <div className="h-full p-4">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full overflow-hidden">
+                <DocumentViewer
+                  documents={documents}
+                  zoom={zoom}
+                  onZoomChange={setZoom}
+                  onDocumentClick={handleDocumentClick}
+                >
+                  {getAllFields().map((field) => (
+                    <FieldComponent
+                      key={field.id}
+                      field={field}
+                      pageNumber={field.pageNumber}
+                      documentIndex={field.documentIndex}
+                      isSelected={selectedField === field.id}
+                      isDragging={isDragging && draggedField?.id === field.id}
+                      onSelect={handleFieldSelect}
+                      onDragStart={handleDragStart}
+                      onDelete={handleFieldDelete}
+                      onValueChange={handleFieldValueChange}
+                    />
+                  ))}
+                </DocumentViewer>
+              </div>
+            </div>
           )}
         </div>
       </div>
