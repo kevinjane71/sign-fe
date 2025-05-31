@@ -39,9 +39,13 @@ import toast from 'react-hot-toast'
 // Field type configurations
 const FIELD_TYPES = {
   TEXT: 'text',
+  NAME: 'name',
   SIGNATURE: 'signature',
   CHECKBOX: 'checkbox',
-  DATE: 'date'
+  DATE: 'date',
+  STAMP: 'stamp',
+  EMAIL: 'email',
+  PHONE: 'phone'
 }
 
 const FIELD_CONFIGS = {
@@ -50,40 +54,96 @@ const FIELD_CONFIGS = {
     label: 'Text Field',
     color: '#3b82f6',
     bgColor: '#eff6ff',
+    borderColor: '#3b82f6',
     minWidth: 80,
     minHeight: 28,
     defaultWidth: 140,
-    defaultHeight: 32
+    defaultHeight: 32,
+    category: 'input'
+  },
+  [FIELD_TYPES.NAME]: {
+    icon: Users,
+    label: 'Name Field',
+    color: '#10b981',
+    bgColor: '#f0fdf4',
+    borderColor: '#10b981',
+    minWidth: 100,
+    minHeight: 28,
+    defaultWidth: 160,
+    defaultHeight: 32,
+    category: 'input'
+  },
+  [FIELD_TYPES.EMAIL]: {
+    icon: Mail,
+    label: 'Email Field',
+    color: '#f59e0b',
+    bgColor: '#fffbeb',
+    borderColor: '#f59e0b',
+    minWidth: 120,
+    minHeight: 28,
+    defaultWidth: 180,
+    defaultHeight: 32,
+    category: 'input'
+  },
+  [FIELD_TYPES.PHONE]: {
+    icon: MessageSquare,
+    label: 'Phone Field',
+    color: '#06b6d4',
+    bgColor: '#f0f9ff',
+    borderColor: '#06b6d4',
+    minWidth: 100,
+    minHeight: 28,
+    defaultWidth: 140,
+    defaultHeight: 32,
+    category: 'input'
   },
   [FIELD_TYPES.SIGNATURE]: {
     icon: PenTool,
     label: 'Signature',
-    color: '#10b981',
-    bgColor: '#f0fdf4',
+    color: '#8b5cf6',
+    bgColor: '#faf5ff',
+    borderColor: '#8b5cf6',
     minWidth: 100,
     minHeight: 40,
     defaultWidth: 160,
-    defaultHeight: 50
+    defaultHeight: 50,
+    category: 'signature'
+  },
+  [FIELD_TYPES.STAMP]: {
+    icon: Shield,
+    label: 'Stamp/Seal',
+    color: '#dc2626',
+    bgColor: '#fef2f2',
+    borderColor: '#dc2626',
+    minWidth: 60,
+    minHeight: 60,
+    defaultWidth: 80,
+    defaultHeight: 80,
+    category: 'signature'
   },
   [FIELD_TYPES.CHECKBOX]: {
     icon: CheckSquare,
     label: 'Checkbox',
-    color: '#8b5cf6',
-    bgColor: '#faf5ff',
+    color: '#7c3aed',
+    bgColor: '#f5f3ff',
+    borderColor: '#7c3aed',
     minWidth: 20,
     minHeight: 20,
     defaultWidth: 24,
-    defaultHeight: 24
+    defaultHeight: 24,
+    category: 'selection'
   },
   [FIELD_TYPES.DATE]: {
     icon: Calendar,
     label: 'Date Field',
-    color: '#f59e0b',
-    bgColor: '#fffbeb',
+    color: '#ea580c',
+    bgColor: '#fff7ed',
+    borderColor: '#ea580c',
     minWidth: 90,
     minHeight: 28,
     defaultWidth: 120,
-    defaultHeight: 32
+    defaultHeight: 32,
+    category: 'input'
   }
 }
 
@@ -917,6 +977,51 @@ const FieldComponent = ({
               }}
             />
         )}
+
+        {field.type === FIELD_TYPES.NAME && (
+          <input
+            type="text"
+            value={field.value || ''}
+            onChange={(e) => onValueChange(field.id, e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full h-full bg-transparent border-none outline-none text-gray-700 font-medium"
+            placeholder="Full Name"
+            style={{ 
+              fontSize: `${fontSize}px`,
+              padding: '2px 4px'
+            }}
+          />
+        )}
+
+        {field.type === FIELD_TYPES.EMAIL && (
+          <input
+            type="email"
+            value={field.value || ''}
+            onChange={(e) => onValueChange(field.id, e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full h-full bg-transparent border-none outline-none text-gray-700"
+            placeholder="email@example.com"
+            style={{ 
+              fontSize: `${fontSize}px`,
+              padding: '2px 4px'
+            }}
+          />
+        )}
+
+        {field.type === FIELD_TYPES.PHONE && (
+          <input
+            type="tel"
+            value={field.value || ''}
+            onChange={(e) => onValueChange(field.id, e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full h-full bg-transparent border-none outline-none text-gray-700"
+            placeholder="(555) 123-4567"
+            style={{ 
+              fontSize: `${fontSize}px`,
+              padding: '2px 4px'
+            }}
+          />
+        )}
         
         {field.type === FIELD_TYPES.CHECKBOX && (
               <input
@@ -960,9 +1065,25 @@ const FieldComponent = ({
             <span style={{ fontSize: `${Math.max(8, fontSize * 0.7)}px` }}>
               Sign here
             </span>
-                </div>
-              )}
-            </div>
+          </div>
+        )}
+
+        {field.type === FIELD_TYPES.STAMP && (
+          <div className="flex flex-col items-center justify-center text-gray-600">
+            <Icon 
+              style={{ 
+                width: `${Math.min(fieldWidth * 0.4, fieldHeight * 0.6)}px`,
+                height: `${Math.min(fieldWidth * 0.4, fieldHeight * 0.6)}px`,
+                minWidth: '16px',
+                minHeight: '16px'
+              }} 
+            />
+            <span style={{ fontSize: `${Math.max(8, fontSize * 0.6)}px` }}>
+              Stamp
+            </span>
+          </div>
+        )}
+      </div>
             
       {/* Field Toolbar */}
       {isSelected && (
@@ -997,11 +1118,11 @@ const MobileFloatingButton = ({ onFieldTypeSelect, selectedFieldType }) => {
   }
 
   return (
-    <div className="fixed bottom-6 left-4 right-4 z-50 md:hidden">
+    <div className="fixed bottom-4 left-4 right-4 z-50 md:hidden">
       {/* Horizontal Field Options Bar */}
       {isOpen && (
-        <div className="mb-4 bg-white rounded-2xl shadow-xl border p-3">
-          <div className="flex items-center justify-between space-x-2 overflow-x-auto">
+        <div className="mb-3 bg-white rounded-xl shadow-lg border p-2">
+          <div className="flex items-center justify-between space-x-1.5 overflow-x-auto">
             {Object.entries(FIELD_CONFIGS).map(([type, config]) => {
               const Icon = config.icon
               const isActive = selectedFieldType === type
@@ -1011,20 +1132,20 @@ const MobileFloatingButton = ({ onFieldTypeSelect, selectedFieldType }) => {
                   key={type}
                   onClick={() => handleFieldSelect(type)}
                   className={`
-                    flex-shrink-0 flex flex-col items-center justify-center p-3 rounded-xl transition-all min-w-[70px]
+                    flex-shrink-0 flex flex-col items-center justify-center p-2 rounded-lg transition-all min-w-[60px]
                     ${isActive 
-                      ? 'bg-blue-500 text-white shadow-lg' 
+                      ? 'bg-blue-500 text-white shadow-md' 
                       : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
                     }
                   `}
                 >
                   <div 
                     className={`
-                      w-8 h-8 rounded-lg flex items-center justify-center mb-1
+                      w-6 h-6 rounded flex items-center justify-center mb-1
                       ${isActive ? 'bg-white/20' : 'bg-white'}
                     `}
                   >
-                    <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-600'}`} />
+                    <Icon className={`w-3 h-3 ${isActive ? 'text-white' : 'text-gray-600'}`} />
                   </div>
                   <span className={`text-xs font-medium text-center leading-tight ${isActive ? 'text-white' : 'text-gray-700'}`}>
                     {config.label.split(' ')[0]}
@@ -1036,12 +1157,12 @@ const MobileFloatingButton = ({ onFieldTypeSelect, selectedFieldType }) => {
         </div>
       )}
 
-      {/* Toggle Button */}
+      {/* Compact Toggle Button */}
       <div className="flex justify-center">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={`
-            w-14 h-14 rounded-full shadow-lg flex items-center justify-center
+            w-12 h-12 rounded-full shadow-lg flex items-center justify-center
             transition-all duration-300 transform
             ${isOpen 
               ? 'bg-red-500 rotate-45' 
@@ -1051,14 +1172,14 @@ const MobileFloatingButton = ({ onFieldTypeSelect, selectedFieldType }) => {
             }
           `}
         >
-          <Plus className="w-6 h-6 text-white" />
+          <Plus className="w-5 h-5 text-white" />
         </button>
       </div>
     </div>
   )
 }
 
-// Document Manager Component - Modified to show document overview instead of switching
+// Document Manager Component - Compact chip-style design
 function DocumentManager({ documents, allFields, onAddDocument, onRemoveDocument }) {
   const fileInputRef = useRef(null)
 
@@ -1124,21 +1245,70 @@ function DocumentManager({ documents, allFields, onAddDocument, onRemoveDocument
     }
   }
 
+  // Get file type color
+  const getFileTypeColor = (type) => {
+    if (type === 'application/pdf') return 'bg-red-100 text-red-700 border-red-200'
+    if (type.startsWith('image/')) return 'bg-green-100 text-green-700 border-green-200'
+    if (type.includes('word')) return 'bg-blue-100 text-blue-700 border-blue-200'
+    return 'bg-gray-100 text-gray-700 border-gray-200'
+  }
+
   return (
-    <div className="bg-white border-b p-3 md:p-4">
-      <div className="flex items-center justify-between mb-2 md:mb-3">
-        <h3 className="text-sm font-medium text-gray-700 flex items-center">
-          <FolderOpen className="w-4 h-4 mr-2" />
-          <span className="hidden md:inline">Documents ({documents.length})</span>
-          <span className="md:hidden">{documents.length} Docs</span>
-        </h3>
+    <div className="bg-white p-2">
+      {/* Document Chips */}
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        {documents.map((doc, index) => {
+          const fieldCount = allFields[index]?.length || 0
+          const colorClass = getFileTypeColor(doc.type)
+          
+          return (
+            <div
+              key={index}
+              className={`
+                relative flex items-center space-x-1.5 px-2 py-1 rounded-full border text-xs font-medium cursor-pointer
+                transition-all hover:shadow-sm ${colorClass}
+              `}
+              onClick={() => scrollToDocument(index)}
+            >
+              {/* Document Number */}
+              <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center text-xs font-bold">
+                {index + 1}
+              </div>
+              
+              {/* Document Name */}
+              <span className="truncate max-w-[80px]">{doc.name.split('.')[0]}</span>
+              
+              {/* Field Count */}
+              <div className="flex items-center space-x-1">
+                <div className={`w-1.5 h-1.5 rounded-full ${fieldCount > 0 ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                <span className="text-xs">{fieldCount}</span>
+              </div>
+              
+              {/* Remove Button */}
+              {documents.length > 1 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onRemoveDocument(index)
+                  }}
+                  className="w-3 h-3 flex items-center justify-center hover:bg-red-200 rounded-full transition-colors"
+                >
+                  <X className="w-2 h-2" />
+                </button>
+              )}
+            </div>
+          )
+        })}
+        
+        {/* Add Document Chip */}
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="flex items-center space-x-1 px-2 md:px-3 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center space-x-1 px-2 py-1 bg-blue-100 text-blue-700 border border-blue-200 rounded-full hover:bg-blue-200 transition-colors text-xs font-medium"
         >
           <Plus className="w-3 h-3" />
           <span>Add</span>
         </button>
+        
         <input
           ref={fileInputRef}
           type="file"
@@ -1149,47 +1319,10 @@ function DocumentManager({ documents, allFields, onAddDocument, onRemoveDocument
         />
       </div>
       
-      <div className="space-y-1 md:space-y-2 max-h-24 md:max-h-32 overflow-y-auto">
-        {documents.map((doc, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between p-2 rounded-lg border border-gray-200 hover:border-gray-300 cursor-pointer transition-all"
-            onClick={() => scrollToDocument(index)}
-          >
-            <div className="flex items-center space-x-2 min-w-0 flex-1">
-              <File className="w-4 h-4 text-gray-400 flex-shrink-0" />
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium text-gray-900 truncate">{doc.name}</p>
-                <div className="flex items-center space-x-2 text-xs text-gray-500">
-                  <span className="hidden md:inline">{(doc.size / 1024 / 1024).toFixed(1)} MB</span>
-                  <span className="hidden md:inline">•</span>
-                  <span>{allFields[index]?.length || 0} fields</span>
-                </div>
-              </div>
-            </div>
-            {documents.length > 1 && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onRemoveDocument(index)
-                }}
-                className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            )}
-          </div>
-        ))}
+      {/* Summary */}
+      <div className="text-xs text-gray-500 px-1">
+        {documents.length} docs • {Object.values(allFields).reduce((total, fields) => total + fields.length, 0)} fields
       </div>
-      
-      {documents.length > 1 && (
-        <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-gray-200">
-          <p className="text-xs text-gray-500 text-center">
-            <span className="hidden md:inline">Scroll down to view all documents or click on a document above to jump to it</span>
-            <span className="md:hidden">Tap document to jump to it</span>
-          </p>
-        </div>
-      )}
     </div>
   )
 }
@@ -1688,111 +1821,119 @@ export default function NewDocumentEditor() {
   // Step 1: Document Editor - Modified for continuous view
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b sticky top-0 z-40">
-        <div className="px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <button 
-              onClick={() => router.push('/')}
-              className="p-2 hover:bg-gray-100 rounded-lg"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            
-            <button 
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="md:hidden p-2 hover:bg-gray-100 rounded-lg"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            
-            <div className="min-w-0 flex-1">
-              <h1 className="text-base md:text-lg font-semibold text-gray-900 truncate">
-                {documents.length === 1 ? documents[0]?.name : `${documents.length} Documents`}
-              </h1>
-              <p className="text-xs md:text-sm text-gray-500 hidden sm:block">
-                Step 1 of 2 - Add fields and configure layout • Scroll to view all documents
-              </p>
-              <p className="text-xs text-gray-500 sm:hidden">
-                Step 1 of 2 • {getAllFields().length} fields
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            {/* Desktop Zoom Controls */}
-            <div className="hidden md:flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
-              <button
-                onClick={handleZoomOut}
-                className="p-1.5 hover:bg-white rounded transition-colors"
-                disabled={zoom <= 0.5}
+      {/* Compact Professional Header */}
+      <header className="bg-gradient-to-r from-white via-blue-50 to-indigo-50 border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between">
+            {/* Left Section */}
+            <div className="flex items-center space-x-3">
+              <button 
+                onClick={() => router.push('/')}
+                className="p-1.5 hover:bg-white/80 rounded-lg transition-colors"
               >
-                <ZoomOut className="w-4 h-4" />
+                <ArrowLeft className="w-4 h-4 text-gray-600" />
               </button>
               
-              <span className="text-sm font-medium px-2 py-1 min-w-[60px] text-center">
-                {Math.round(zoom * 100)}%
-              </span>
-              
-              <button
-                onClick={handleZoomIn}
-                className="p-1.5 hover:bg-white rounded transition-colors"
-                disabled={zoom >= 3}
+              <button 
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="md:hidden p-1.5 hover:bg-white/80 rounded-lg transition-colors"
               >
-                <ZoomIn className="w-4 h-4" />
+                <Menu className="w-4 h-4 text-gray-600" />
               </button>
+              
+              {/* Document Info */}
+              <div className="flex items-center space-x-2">
+                <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                  <FileText className="w-3.5 h-3.5 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-sm font-bold text-gray-900 truncate max-w-[200px] md:max-w-none">
+                    {documents.length === 1 ? documents[0]?.name : `${documents.length} Documents`}
+                  </h1>
+                  <div className="flex items-center space-x-2 text-xs text-gray-500">
+                    <span>Step 1 of 2</span>
+                    <span>•</span>
+                    <span>{getAllFields().length} fields</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Progress Dots */}
+              <div className="hidden sm:flex items-center space-x-1 ml-4">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div className="w-4 h-0.5 bg-gray-300"></div>
+                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+              </div>
             </div>
             
-            <button
-              onClick={handlePreview}
-              className="btn-secondary flex items-center space-x-2 text-sm px-3 py-2"
-            >
-              <Eye className="w-4 h-4" />
-              <span className="hidden sm:inline">Preview</span>
-            </button>
-            
-            <button
-              onClick={handleNextStep}
-              className="btn-primary flex items-center space-x-2 text-sm px-3 py-2"
-            >
-              <span className="hidden sm:inline">Next: Configure</span>
-              <span className="sm:hidden">Next</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            {/* Right Section */}
+            <div className="flex items-center space-x-2">
+              {/* Zoom Controls */}
+              <div className="hidden md:flex items-center bg-white/60 rounded-lg border border-gray-200 p-0.5">
+                <button
+                  onClick={handleZoomOut}
+                  className="p-1 hover:bg-white rounded transition-colors disabled:opacity-50"
+                  disabled={zoom <= 0.5}
+                >
+                  <ZoomOut className="w-3.5 h-3.5 text-gray-600" />
+                </button>
+                <span className="text-xs font-medium px-2 text-gray-700 min-w-[40px] text-center">
+                  {Math.round(zoom * 100)}%
+                </span>
+                <button
+                  onClick={handleZoomIn}
+                  className="p-1 hover:bg-white rounded transition-colors disabled:opacity-50"
+                  disabled={zoom >= 3}
+                >
+                  <ZoomIn className="w-3.5 h-3.5 text-gray-600" />
+                </button>
+              </div>
+              
+              <button
+                onClick={handlePreview}
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-white/70 hover:bg-white border border-gray-200 rounded-lg transition-colors text-xs font-medium text-gray-700"
+              >
+                <Eye className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Preview</span>
+              </button>
+              
+              <button
+                onClick={handleNextStep}
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-lg transition-colors text-xs font-medium"
+              >
+                <span className="hidden sm:inline">Configure</span>
+                <span className="sm:hidden">Next</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Desktop Sidebar */}
+        {/* Compact Desktop Sidebar */}
         <div className={`
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
-          md:translate-x-0 fixed md:relative z-30 w-80 md:w-80 bg-white border-r 
-          transition-transform duration-300 ease-in-out h-full overflow-y-auto
+          md:translate-x-0 fixed md:fixed z-30 w-72 md:w-72 bg-white border-r border-gray-200
+          transition-transform duration-300 ease-in-out h-full md:h-[calc(100vh-120px)] overflow-y-auto
+          top-0 md:top-[120px] left-0 pt-16 md:pt-0 flex flex-col
         `}>
-          {/* Document Manager - Modified for continuous view */}
-          <DocumentManager
-            documents={documents}
-            allFields={allFields}
-            onAddDocument={handleAddDocument}
-            onRemoveDocument={handleRemoveDocument}
-          />
           
-          <div className="p-4">
-            <div className="flex justify-between items-center mb-4 md:hidden">
-              <h3 className="text-lg font-semibold">Add Fields</h3>
+          {/* Field Palette - Top */}
+          <div className="p-3 flex-1">
+            {/* Mobile Close Button */}
+            <div className="flex justify-between items-center mb-3 md:hidden">
+              <h3 className="text-sm font-semibold text-gray-900">Field Palette</h3>
               <button 
                 onClick={() => setSidebarOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="p-1 hover:bg-gray-100 rounded transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 text-gray-500" />
               </button>
             </div>
             
-            {/* Field Types - Compact for mobile */}
-            <div className="space-y-2 md:space-y-3">
-              <h3 className="text-sm font-medium text-gray-700 mb-3 hidden md:block">Add Fields</h3>
-              
+            {/* Compact Field Grid */}
+            <div className="grid grid-cols-2 gap-2">
               {Object.entries(FIELD_CONFIGS).map(([type, config]) => {
                 const Icon = config.icon
                 const isActive = selectedFieldType === type
@@ -1803,66 +1944,76 @@ export default function NewDocumentEditor() {
                     onClick={() => {
                       setSelectedFieldType(isActive ? null : type)
                       if (!isActive) {
-                        toast.info(`Tap on document to place ${config.label}`)
+                        toast.info(`Click on document to place ${config.label}`)
                       }
-                      // Auto-close sidebar on mobile after selection
                       if (window.innerWidth < 768) {
                         setSidebarOpen(false)
                       }
                     }}
                     className={`
-                    w-full p-2 md:p-3 rounded-lg border-2 transition-all text-left
+                      relative p-2 rounded-lg border transition-all text-left group
                       ${isActive 
-                      ? 'border-blue-500 bg-blue-50 shadow-sm' 
-                      : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-blue-500 bg-blue-50 shadow-sm' 
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                       }
                     `}
+                    style={{
+                      backgroundColor: isActive ? '#eff6ff' : config.bgColor
+                    }}
                   >
-                    <div className="flex items-center space-x-3">
-                    <div 
-                      className={`
-                        w-8 h-8 rounded-lg flex items-center justify-center
-                        ${isActive ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600'}
-                      `}
-                    >
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="font-medium text-gray-900 text-sm md:text-base">{config.label}</div>
-                      <div className="text-xs text-gray-500 hidden md:block">
-                        {isActive ? 'Tap to place' : 'Tap to select'}
+                    <div className="flex items-center space-x-2">
+                      <div className={`
+                        w-6 h-6 rounded flex items-center justify-center
+                        ${isActive ? 'bg-white shadow-sm' : 'bg-white/50'}
+                      `}>
+                        <Icon 
+                          className="w-3 h-3" 
+                          style={{ color: config.color }}
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className={`text-xs font-medium ${isActive ? 'text-blue-700' : 'text-gray-900'}`}>
+                          {config.label}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </button>
+                  </button>
                 )
               })}
             </div>
-            
-            {/* Mobile Zoom Controls */}
-            <div className="mt-6 pt-4 border-t md:hidden">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">Zoom</h3>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={handleZoomOut}
-                  className="p-2 hover:bg-gray-100 rounded-lg"
-                  disabled={zoom <= 0.5}
-                >
-                  <ZoomOut className="w-4 h-4" />
-                </button>
-                
-                <span className="text-sm font-medium px-3 py-1 bg-gray-100 rounded flex-1 text-center">
-                  {Math.round(zoom * 100)}%
-                </span>
-                
-                <button
-                  onClick={handleZoomIn}
-                  className="p-2 hover:bg-gray-100 rounded-lg"
-                  disabled={zoom >= 3}
-                >
-                  <ZoomIn className="w-4 h-4" />
-                </button>
+          </div>
+          
+          {/* Document Manager - Bottom */}
+          <DocumentManager
+            documents={documents}
+            allFields={allFields}
+            onAddDocument={handleAddDocument}
+            onRemoveDocument={handleRemoveDocument}
+          />
+          
+          {/* Compact Zoom Controls - Very Bottom */}
+          <div className="p-3 border-t border-gray-200">
+            <h4 className="text-xs font-semibold text-gray-900 mb-2">Zoom</h4>
+            <div className="flex items-center space-x-2 bg-gray-50 rounded-lg p-2">
+              <button
+                onClick={handleZoomOut}
+                className="p-1 hover:bg-white rounded transition-colors disabled:opacity-50"
+                disabled={zoom <= 0.5}
+              >
+                <ZoomOut className="w-3 h-3 text-gray-600" />
+              </button>
+              
+              <div className="flex-1 text-center">
+                <div className="text-sm font-bold text-gray-900">{Math.round(zoom * 100)}%</div>
               </div>
+              
+              <button
+                onClick={handleZoomIn}
+                className="p-1 hover:bg-white rounded transition-colors disabled:opacity-50"
+                disabled={zoom >= 3}
+              >
+                <ZoomIn className="w-3 h-3 text-gray-600" />
+              </button>
             </div>
           </div>
         </div>
@@ -1875,8 +2026,8 @@ export default function NewDocumentEditor() {
           />
         )}
 
-        {/* Main Content - Modified to show all documents */}
-        <div className="flex-1 overflow-hidden">
+        {/* Main Content - Adjusted for compact sidebar */}
+        <div className="flex-1 overflow-hidden md:ml-72">
           {documents.length > 0 && (
             <DocumentViewer
               documents={documents}
@@ -1903,11 +2054,12 @@ export default function NewDocumentEditor() {
         </div>
       </div>
       
-      {/* Mobile Floating Action Button */}
+      {/* Compact Mobile Floating Button */}
       <MobileFloatingButton 
         onFieldTypeSelect={setSelectedFieldType}
         selectedFieldType={selectedFieldType}
       />
     </div>
   )
-} 
+}
+
