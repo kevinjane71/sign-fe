@@ -45,7 +45,7 @@ export default function Header() {
               {/* Navigation */}
               <nav className="hidden md:flex items-center space-x-1">
                 <button
-                  onClick={() => router.push('/')}
+                  onClick={() => router.push('/home')}
                   className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
                 >
                   <Home className="w-4 h-4" />
@@ -80,7 +80,7 @@ export default function Header() {
 
   // Full header for home page
   const navigation = [
-    { name: 'Home', href: '/', icon: Home },
+    { name: 'Home', href: '/home', icon: Home },
     { name: 'Documents', href: '/dashboard', icon: FileText },
   ]
 

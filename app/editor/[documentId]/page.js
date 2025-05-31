@@ -148,7 +148,7 @@ const FIELD_CONFIGS = {
 }
 
 // Document Configuration Component (Step 2)
-function DocumentConfiguration({ documentFile, documents, allFields, fields, onBack, onSend, isLoading, documentData }) {
+function DocumentConfiguration({ documentFile, documents, allFields, fields, onBack, onNext, isLoading, documentData }) {
   const [signers, setSigners] = useState([])
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
@@ -254,7 +254,11 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
       allowDownload
     }
 
-    onSend(config)
+    // Store configuration in sessionStorage for step 2
+    sessionStorage.setItem('documentConfiguration', JSON.stringify(config))
+
+    // Just navigate to step 2, don't call API yet
+    onNext()
   }
 
   return (
@@ -278,7 +282,7 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
                 <div>
                   <h1 className="text-sm font-bold text-gray-900">Configure Document</h1>
                   <div className="flex items-center space-x-2 text-xs text-gray-500">
-                    <span>Step 2 of 2</span>
+                    <span>Step 1 of 2</span>
                     <span>•</span>
                     <span>{fields.length} fields</span>
                   </div>
@@ -294,9 +298,9 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
               {isLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <Send className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4" />
               )}
-              <span>Send Document</span>
+              <span>Next: Add Fields</span>
             </button>
           </div>
         </div>
@@ -324,6 +328,14 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
               </div>
             </div>
           </div>
+
+          {/* Document Preview Grid */}
+          <DocumentPreviewGrid
+            documents={documents}
+            allFields={allFields}
+            onAddDocument={() => toast.info('Cannot add documents in configuration step')}
+            onRemoveDocument={() => toast.info('Cannot remove documents in configuration step')}
+          />
 
           {/* Signers - Compact */}
           <div className="bg-white rounded-lg border border-gray-200 p-4">
@@ -601,9 +613,9 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
               {isLoading ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
               ) : (
-                <Send className="w-3 h-3" />
+                <ArrowRight className="w-3 h-3" />
               )}
-              <span>Send Document</span>
+              <span>Next: Add Fields</span>
             </button>
           </div>
         </div>
@@ -1282,6 +1294,180 @@ function DocumentManager({ documents, allFields, onAddDocument, onRemoveDocument
   )
 }
 
+// Document Preview Grid Component - Google Drive style
+function DocumentPreviewGrid({ documents, allFields, onAddDocument, onRemoveDocument }) {
+  const fileInputRef = useRef(null)
+
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files)
+    if (files.length > 0) {
+      files.forEach(file => {
+        // Validate file size (50MB limit)
+        if (file.size > 50 * 1024 * 1024) {
+          toast.error(`File ${file.name} is too large (max 50MB)`)
+          return
+        }
+
+        // Accept all document types
+        const allowedTypes = [
+          'application/pdf',
+          'image/jpeg',
+          'image/jpg', 
+          'image/png',
+          'image/gif',
+          'image/webp',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'text/plain',
+          'application/rtf'
+        ]
+
+        if (!allowedTypes.includes(file.type)) {
+          toast.error(`${file.name} is not a supported file type`)
+          return
+        }
+
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          const fileData = e.target.result
+          
+          const selectedFile = {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            data: fileData
+          }
+
+          onAddDocument(selectedFile)
+          toast.success(`${file.name} added successfully!`)
+        }
+
+        reader.onerror = () => {
+          toast.error(`Error reading ${file.name}`)
+        }
+
+        reader.readAsDataURL(file)
+      })
+    }
+    // Reset input
+    e.target.value = ''
+  }
+
+  const getFileIcon = (type) => {
+    if (type === 'application/pdf') return '📄'
+    if (type.startsWith('image/')) return '🖼️'
+    if (type.includes('word')) return '📝'
+    return '📄'
+  }
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  }
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-900">Documents</h2>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="flex items-center space-x-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-sm font-medium"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Add Document</span>
+        </button>
+        
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.txt,.rtf"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+      </div>
+
+      {/* Document Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {documents.map((doc, index) => {
+          const fieldCount = allFields[index]?.length || 0
+          
+          return (
+            <div
+              key={index}
+              className="relative group border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all cursor-pointer bg-gray-50 hover:bg-gray-100"
+            >
+              {/* Remove Button - Disabled for existing documents */}
+              {documents.length > 1 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    toast.info('Cannot remove documents from existing document editor')
+                  }}
+                  className="absolute top-2 right-2 w-6 h-6 bg-gray-400 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-not-allowed"
+                  disabled
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+
+              {/* Document Preview */}
+              <div className="flex flex-col items-center text-center">
+                {/* File Icon */}
+                <div className="text-4xl mb-3">
+                  {getFileIcon(doc.type)}
+                </div>
+
+                {/* Document Info */}
+                <div className="w-full">
+                  <h3 className="font-medium text-gray-900 truncate mb-1" title={doc.name}>
+                    {doc.name}
+                  </h3>
+                  
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <div>{formatFileSize(doc.size)}</div>
+                    <div className="flex items-center justify-center space-x-2">
+                      <span>{doc.type.split('/')[1]?.toUpperCase()}</span>
+                      <span>•</span>
+                      <span className={`${fieldCount > 0 ? 'text-green-600' : 'text-gray-400'}`}>
+                        {fieldCount} fields
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status Indicator */}
+                <div className="mt-3 w-full">
+                  <div className={`w-full h-1 rounded-full ${fieldCount > 0 ? 'bg-green-200' : 'bg-gray-200'}`}>
+                    <div 
+                      className={`h-full rounded-full transition-all ${fieldCount > 0 ? 'bg-green-500' : 'bg-gray-400'}`}
+                      style={{ width: fieldCount > 0 ? '100%' : '20%' }}
+                    />
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    {fieldCount > 0 ? 'Ready' : 'Needs fields'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Summary */}
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <div className="flex items-center justify-between text-sm text-gray-600">
+          <span>{documents.length} document{documents.length !== 1 ? 's' : ''}</span>
+          <span>{Object.values(allFields).reduce((total, fields) => total + fields.length, 0)} total fields</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Main Editor Component
 export default function EditDocumentEditor() {
   const router = useRouter()
@@ -1299,7 +1485,7 @@ export default function EditDocumentEditor() {
   const [isMobile, setIsMobile] = useState(false)
   
   // 2-Step Process State
-  const [currentStep, setCurrentStep] = useState(1) // 1 = Editor, 2 = Configuration
+  const [currentStep, setCurrentStep] = useState(2) // 1 = Configuration, 2 = Editor (start at editor for existing docs)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   // Document data for pre-filling configuration
@@ -1700,14 +1886,20 @@ export default function EditDocumentEditor() {
 
   // Step navigation
   const handleNextStep = () => {
-    if (documents.length === 0) {
-      toast.error('Please upload at least one document first')
+    // Get the configuration from step 1 (stored in sessionStorage)
+    const storedConfig = sessionStorage.getItem('documentConfiguration')
+    if (!storedConfig) {
+      toast.error('Configuration missing. Please go back to step 1.')
+      setCurrentStep(1)
       return
     }
-    setCurrentStep(2)
+    
+    // Parse config and call the API to update and send document
+    const config = JSON.parse(storedConfig)
+    handleSend(config)
   }
 
-  const handleBackToEditor = () => {
+  const handleBackToConfiguration = () => {
     setCurrentStep(1)
   }
 
@@ -1805,23 +1997,23 @@ export default function EditDocumentEditor() {
     )
   }
 
-  // Step 2: Document Configuration
-  if (currentStep === 2) {
+  // Step 1: Document Configuration
+  if (currentStep === 1) {
     return (
       <DocumentConfiguration
         documentFile={documents[0]} // Pass first document for compatibility
         documents={documents}
         allFields={allFields}
         fields={getAllFields()} // All fields from all documents
-        onBack={handleBackToEditor}
-        onSend={handleSend}
+        onBack={handleBackToConfiguration}
+        onNext={() => setCurrentStep(2)}
         isLoading={isSubmitting}
         documentData={documentData}
       />
     )
   }
 
-  // Step 1: Document Editor - Modified for continuous view
+  // Step 2: Document Editor - Modified for continuous view
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Compact Professional Header */}
@@ -1840,7 +2032,7 @@ export default function EditDocumentEditor() {
                     {documentData?.title || 'Document Editor'}
                   </h1>
                   <div className="flex items-center space-x-2 text-xs text-gray-500">
-                    <span>Step 1 of 2</span>
+                    <span>Step 2 of 2</span>
                     <span>•</span>
                     <span>{getAllFields().length} fields</span>
                   </div>
@@ -1849,9 +2041,9 @@ export default function EditDocumentEditor() {
               
               {/* Progress Dots */}
               <div className="hidden sm:flex items-center space-x-1 ml-4">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <div className="w-4 h-0.5 bg-gray-300"></div>
                 <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                <div className="w-4 h-0.5 bg-blue-500"></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
               </div>
             </div>
             
@@ -1895,12 +2087,20 @@ export default function EditDocumentEditor() {
               </button>
               
               <button
+                onClick={() => setCurrentStep(1)}
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 rounded-md transition-colors text-xs font-semibold text-gray-700 shadow-sm"
+              >
+                <Settings className="w-4 h-4" />
+                <span className="hidden sm:inline">Configure</span>
+              </button>
+              
+              <button
                 onClick={handleNextStep}
                 className="flex items-center space-x-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-xs font-semibold shadow-sm"
               >
-                <span className="hidden sm:inline">Configure</span>
-                <span className="sm:hidden">Next</span>
-                <ArrowRight className="w-4 h-4" />
+                <span className="hidden sm:inline">Share Document</span>
+                <span className="sm:hidden">Share</span>
+                <Send className="w-4 h-4" />
               </button>
             </div>
           </div>
