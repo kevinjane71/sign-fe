@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { 
   Upload, 
   Type, 
@@ -147,8 +147,8 @@ const FIELD_CONFIGS = {
   }
 }
 
-// Document Configuration Component (Step 2)
-function DocumentConfiguration({ documentFile, documents, allFields, fields, onBack, onSend, isLoading }) {
+// Document Configuration Component (Step 2) - Modified to pre-fill with existing data
+function DocumentConfiguration({ documentFile, documents, allFields, fields, onBack, onSend, isLoading, documentData }) {
   const [signers, setSigners] = useState([])
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
@@ -167,25 +167,47 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
   const [allowPrinting, setAllowPrinting] = useState(true)
   const [allowDownload, setAllowDownload] = useState(true)
 
-  // Initialize with default values
+  // Initialize with existing data or default values
   useEffect(() => {
-    const documentName = documents && documents.length > 1 
-      ? `${documents.length} Documents` 
-      : documentFile?.name || 'Document'
-    
-    setSubject(`Please sign: ${documentName}`)
-    setMessage('Please review and sign this document at your earliest convenience.')
-    
-    // Add a default signer if none exist
-    if (signers.length === 0) {
-      setSigners([{
-        id: Date.now(),
-        name: '',
-        email: '',
-        role: 'Signer'
-      }])
+    if (documentData) {
+      // Pre-fill with existing document data
+      setSigners(documentData.signers || [])
+      setSubject(documentData.subject || '')
+      setMessage(documentData.message || '')
+      
+      // Pre-fill advanced settings
+      const config = documentData.configuration || {}
+      setRequireAuthentication(config.requireAuthentication || false)
+      setAllowDelegation(config.allowDelegation !== undefined ? config.allowDelegation : true)
+      setAllowComments(config.allowComments !== undefined ? config.allowComments : true)
+      setSendReminders(config.sendReminders !== undefined ? config.sendReminders : true)
+      setReminderFrequency(config.reminderFrequency || 3)
+      setExpirationEnabled(config.expirationEnabled || false)
+      setExpirationDays(config.expirationDays || 30)
+      setSigningOrder(config.signingOrder || 'any')
+      setRequireAllSigners(config.requireAllSigners !== undefined ? config.requireAllSigners : true)
+      setAllowPrinting(config.allowPrinting !== undefined ? config.allowPrinting : true)
+      setAllowDownload(config.allowDownload !== undefined ? config.allowDownload : true)
+    } else {
+      // Default values for new documents
+      const documentName = documents && documents.length > 1 
+        ? `${documents.length} Documents` 
+        : documentFile?.name || 'Document'
+      
+      setSubject(`Please sign: ${documentName}`)
+      setMessage('Please review and sign this document at your earliest convenience.')
+      
+      // Add a default signer if none exist
+      if (signers.length === 0) {
+        setSigners([{
+          id: Date.now(),
+          name: '',
+          email: '',
+          role: 'Signer'
+        }])
+      }
     }
-  }, [documentFile?.name, documents, signers.length])
+  }, [documentFile?.name, documents, documentData, signers.length])
 
   const addSigner = () => {
     const newSigner = {
@@ -1328,8 +1350,10 @@ function DocumentManager({ documents, allFields, onAddDocument, onRemoveDocument
 }
 
 // Main Editor Component
-export default function NewDocumentEditor() {
+export default function EditDocumentEditor() {
   const router = useRouter()
+  const params = useParams()
+  const documentId = params.documentId
   
   // State - Modified to support multiple documents in continuous view
   const [documents, setDocuments] = useState([])
@@ -1344,6 +1368,9 @@ export default function NewDocumentEditor() {
   // 2-Step Process State
   const [currentStep, setCurrentStep] = useState(1) // 1 = Editor, 2 = Configuration
   const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  // Document data for pre-filling configuration
+  const [documentData, setDocumentData] = useState(null)
   
   // Drag state
   const [isDragging, setIsDragging] = useState(false)
@@ -1367,45 +1394,96 @@ export default function NewDocumentEditor() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Load documents from sessionStorage - Modified to support multiple documents
+  // Load documents from API - Modified to load existing document
   useEffect(() => {
-    const loadDocuments = () => {
+    const loadDocumentFromAPI = async () => {
+      if (!documentId) {
+        toast.error('No document ID provided')
+        router.push('/')
+        return
+      }
+
       try {
-        // Check for multiple documents first
-        const multipleDocsData = sessionStorage.getItem('pendingDocuments')
-        if (multipleDocsData) {
-          const docs = JSON.parse(multipleDocsData)
-          setDocuments(docs)
-          // Initialize fields for each document
-          const fieldsData = {}
-          docs.forEach((_, index) => {
-            fieldsData[index] = []
-          })
-          setAllFields(fieldsData)
-        } else {
-          // Fallback to single document for backward compatibility
-          const singleDocData = sessionStorage.getItem('pendingDocument')
-          if (singleDocData) {
-            const docData = JSON.parse(singleDocData)
-            setDocuments([docData])
-            setAllFields({ 0: [] })
-          } else {
-            toast.error('No documents found')
-            router.push('/')
-            return
+        setLoading(true)
+        
+        // Fetch document data from API
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'}/api/documents/${documentId}`)
+        
+        if (!response.ok) {
+          throw new Error('Failed to load document')
+        }
+        
+        const result = await response.json()
+        const docData = result.document
+        
+        setDocumentData(docData)
+        
+        // Convert API files to document format for the viewer
+        const loadedDocuments = []
+        const fieldsData = {}
+        
+        for (let i = 0; i < docData.files.length; i++) {
+          const file = docData.files[i]
+          
+          try {
+            // Fetch the actual file content
+            const fileResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'}/api/documents/${documentId}/file/${file.fileId}`)
+            
+            if (!fileResponse.ok) {
+              throw new Error(`Failed to load file: ${file.originalName}`)
+            }
+            
+            const fileBlob = await fileResponse.blob()
+            
+            // Convert blob to base64 data URL for the viewer
+            const reader = new FileReader()
+            const dataUrl = await new Promise((resolve) => {
+              reader.onload = () => resolve(reader.result)
+              reader.readAsDataURL(fileBlob)
+            })
+            
+            // Create document object compatible with the viewer
+            const documentObj = {
+              name: file.originalName,
+              type: file.mimeType,
+              size: file.size,
+              data: dataUrl,
+              fileId: file.fileId,
+              title: file.title
+            }
+            
+            loadedDocuments.push(documentObj)
+            
+            // Convert fields from API format to editor format
+            const convertedFields = (file.fields || []).map(field => ({
+              ...field,
+              documentIndex: i // Ensure document index is set
+            }))
+            
+            fieldsData[i] = convertedFields
+            
+          } catch (fileError) {
+            console.error(`Error loading file ${file.originalName}:`, fileError)
+            toast.error(`Failed to load ${file.originalName}`)
           }
         }
+        
+        setDocuments(loadedDocuments)
+        setAllFields(fieldsData)
+        
+        toast.success(`Loaded ${loadedDocuments.length} document(s)`)
+        
       } catch (error) {
-        console.error('Error loading documents:', error)
-        toast.error('Error loading documents')
+        console.error('Error loading document:', error)
+        toast.error('Failed to load document')
         router.push('/')
       } finally {
         setLoading(false)
       }
     }
 
-    loadDocuments()
-  }, [router])
+    loadDocumentFromAPI()
+  }, [documentId, router])
 
   // Document management functions
   const handleAddDocument = (newDocument) => {
@@ -1700,94 +1778,88 @@ export default function NewDocumentEditor() {
     setCurrentStep(1)
   }
 
-  // Send handler (final step) - Updated for single API call with multiple documents
+  // Send handler (final step) - Modified for updating existing document
   const handleSend = useCallback(async (config) => {
     if (documents.length === 0) {
-      toast.error('Please upload at least one document first')
+      toast.error('Please load documents first')
       return
     }
 
     try {
       setIsSubmitting(true)
-      toast.loading('Sending documents...', { id: 'sending' })
+      toast.loading('Updating document...', { id: 'updating' })
 
-      // Create single FormData for all documents
-      const formData = new FormData()
-      
-      // Add each document as a file
-      documents.forEach((document, index) => {
-        // Convert base64 data to blob and add as file
-        if (document.data) {
-          // Remove data URL prefix (e.g., "data:application/pdf;base64,")
-          const base64Data = document.data.split(',')[1]
-          const byteCharacters = atob(base64Data)
-          const byteNumbers = new Array(byteCharacters.length)
-          for (let j = 0; j < byteCharacters.length; j++) {
-            byteNumbers[j] = byteCharacters.charCodeAt(j)
-          }
-          const byteArray = new Uint8Array(byteNumbers)
-          const blob = new Blob([byteArray], { type: document.type })
-          
-          // Add file to FormData with 'documents' key (array)
-          formData.append('documents', blob, document.name)
-          
-          // Add metadata for each document
-          formData.append(`title_${index}`, document.name || `Untitled Document ${index + 1}`)
-          formData.append(`mimeType_${index}`, document.type)
-          formData.append(`fields_${index}`, JSON.stringify(allFields[index] || []))
-        }
-      })
-      
-      // Add configuration data (shared across all documents)
-      formData.append('signers', JSON.stringify(config.signers))
-      formData.append('subject', config.subject)
-      formData.append('message', config.message)
-      formData.append('configuration', JSON.stringify({
-        requireAuthentication: config.requireAuthentication,
-        allowDelegation: config.allowDelegation,
-        allowComments: config.allowComments,
-        sendReminders: config.sendReminders,
-        reminderFrequency: config.reminderFrequency,
-        expirationEnabled: config.expirationEnabled,
-        expirationDays: config.expirationDays,
-        signingOrder: config.signingOrder,
-        requireAllSigners: config.requireAllSigners,
-        allowPrinting: config.allowPrinting,
-        allowDownload: config.allowDownload
+      // Prepare fileFields data for the API
+      const fileFields = documents.map((document, index) => ({
+        fileId: document.fileId,
+        fields: allFields[index] || []
       }))
 
-      // Make single API call with all documents
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'}/api/documents/upload`, {
-        method: 'POST',
-        body: formData
+      // Prepare update data
+      const updateData = {
+        fileFields: fileFields,
+        signers: config.signers,
+        subject: config.subject,
+        message: config.message,
+        configuration: {
+          requireAuthentication: config.requireAuthentication,
+          allowDelegation: config.allowDelegation,
+          allowComments: config.allowComments,
+          sendReminders: config.sendReminders,
+          reminderFrequency: config.reminderFrequency,
+          expirationEnabled: config.expirationEnabled,
+          expirationDays: config.expirationDays,
+          signingOrder: config.signingOrder,
+          requireAllSigners: config.requireAllSigners,
+          allowPrinting: config.allowPrinting,
+          allowDownload: config.allowDownload
+        }
+      }
+
+      // Update the existing document
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'}/api/documents/${documentId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updateData)
       })
 
       if (!response.ok) {
-        throw new Error('Failed to send documents')
+        throw new Error('Failed to update document')
       }
 
-      const result = await response.json()
-      
-      toast.success(`${documents.length} document(s) sent successfully!`, { id: 'sending' })
-      
-      // Clear session storage
-      sessionStorage.removeItem('pendingDocument')
-      sessionStorage.removeItem('pendingDocuments')
-      
-      // Redirect to the editor for the created document
-      if (result.documentId) {
-        router.push(`/editor/${result.documentId}`)
-      } else {
-        router.push('/dashboard')
+      // Send the document
+      const sendResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'}/api/documents/${documentId}/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fileFields: fileFields,
+          signers: config.signers,
+          subject: config.subject,
+          message: config.message,
+          configuration: updateData.configuration
+        })
+      })
+
+      if (!sendResponse.ok) {
+        throw new Error('Failed to send document')
       }
+
+      toast.success('Document updated and sent successfully!', { id: 'updating' })
+      
+      // Redirect to dashboard or stay on the same page
+      router.push('/dashboard')
       
     } catch (error) {
-      console.error('Error sending documents:', error)
-      toast.error('Failed to send documents', { id: 'sending' })
+      console.error('Error updating document:', error)
+      toast.error('Failed to update document', { id: 'updating' })
     } finally {
       setIsSubmitting(false)
     }
-  }, [documents, allFields, router])
+  }, [documents, allFields, documentId, router])
 
   if (loading) {
     return (
@@ -1811,6 +1883,7 @@ export default function NewDocumentEditor() {
         onBack={handleBackToEditor}
         onSend={handleSend}
         isLoading={isSubmitting}
+        documentData={documentData}
       />
     )
   }
@@ -1980,13 +2053,15 @@ export default function NewDocumentEditor() {
             </div>
           </div>
           
-          {/* Document Manager - Bottom */}
+          {/* Document Manager - Bottom - Disabled in edit mode */}
+          {/* 
           <DocumentManager
             documents={documents}
             allFields={allFields}
             onAddDocument={handleAddDocument}
             onRemoveDocument={handleRemoveDocument}
           />
+          */}
           
           {/* Compact Zoom Controls - Very Bottom */}
           <div className="p-3 border-t border-gray-200">
