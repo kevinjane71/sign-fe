@@ -63,18 +63,12 @@ export default function HomePage() {
     })
   }, [])
 
-  // Handle file drop - directly navigate to editor
+  // Handle file drop - support multiple files
   const onDrop = useCallback((acceptedFiles) => {
-    const file = acceptedFiles[0]
-    if (!file) return
+    if (!acceptedFiles || acceptedFiles.length === 0) return
 
-    // Validate file size (50MB limit)
-    if (file.size > 50 * 1024 * 1024) {
-      toast.error('File size must be less than 50MB')
-      return
-    }
-
-    // Accept all document types
+    // Validate each file
+    const validFiles = []
     const allowedTypes = [
       'application/pdf',
       'image/jpeg',
@@ -88,42 +82,93 @@ export default function HomePage() {
       'application/rtf'
     ]
 
-    if (!allowedTypes.includes(file.type)) {
-      toast.error('Please select a valid document file (PDF, Image, Word, Text)')
+    for (const file of acceptedFiles) {
+      // Validate file size (50MB limit)
+      if (file.size > 50 * 1024 * 1024) {
+        toast.error(`File ${file.name} is too large (max 50MB)`)
+        continue
+      }
+
+      if (!allowedTypes.includes(file.type)) {
+        toast.error(`${file.name} is not a supported file type`)
+        continue
+      }
+
+      validFiles.push(file)
+    }
+
+    if (validFiles.length === 0) {
       return
     }
 
     setIsProcessing(true)
 
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const fileData = e.target.result
-      
-      const selectedFile = {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        data: fileData
+    // Process all valid files
+    const processedFiles = []
+    let processedCount = 0
+
+    validFiles.forEach((file, index) => {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const fileData = e.target.result
+        
+        const selectedFile = {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          data: fileData
+        }
+
+        processedFiles[index] = selectedFile
+        processedCount++
+
+        // When all files are processed
+        if (processedCount === validFiles.length) {
+          // Filter out any undefined entries and store in sessionStorage
+          const finalFiles = processedFiles.filter(Boolean)
+          
+          if (finalFiles.length === 1) {
+            // Single file - use old format for backward compatibility
+            sessionStorage.setItem('pendingDocument', JSON.stringify(finalFiles[0]))
+          } else {
+            // Multiple files - use new format
+            sessionStorage.setItem('pendingDocuments', JSON.stringify(finalFiles))
+          }
+          
+          toast.success(`${finalFiles.length} document(s) loaded successfully!`)
+          
+          // Navigate directly to editor
+          router.push('/editor/new')
+        }
       }
 
-      // Store file in sessionStorage
-      sessionStorage.setItem('pendingDocument', JSON.stringify(selectedFile))
-      
-      toast.success('Document loaded successfully!')
-      
-      // Navigate directly to editor
-      router.push('/editor/new')
-    }
+      reader.onerror = () => {
+        toast.error(`Error reading ${file.name}`)
+        processedCount++
+        
+        // Check if all files are processed (including errors)
+        if (processedCount === validFiles.length) {
+          const finalFiles = processedFiles.filter(Boolean)
+          if (finalFiles.length > 0) {
+            if (finalFiles.length === 1) {
+              sessionStorage.setItem('pendingDocument', JSON.stringify(finalFiles[0]))
+            } else {
+              sessionStorage.setItem('pendingDocuments', JSON.stringify(finalFiles))
+            }
+            
+            toast.success(`${finalFiles.length} document(s) loaded successfully!`)
+            router.push('/editor/new')
+          } else {
+            setIsProcessing(false)
+          }
+        }
+      }
 
-    reader.onerror = () => {
-      toast.error('Error reading file')
-      setIsProcessing(false)
-    }
-
-    reader.readAsDataURL(file)
+      reader.readAsDataURL(file)
+    })
   }, [router])
 
-  // Handle file input change
+  // Handle file input change - support multiple files
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files)
     if (files.length > 0) {
@@ -270,14 +315,14 @@ export default function HomePage() {
                       <>
                         <Upload className="w-8 h-8 text-gray-400 group-hover:text-blue-500 mx-auto mb-3 transition-colors" />
                         <span className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors block mb-1">
-                          Drop file here
+                          Drop files here
                         </span>
                         <span className="text-xs text-gray-500 block mb-2">
                           or click to browse
                         </span>
                         <div className="inline-flex items-center space-x-1 text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded">
                           <FileText className="w-3 h-3" />
-                          <span>PDF, Images, Word</span>
+                          <span>PDF, Images, Word • Multiple files</span>
                         </div>
                       </>
                     )}
@@ -285,6 +330,7 @@ export default function HomePage() {
                   <input
                     id="file-upload"
                     type="file"
+                    multiple
                     className="sr-only"
                     accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.txt,.rtf"
                     onChange={handleFileChange}
