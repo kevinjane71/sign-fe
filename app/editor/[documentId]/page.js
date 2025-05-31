@@ -9,7 +9,7 @@ import {
   CheckSquare, 
   Calendar,
   Save,
-  Send,
+  Send, 
   Eye,
   Trash2,
   Plus,
@@ -705,9 +705,9 @@ const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentCli
         } else if (document.type.startsWith('image/')) {
           const imagePage = await loadImageDocument(document, docIndex)
           allDocumentPages.push(imagePage)
-        } else {
+      } else {
           console.warn(`Unsupported file type: ${document.type}`)
-        }
+      }
       }
       
       setAllPages(allDocumentPages)
@@ -801,7 +801,7 @@ const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentCli
       }
       
       img.onerror = () => reject(new Error(`Failed to load image: ${documentFile.name}`))
-      img.src = documentFile.data || documentFile.url
+        img.src = documentFile.data || documentFile.url
     })
   }
 
@@ -839,23 +839,23 @@ const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentCli
       style={{ scrollBehavior: 'smooth' }}
     >
       {allPages.map((page, globalPageIndex) => {
-        // Calculate display dimensions to use full available width when zoomed
-        const isMobile = window.innerWidth < 768
-        
-        // Use full available width, accounting for sidebar
-        let availableWidth
-        if (isMobile) {
-          availableWidth = window.innerWidth - 16 // Small margin
-        } else {
-          availableWidth = window.innerWidth - 320 - 16 // Sidebar + small margin
-        }
-        
-        // Calculate display width based on zoom and available space
-        const baseWidth = Math.min(page.originalWidth, availableWidth / zoom)
-        const displayWidth = baseWidth * zoom
-        const displayHeight = (page.originalHeight / page.originalWidth) * displayWidth
-        
-        return (
+          // Calculate display dimensions to use full available width when zoomed
+          const isMobile = window.innerWidth < 768
+          
+          // Use full available width, accounting for sidebar
+          let availableWidth
+          if (isMobile) {
+            availableWidth = window.innerWidth - 16 // Small margin
+          } else {
+            availableWidth = window.innerWidth - 320 - 16 // Sidebar + small margin
+          }
+          
+          // Calculate display width based on zoom and available space
+          const baseWidth = Math.min(page.originalWidth, availableWidth / zoom)
+          const displayWidth = baseWidth * zoom
+          const displayHeight = (page.originalHeight / page.originalWidth) * displayWidth
+
+          return (
           <div key={`${page.documentIndex}-${page.pageNumber}`} className="relative">
             {/* Document Page */}
             <div
@@ -906,10 +906,10 @@ const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentCli
                   return null
                 })}
               </div>
+              </div>
             </div>
-          </div>
-        )
-      })}
+          )
+        })}
     </div>
   )
 }
@@ -926,8 +926,8 @@ const FieldComponent = ({
   containerWidth,
   containerHeight 
 }) => {
-    const config = FIELD_CONFIGS[field.type]
-    const Icon = config.icon
+  const config = FIELD_CONFIGS[field.type]
+  const Icon = config.icon
   const isMobile = window.innerWidth < 768
   
   // Calculate responsive position and size
@@ -949,7 +949,7 @@ const FieldComponent = ({
     transform: isDragging ? 'scale(1.03)' : isSelected ? 'scale(1.01)' : 'scale(1)',
     boxShadow: isDragging 
       ? '0 4px 12px rgba(0,0,0,0.15)' 
-          : isSelected 
+      : isSelected 
         ? '0 2px 8px rgba(0,0,0,0.1)' 
         : '0 1px 3px rgba(0,0,0,0.05)'
   }
@@ -972,28 +972,28 @@ const FieldComponent = ({
     onDragStart(e, field)
   }
     
-    return (
-      <div
-        data-field-id={field.id}
+  return (
+    <div
+      data-field-id={field.id}
       style={fieldStyle}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
-        onClick={(e) => {
-          e.stopPropagation()
+      onClick={(e) => {
+        e.stopPropagation()
         onSelect(field.id)
-        }}
-      >
-        {/* Field Content */}
+      }}
+    >
+      {/* Field Content */}
       <div className="w-full h-full flex items-center justify-center p-1">
         {field.type === FIELD_TYPES.TEXT && (
-            <input
-              type="text"
-              value={field.value || ''}
+          <input
+            type="text"
+            value={field.value || ''}
             onChange={(e) => onValueChange(field.id, e.target.value)}
-              onClick={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
             className="w-full h-full bg-transparent border-none outline-none text-gray-700"
-              placeholder="Enter text..."
-              style={{ 
+            placeholder="Enter text..."
+            style={{ 
               fontSize: `${fontSize}px`,
               padding: '2px 4px'
               }}
@@ -1046,11 +1046,11 @@ const FieldComponent = ({
         )}
         
         {field.type === FIELD_TYPES.CHECKBOX && (
-              <input
-                type="checkbox"
-                checked={field.value || false}
+          <input
+            type="checkbox"
+            checked={field.value || false}
             onChange={(e) => onValueChange(field.id, e.target.checked)}
-                onClick={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
             style={{ 
               width: `${Math.min(fieldWidth * 0.8, fieldHeight * 0.8)}px`,
               height: `${Math.min(fieldWidth * 0.8, fieldHeight * 0.8)}px`,
@@ -1061,13 +1061,13 @@ const FieldComponent = ({
         )}
         
         {field.type === FIELD_TYPES.DATE && (
-            <input
-              type="date"
-              value={field.value || ''}
+          <input
+            type="date"
+            value={field.value || ''}
             onChange={(e) => onValueChange(field.id, e.target.value)}
-              onClick={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
             className="w-full h-full bg-transparent border-none outline-none text-gray-700"
-              style={{ 
+            style={{ 
               fontSize: `${fontSize}px`,
               padding: '2px 4px'
             }}
@@ -1106,21 +1106,21 @@ const FieldComponent = ({
           </div>
         )}
       </div>
-            
+
       {/* Field Toolbar */}
       {isSelected && (
         <div className="absolute -top-8 left-0 bg-gray-900 text-white px-2 py-1 rounded text-xs flex items-center space-x-1 z-60">
           <Icon className="w-3 h-3" />
           <span className="text-xs">{config.label}</span>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-              onDelete(field.id)
-              }}
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onDelete(field.id)
+          }}
             className="text-red-400 hover:text-red-300 ml-1"
-            >
+        >
             <Trash2 className="w-3 h-3" />
-            </button>
+        </button>
         </div>
       )}
     </div>
@@ -1176,12 +1176,12 @@ const MobileFloatingButton = ({ onFieldTypeSelect, selectedFieldType }) => {
               )
             })}
           </div>
-        </div>
-      )}
+          </div>
+        )}
 
       {/* Compact Toggle Button */}
       <div className="flex justify-center">
-        <button
+            <button
           onClick={() => setIsOpen(!isOpen)}
           className={`
             w-12 h-12 rounded-full shadow-lg flex items-center justify-center
@@ -1195,8 +1195,8 @@ const MobileFloatingButton = ({ onFieldTypeSelect, selectedFieldType }) => {
           `}
         >
           <Plus className="w-5 h-5 text-white" />
-        </button>
-      </div>
+            </button>
+            </div>
     </div>
   )
 }
@@ -1295,7 +1295,7 @@ function DocumentManager({ documents, allFields, onAddDocument, onRemoveDocument
               {/* Document Number */}
               <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center text-xs font-bold">
                 {index + 1}
-              </div>
+          </div>
               
               {/* Document Name */}
               <span className="truncate max-w-[80px]">{doc.name.split('.')[0]}</span>
@@ -1308,7 +1308,7 @@ function DocumentManager({ documents, allFields, onAddDocument, onRemoveDocument
               
               {/* Remove Button */}
               {documents.length > 1 && (
-                <button
+            <button
                   onClick={(e) => {
                     e.stopPropagation()
                     onRemoveDocument(index)
@@ -1316,12 +1316,12 @@ function DocumentManager({ documents, allFields, onAddDocument, onRemoveDocument
                   className="w-3 h-3 flex items-center justify-center hover:bg-red-200 rounded-full transition-colors"
                 >
                   <X className="w-2 h-2" />
-                </button>
-              )}
-            </div>
+            </button>
+        )}
+      </div>
           )
         })}
-        
+
         {/* Add Document Chip */}
         <button
           onClick={() => fileInputRef.current?.click()}
@@ -1339,7 +1339,7 @@ function DocumentManager({ documents, allFields, onAddDocument, onRemoveDocument
           onChange={handleFileSelect}
           className="hidden"
         />
-      </div>
+          </div>
       
       {/* Summary */}
       <div className="text-xs text-gray-500 px-1">
@@ -1591,7 +1591,7 @@ export default function EditDocumentEditor() {
     
     const pageElement = e.target.closest('[data-page-number][data-document-index]')
     if (!pageElement) return
-    
+
     const pageNumber = parseInt(pageElement.getAttribute('data-page-number'))
     const documentIndex = parseInt(pageElement.getAttribute('data-document-index'))
     const rect = pageElement.getBoundingClientRect()
@@ -1658,14 +1658,14 @@ export default function EditDocumentEditor() {
 
   const handleDragMove = useCallback((e) => {
     if (!isDragging || !draggedField) return
-    
+
     const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX
     const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY
-    
+
     // Find the page element under the cursor
     const pageElement = document.elementFromPoint(clientX, clientY)?.closest('[data-page-number][data-document-index]')
     if (!pageElement) return
-    
+
     const pageRect = pageElement.getBoundingClientRect()
     const newX = clientX - pageRect.left - dragOffset.x
     const newY = clientY - pageRect.top - dragOffset.y
@@ -1679,9 +1679,9 @@ export default function EditDocumentEditor() {
     setAllFields(prev => ({
       ...prev,
       [docIndex]: prev[docIndex].map(field => 
-        field.id === draggedField.id 
-          ? { ...field, leftPercent, topPercent }
-          : field
+      field.id === draggedField.id 
+        ? { ...field, leftPercent, topPercent }
+        : field
       )
     }))
   }, [isDragging, draggedField, dragOffset])
@@ -1707,12 +1707,12 @@ export default function EditDocumentEditor() {
         handleDragMove(e)
       }
       const handleTouchEnd = () => handleDragEnd()
-      
+
       document.addEventListener('mousemove', handleMouseMove)
       document.addEventListener('mouseup', handleMouseUp)
       document.addEventListener('touchmove', handleTouchMove, { passive: false })
       document.addEventListener('touchend', handleTouchEnd)
-      
+
       return () => {
         document.removeEventListener('mousemove', handleMouseMove)
         document.removeEventListener('mouseup', handleMouseUp)
@@ -1798,17 +1798,17 @@ export default function EditDocumentEditor() {
       // Prepare update data
       const updateData = {
         fileFields: fileFields,
-        signers: config.signers,
-        subject: config.subject,
-        message: config.message,
-        configuration: {
+          signers: config.signers,
+          subject: config.subject,
+          message: config.message,
+          configuration: {
           requireAuthentication: config.requireAuthentication,
           allowDelegation: config.allowDelegation,
           allowComments: config.allowComments,
           sendReminders: config.sendReminders,
           reminderFrequency: config.reminderFrequency,
           expirationEnabled: config.expirationEnabled,
-          expirationDays: config.expirationDays,
+            expirationDays: config.expirationDays,
           signingOrder: config.signingOrder,
           requireAllSigners: config.requireAllSigners,
           allowPrinting: config.allowPrinting,
@@ -1895,15 +1895,15 @@ export default function EditDocumentEditor() {
       <header className="bg-gradient-to-r from-white via-blue-50 to-indigo-50 border-b border-gray-200 sticky top-0 z-40 shadow-sm">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
-            {/* Left Section */}
+          {/* Left Section */}
             <div className="flex items-center space-x-3">
-              <button 
+            <button 
                 onClick={() => router.push('/')}
                 className="p-1.5 hover:bg-white/80 rounded-lg transition-colors"
-              >
+            >
                 <ArrowLeft className="w-4 h-4 text-gray-600" />
-              </button>
-              
+            </button>
+            
               <button 
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className="md:hidden p-1.5 hover:bg-white/80 rounded-lg transition-colors"
@@ -1919,15 +1919,15 @@ export default function EditDocumentEditor() {
                 <div>
                   <h1 className="text-sm font-bold text-gray-900 truncate max-w-[200px] md:max-w-none">
                     {documents.length === 1 ? documents[0]?.name : `${documents.length} Documents`}
-                  </h1>
+              </h1>
                   <div className="flex items-center space-x-2 text-xs text-gray-500">
                     <span>Step 1 of 2</span>
                     <span>•</span>
                     <span>{getAllFields().length} fields</span>
                   </div>
-                </div>
-              </div>
-              
+            </div>
+          </div>
+          
               {/* Progress Dots */}
               <div className="hidden sm:flex items-center space-x-1 ml-4">
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -1938,44 +1938,44 @@ export default function EditDocumentEditor() {
             
             {/* Right Section */}
             <div className="flex items-center space-x-2">
-              {/* Zoom Controls */}
+            {/* Zoom Controls */}
               <div className="hidden md:flex items-center bg-white/60 rounded-lg border border-gray-200 p-0.5">
-                <button
-                  onClick={handleZoomOut}
+              <button
+                onClick={handleZoomOut}
                   className="p-1 hover:bg-white rounded transition-colors disabled:opacity-50"
-                  disabled={zoom <= 0.5}
-                >
+                disabled={zoom <= 0.5}
+              >
                   <ZoomOut className="w-3.5 h-3.5 text-gray-600" />
-                </button>
+              </button>
                 <span className="text-xs font-medium px-2 text-gray-700 min-w-[40px] text-center">
                   {Math.round(zoom * 100)}%
                 </span>
-                <button
-                  onClick={handleZoomIn}
-                  className="p-1 hover:bg-white rounded transition-colors disabled:opacity-50"
-                  disabled={zoom >= 3}
-                >
-                  <ZoomIn className="w-3.5 h-3.5 text-gray-600" />
-                </button>
-              </div>
-              
               <button
-                onClick={handlePreview}
+                onClick={handleZoomIn}
+                  className="p-1 hover:bg-white rounded transition-colors disabled:opacity-50"
+                disabled={zoom >= 3}
+              >
+                  <ZoomIn className="w-3.5 h-3.5 text-gray-600" />
+              </button>
+            </div>
+            
+            <button
+              onClick={handlePreview}
                 className="flex items-center space-x-1.5 px-3 py-1.5 bg-white/70 hover:bg-white border border-gray-200 rounded-lg transition-colors text-xs font-medium text-gray-700"
               >
                 <Eye className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Preview</span>
-              </button>
-              
-              <button
-                onClick={handleNextStep}
+            </button>
+            
+            <button
+              onClick={handleNextStep}
                 className="flex items-center space-x-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-lg transition-colors text-xs font-medium"
-              >
+            >
                 <span className="hidden sm:inline">Configure</span>
                 <span className="sm:hidden">Next</span>
                 <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
+            </button>
+          </div>
           </div>
         </div>
       </header>
@@ -2045,14 +2045,14 @@ export default function EditDocumentEditor() {
                         <div className={`text-xs font-medium ${isActive ? 'text-blue-700' : 'text-gray-900'}`}>
                           {config.label}
                         </div>
-                      </div>
+                        </div>
                     </div>
                   </button>
                 )
               })}
             </div>
-          </div>
-          
+            </div>
+
           {/* Document Manager - Bottom - Disabled in edit mode */}
           {/* 
           <DocumentManager
@@ -2077,7 +2077,7 @@ export default function EditDocumentEditor() {
               
               <div className="flex-1 text-center">
                 <div className="text-sm font-bold text-gray-900">{Math.round(zoom * 100)}%</div>
-              </div>
+                </div>
               
               <button
                 onClick={handleZoomIn}
@@ -2101,37 +2101,37 @@ export default function EditDocumentEditor() {
         {/* Main Content - Adjusted for compact sidebar */}
         <div className="flex-1 overflow-hidden md:ml-72">
           {documents.length > 0 && (
-            <DocumentViewer
+          <DocumentViewer
               documents={documents}
-              zoom={zoom}
-              onZoomChange={setZoom}
-              onDocumentClick={handleDocumentClick}
-            >
+            zoom={zoom}
+            onZoomChange={setZoom}
+            onDocumentClick={handleDocumentClick}
+          >
               {getAllFields().map((field) => (
-                <FieldComponent
-                  key={field.id}
-                  field={field}
-                  pageNumber={field.pageNumber}
+              <FieldComponent
+                key={field.id}
+                field={field}
+                pageNumber={field.pageNumber}
                   documentIndex={field.documentIndex}
-                  isSelected={selectedField === field.id}
-                  isDragging={isDragging && draggedField?.id === field.id}
-                  onSelect={handleFieldSelect}
-                  onDragStart={handleDragStart}
-                  onDelete={handleFieldDelete}
-                  onValueChange={handleFieldValueChange}
-                />
-              ))}
-            </DocumentViewer>
+                isSelected={selectedField === field.id}
+                isDragging={isDragging && draggedField?.id === field.id}
+                onSelect={handleFieldSelect}
+                onDragStart={handleDragStart}
+                onDelete={handleFieldDelete}
+                onValueChange={handleFieldValueChange}
+              />
+            ))}
+          </DocumentViewer>
           )}
         </div>
       </div>
-      
+
       {/* Compact Mobile Floating Button */}
       <MobileFloatingButton 
-        onFieldTypeSelect={setSelectedFieldType}
-        selectedFieldType={selectedFieldType}
+          onFieldTypeSelect={setSelectedFieldType}
+          selectedFieldType={selectedFieldType}
       />
     </div>
   )
-}
+} 
 
