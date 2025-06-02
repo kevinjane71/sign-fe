@@ -2,7 +2,7 @@
 
 import { useRouter, usePathname } from 'next/navigation'
 import { FileText, User, LogIn, LogOut, Menu, X } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 export default function Header() {
   const router = useRouter()
@@ -10,56 +10,76 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [user, setUser] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+  const isMountedRef = useRef(true)
 
   useEffect(() => {
+    isMountedRef.current = true
+
     // Check if user is logged in
     const checkUser = () => {
+      if (!isMountedRef.current) return
+
       const userData = localStorage.getItem('user')
       if (userData) {
         try {
           const parsedUser = JSON.parse(userData)
           if (parsedUser && (parsedUser.id || parsedUser.email)) {
-            setUser(parsedUser)
+            if (isMountedRef.current) {
+              setUser(parsedUser)
+            }
           } else {
             localStorage.removeItem('user')
-            setUser(null)
+            if (isMountedRef.current) {
+              setUser(null)
+            }
           }
         } catch (error) {
           console.error('Error parsing user data:', error)
           localStorage.removeItem('user')
-          setUser(null)
+          if (isMountedRef.current) {
+            setUser(null)
+          }
         }
       } else {
-        setUser(null)
+        if (isMountedRef.current) {
+          setUser(null)
+        }
       }
-      setIsLoading(false)
+      
+      if (isMountedRef.current) {
+        setIsLoading(false)
+      }
     }
 
     checkUser()
 
     // Listen for storage changes (when user logs in/out in another tab)
     const handleStorageChange = (e) => {
-      if (e.key === 'user') {
+      if (e.key === 'user' && isMountedRef.current) {
+        checkUser()
+      }
+    }
+
+    // Also listen for custom events when user state changes in same tab
+    const handleUserChange = () => {
+      if (isMountedRef.current) {
         checkUser()
       }
     }
 
     window.addEventListener('storage', handleStorageChange)
-    
-    // Also listen for custom events when user state changes in same tab
-    const handleUserChange = () => {
-      checkUser()
-    }
-
     window.addEventListener('userStateChanged', handleUserChange)
 
     return () => {
+      isMountedRef.current = false
       window.removeEventListener('storage', handleStorageChange)
       window.removeEventListener('userStateChanged', handleUserChange)
     }
   }, [])
 
   const handleLogout = async () => {
+    if (!isMountedRef.current) return
+
     try {
       // Call logout endpoint if user is logged in
       if (user && user.id) {
@@ -74,24 +94,38 @@ export default function Header() {
     } catch (error) {
       console.error('Logout API error:', error)
     } finally {
-      // Clear local storage and update state
-      localStorage.removeItem('user')
-      setUser(null)
-      
-      // Dispatch custom event to notify other components
-      window.dispatchEvent(new Event('userStateChanged'))
-      
-      // Redirect to home page
-      router.push('/')
+      if (isMountedRef.current) {
+        // Clear local storage and update state
+        localStorage.removeItem('user')
+        setUser(null)
+        
+        // Dispatch custom event to notify other components
+        window.dispatchEvent(new Event('userStateChanged'))
+        
+        // Use setTimeout to prevent navigation during render
+        setTimeout(() => {
+          if (isMountedRef.current) {
+            router.push('/')
+          }
+        }, 0)
+      }
     }
   }
 
   const handleLogin = () => {
+    if (!isMountedRef.current) return
     router.push('/login')
   }
 
   const handleDashboard = () => {
+    if (!isMountedRef.current) return
     router.push('/dashboard')
+  }
+
+  const handleNavigation = (path) => {
+    if (!isMountedRef.current) return
+    setMobileMenuOpen(false)
+    router.push(path)
   }
 
   // Don't render anything while checking user state
@@ -129,7 +163,7 @@ export default function Header() {
           {/* Logo Section */}
           <div className="flex items-center">
             <button
-              onClick={() => router.push('/')}
+              onClick={() => handleNavigation('/')}
               className="flex items-center space-x-3 hover:opacity-90 transition-opacity group"
             >
               <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
@@ -153,13 +187,13 @@ export default function Header() {
             {/* Navigation */}
             <nav className="hidden md:flex items-center space-x-1">
               <button
-                onClick={() => router.push('/price')}
+                onClick={() => handleNavigation('/price')}
                 className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
               >
                 <span>Pricing</span>
               </button>
               <button
-                onClick={() => router.push('/contact-us')}
+                onClick={() => handleNavigation('/contact-us')}
                 className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
               >
                 <span>Contact</span>
@@ -224,19 +258,13 @@ export default function Header() {
           <div className="md:hidden border-t border-white/20 py-6">
             <div className="space-y-3">
               <button
-                onClick={() => {
-                  router.push('/price')
-                  setMobileMenuOpen(false)
-                }}
+                onClick={() => handleNavigation('/price')}
                 className="w-full flex items-center space-x-4 px-6 py-4 rounded-xl text-left transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
               >
                 <span className="font-medium text-base">Pricing</span>
               </button>
               <button
-                onClick={() => {
-                  router.push('/contact-us')
-                  setMobileMenuOpen(false)
-                }}
+                onClick={() => handleNavigation('/contact-us')}
                 className="w-full flex items-center space-x-4 px-6 py-4 rounded-xl text-left transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
               >
                 <span className="font-medium text-base">Contact</span>

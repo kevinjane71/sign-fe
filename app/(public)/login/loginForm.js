@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Mail, Phone, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { auth } from '../../../firebase';
@@ -47,19 +47,48 @@ const LoginForm = () => {
     otp: ''
   });
 
+  // Use refs to track component state and cleanup
+  const isMountedRef = useRef(true);
+  const recaptchaContainerRef = useRef(null);
+
   useEffect(() => {
+    isMountedRef.current = true;
+    
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
-    if (code) handleAuthRequest('google', { code });
+    if (code && isMountedRef.current) {
+      handleAuthRequest('google', { code });
+    }
+
+    // Cleanup function
+    return () => {
+      isMountedRef.current = false;
+      cleanupRecaptcha();
+    };
   }, []);
 
+  // Cleanup function for reCAPTCHA
+  const cleanupRecaptcha = () => {
+    try {
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+    } catch (error) {
+      console.log('Recaptcha cleanup error (safe to ignore):', error);
+    }
+  };
+
   const handleInputChange = (e) => {
+    if (!isMountedRef.current) return;
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     setError('');
   };
 
   // Generic auth request handler
   const handleAuthRequest = async (provider, data) => {
+    if (!isMountedRef.current) return;
+    
     setIsLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/meetflow/auth/${provider}`, {
@@ -70,38 +99,51 @@ const LoginForm = () => {
 
       const result = await response.json();
 
+      if (!isMountedRef.current) return;
+
       if (result.success) {
         // Store user data in localStorage
         localStorage.setItem('user', JSON.stringify(result.data));
+        
+        // Dispatch custom event to notify other components
+        window.dispatchEvent(new Event('userStateChanged'));
+        
         toast.success(result.message || 'Authentication successful');
         
         // Redirect to dashboard after successful login
         setTimeout(() => {
-          window.location.href = '/dashboard';
+          if (isMountedRef.current) {
+            window.location.href = '/dashboard';
+          }
         }, 1000);
       } else {
         throw new Error(result.error || 'Authentication failed');
       }
     } catch (error) {
       console.error(`${provider} auth error:`, error);
-      toast.error(error.message || 'Authentication failed');
+      if (isMountedRef.current) {
+        toast.error(error.message || 'Authentication failed');
+      }
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
     }
   };
 
   // Phone auth handlers
   const setupRecaptcha = () => {
     try {
-      if (!window.recaptchaVerifier) {
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+      // Clean up any existing verifier first
+      cleanupRecaptcha();
+      
+      if (!window.recaptchaVerifier && recaptchaContainerRef.current) {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
           size: 'invisible',
           callback: () => {
-            // Optional: Handle reCAPTCHA solve callback
             console.log('Captcha solved');
           },
           'expired-callback': () => {
-            // Optional: Handle reCAPTCHA expiry
             console.log('Captcha expired');
           }
         });
@@ -114,6 +156,8 @@ const LoginForm = () => {
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
+    if (!isMountedRef.current) return;
+    
     if (!formData.phone) {
       setError('Please enter a valid phone number');
       return;
@@ -146,6 +190,8 @@ const LoginForm = () => {
         appVerifier
       );
       
+      if (!isMountedRef.current) return;
+      
       console.log('OTP sent successfully');
       setVerificationId(confirmation);
       setOtpSent(true);
@@ -153,23 +199,22 @@ const LoginForm = () => {
   
     } catch (error) {
       console.error('Send OTP error:', error);
-      toast.error('Failed to send OTP. Please try again.');
+      if (isMountedRef.current) {
+        toast.error('Failed to send OTP. Please try again.');
+      }
       
       // Reset recaptcha on error
-      if (window.recaptchaVerifier) {
-        try {
-          await window.recaptchaVerifier.clear();
-          window.recaptchaVerifier = null;
-        } catch (clearError) {
-          console.error('Error clearing recaptcha:', clearError);
-        }
-      }
+      cleanupRecaptcha();
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
     }
   };
 
   const handleVerifyOTP = async () => {
+    if (!isMountedRef.current) return;
+    
     if (!formData.otp || !verificationId) {
       setError('Please enter the OTP');
       return;
@@ -180,6 +225,8 @@ const LoginForm = () => {
       const result = await verificationId.confirm(formData.otp);
       const idToken = await result.user.getIdToken();
       
+      if (!isMountedRef.current) return;
+      
       // After Firebase verification, call our backend
       await handleAuthRequest('phone', {
         phone: formData.phone,
@@ -187,14 +234,20 @@ const LoginForm = () => {
       });
     } catch (error) {
       console.error('OTP verification error:', error);
-      toast.error('Invalid OTP. Please try again.');
+      if (isMountedRef.current) {
+        toast.error('Invalid OTP. Please try again.');
+      }
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
     }
   };
 
   // Google auth handler
   const handleGoogleLogin = () => {
+    if (!isMountedRef.current) return;
+    
     try {
       setIsLoading(true);
       localStorage.clear();
@@ -204,15 +257,18 @@ const LoginForm = () => {
       window.location.assign(authUrl);
     } catch (error) {
       console.error('Google login error:', error);
-      toast.error('Failed to initialize Google login');
-    } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) {
+        toast.error('Failed to initialize Google login');
+        setIsLoading(false);
+      }
     }
   };
 
   // Form submission handler
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isMountedRef.current) return;
+    
     setIsLoading(true);
 
     try {
@@ -252,9 +308,13 @@ const LoginForm = () => {
       }
     } catch (error) {
       console.error('Submission error:', error);
-      toast.error(error.message || 'Authentication failed');
+      if (isMountedRef.current) {
+        toast.error(error.message || 'Authentication failed');
+      }
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -269,7 +329,7 @@ const LoginForm = () => {
         </div>
       )}
       {/* Invisible reCAPTCHA container */}
-      <div id="recaptcha-container"></div>
+      <div ref={recaptchaContainerRef} id="recaptcha-container"></div>
       <div className="w-full max-w-md mt-16 p-6 bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100">
       {showForgotPassword ? (
         <ForgotPassword onBack={() => setShowForgotPassword(false)} />

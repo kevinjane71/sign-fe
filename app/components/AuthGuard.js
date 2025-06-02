@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 
@@ -9,6 +9,7 @@ export default function AuthGuard({ children }) {
   const pathname = usePathname()
   const [isLoading, setIsLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const isMountedRef = useRef(true)
 
   // Public routes that don't require authentication
   const publicRoutes = [
@@ -22,7 +23,11 @@ export default function AuthGuard({ children }) {
   ]
 
   useEffect(() => {
+    isMountedRef.current = true;
+
     const checkAuth = () => {
+      if (!isMountedRef.current) return;
+
       // Check if current route is public
       const isPublicRoute = publicRoutes.some(route => {
         if (route === '/') {
@@ -32,8 +37,10 @@ export default function AuthGuard({ children }) {
       })
 
       if (isPublicRoute) {
-        setIsAuthenticated(true)
-        setIsLoading(false)
+        if (isMountedRef.current) {
+          setIsAuthenticated(true)
+          setIsLoading(false)
+        }
         return
       }
 
@@ -43,53 +50,89 @@ export default function AuthGuard({ children }) {
         if (userData) {
           const user = JSON.parse(userData)
           if (user && (user.id || user.email)) {
-            setIsAuthenticated(true)
+            if (isMountedRef.current) {
+              setIsAuthenticated(true)
+            }
           } else {
             // Invalid user data, redirect to login
             localStorage.removeItem('user')
-            setIsAuthenticated(false)
-            router.push('/login')
+            if (isMountedRef.current) {
+              setIsAuthenticated(false)
+              // Use setTimeout to prevent immediate navigation during render
+              setTimeout(() => {
+                if (isMountedRef.current) {
+                  router.push('/login')
+                }
+              }, 0)
+            }
             return
           }
         } else {
           // No user data, redirect to login
-          setIsAuthenticated(false)
-          router.push('/login')
+          if (isMountedRef.current) {
+            setIsAuthenticated(false)
+            // Use setTimeout to prevent immediate navigation during render
+            setTimeout(() => {
+              if (isMountedRef.current) {
+                router.push('/login')
+              }
+            }, 0)
+          }
           return
         }
       } catch (error) {
         console.error('Error checking authentication:', error)
         localStorage.removeItem('user')
-        setIsAuthenticated(false)
-        router.push('/login')
+        if (isMountedRef.current) {
+          setIsAuthenticated(false)
+          // Use setTimeout to prevent immediate navigation during render
+          setTimeout(() => {
+            if (isMountedRef.current) {
+              router.push('/login')
+            }
+          }, 0)
+        }
         return
       }
 
-      setIsLoading(false)
+      if (isMountedRef.current) {
+        setIsLoading(false)
+      }
     }
 
+    // Initial check
     checkAuth()
 
     // Listen for storage changes (when user logs in/out in another tab)
     const handleStorageChange = (e) => {
-      if (e.key === 'user') {
+      if (e.key === 'user' && isMountedRef.current) {
         checkAuth()
       }
     }
 
     // Listen for custom events when user state changes in same tab
     const handleUserChange = () => {
-      checkAuth()
+      if (isMountedRef.current) {
+        checkAuth()
+      }
     }
 
     window.addEventListener('storage', handleStorageChange)
     window.addEventListener('userStateChanged', handleUserChange)
 
     return () => {
+      isMountedRef.current = false
       window.removeEventListener('storage', handleStorageChange)
       window.removeEventListener('userStateChanged', handleUserChange)
     }
   }, [pathname, router])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   // Show loading spinner while checking authentication
   if (isLoading) {
