@@ -35,6 +35,7 @@ import {
   File
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { uploadDocument } from '../../utils/api'
 
 // Field type configurations
 const FIELD_TYPES = {
@@ -1773,17 +1774,8 @@ export default function NewDocumentEditor() {
         allowDownload: config.allowDownload
       }))
 
-      // Make single API call with all documents
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'}/api/documents/upload`, {
-        method: 'POST',
-        body: formData
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to send documents')
-      }
-
-      const result = await response.json()
+      // Use authenticated upload function instead of direct fetch
+      const result = await uploadDocument(formData)
       
       toast.success(`${documents.length} document(s) sent successfully!`, { id: 'sending' })
       

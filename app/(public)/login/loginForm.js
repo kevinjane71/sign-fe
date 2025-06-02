@@ -27,7 +27,7 @@ const GOOGLE_SCOPES = [
 ];
 
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'
 const LoginForm = () => {
   const [loginMethod, setLoginMethod] = useState('email');
   const [showPassword, setShowPassword] = useState(false);

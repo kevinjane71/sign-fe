@@ -37,6 +37,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { DocumentConfigurationStep } from '../../components/SharedEditorComponents'
+import { getDocument, updateDocument, sendDocument } from '../../utils/api'
 
 // Field type configurations
 const FIELD_TYPES = {
@@ -471,13 +472,7 @@ export default function DocumentEditor() {
       setLoading(true)
       setError(null)
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'}/api/documents/${documentId}`)
-      
-      if (!response.ok) {
-        throw new Error('Failed to load document')
-      }
-
-      const result = await response.json()
+      const result = await getDocument(documentId)
       const docData = result.document
 
       setDocument(docData)
@@ -500,39 +495,28 @@ export default function DocumentEditor() {
       }
       setFields(allFields)
 
-      // Set up configuration for step 1
-      setDocumentConfig({
-        documents: docData.files.map(file => ({
-          name: file.originalName,
-          type: file.mimeType,
-          size: file.size,
-          data: null, // We don't need the data for editing
-          preview: file.fileUrl
-        })),
-        signers: docData.signers || [],
-        subject: docData.subject || '',
-        message: docData.message || '',
-        requireAuthentication: docData.configuration?.requireAuthentication || false,
-        allowDelegation: docData.configuration?.allowDelegation || true,
-        allowComments: docData.configuration?.allowComments || true,
-        sendReminders: docData.configuration?.sendReminders || true,
-        reminderFrequency: docData.configuration?.reminderFrequency || 'daily',
-        expirationEnabled: docData.configuration?.expirationEnabled || false,
-        expirationDays: docData.configuration?.expirationDays || 30,
-        signingOrder: docData.configuration?.signingOrder || 'any',
-        requireAllSigners: docData.configuration?.requireAllSigners || true,
-        allowPrinting: docData.configuration?.allowPrinting || true,
-        allowDownload: docData.configuration?.allowDownload || true
-      })
-
-      // If document has fields, go directly to step 2 (field editor)
-      if (allFields.length > 0) {
-        setCurrentStep(2)
+      if (docData.status === 'sent') {
+        setDocumentConfig({
+          signers: docData.signers || [],
+          subject: docData.subject || '',
+          message: docData.message || '',
+          requireAuthentication: docData.configuration?.requireAuthentication || false,
+          allowDelegation: docData.configuration?.allowDelegation || true,
+          allowComments: docData.configuration?.allowComments || true,
+          sendReminders: docData.configuration?.sendReminders || true,
+          reminderFrequency: docData.configuration?.reminderFrequency || 'daily',
+          expirationEnabled: docData.configuration?.expirationEnabled || false,
+          expirationDays: docData.configuration?.expirationDays || 30,
+          signingOrder: docData.configuration?.signingOrder || 'any',
+          requireAllSigners: docData.configuration?.requireAllSigners || true,
+          allowPrinting: docData.configuration?.allowPrinting || true,
+          allowDownload: docData.configuration?.allowDownload || true
+        })
       }
 
-    } catch (err) {
-      console.error('Error loading document:', err)
-      setError(err.message)
+    } catch (error) {
+      setError(error.message)
+      console.error('Error loading document:', error)
     } finally {
       setLoading(false)
     }
@@ -628,19 +612,9 @@ export default function DocumentEditor() {
         fields: fileFields[fileId]
       }))
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'}/api/documents/${documentId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          fileFields: fileFieldsArray
-        })
+      await updateDocument(documentId, {
+        fileFields: fileFieldsArray
       })
-
-      if (!response.ok) {
-        throw new Error('Failed to save fields')
-      }
 
       setLastSaved(new Date())
       toast.success('Fields saved successfully')
@@ -653,7 +627,7 @@ export default function DocumentEditor() {
   }, [fields, documentId])
 
   // Send document
-  const sendDocument = useCallback(async () => {
+  const sendDocumentHandler = useCallback(async () => {
     try {
       setIsSending(true)
 
@@ -675,45 +649,35 @@ export default function DocumentEditor() {
         fields: fileFields[fileId]
       }))
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'}/api/documents/${documentId}/send`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          fileFields: fileFieldsArray,
-          signers: documentConfig?.signers || [],
-          subject: documentConfig?.subject || '',
-          message: documentConfig?.message || '',
-          configuration: {
-            requireAuthentication: documentConfig?.requireAuthentication || false,
-            allowDelegation: documentConfig?.allowDelegation || true,
-            allowComments: documentConfig?.allowComments || true,
-            sendReminders: documentConfig?.sendReminders || true,
-            reminderFrequency: documentConfig?.reminderFrequency || 'daily',
-            expirationEnabled: documentConfig?.expirationEnabled || false,
-            expirationDays: documentConfig?.expirationDays || 30,
-            signingOrder: documentConfig?.signingOrder || 'any',
-            requireAllSigners: documentConfig?.requireAllSigners || true,
-            allowPrinting: documentConfig?.allowPrinting || true,
-            allowDownload: documentConfig?.allowDownload || true
-          }
-        })
+      await sendDocument(documentId, {
+        fileFields: fileFieldsArray,
+        signers: documentConfig?.signers || [],
+        subject: documentConfig?.subject || '',
+        message: documentConfig?.message || '',
+        configuration: {
+          requireAuthentication: documentConfig?.requireAuthentication || false,
+          allowDelegation: documentConfig?.allowDelegation || true,
+          allowComments: documentConfig?.allowComments || true,
+          sendReminders: documentConfig?.sendReminders || true,
+          reminderFrequency: documentConfig?.reminderFrequency || 'daily',
+          expirationEnabled: documentConfig?.expirationEnabled || false,
+          expirationDays: documentConfig?.expirationDays || 30,
+          signingOrder: documentConfig?.signingOrder || 'any',
+          requireAllSigners: documentConfig?.requireAllSigners || true,
+          allowPrinting: documentConfig?.allowPrinting || true,
+          allowDownload: documentConfig?.allowDownload || true
+        }
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to send document')
-      }
-
       toast.success('Document sent successfully!')
-      router.push('/dashboard')
+      await loadDocument() // Reload to update status
     } catch (error) {
       console.error('Error sending document:', error)
       toast.error('Failed to send document')
     } finally {
       setIsSending(false)
     }
-  }, [fields, documentConfig, documentId, router])
+  }, [fields, documentId, documentConfig, loadDocument])
 
   // Auto-save fields
   useEffect(() => {
@@ -971,7 +935,7 @@ export default function DocumentEditor() {
                     </button>
                     
                     <button
-                      onClick={sendDocument}
+                      onClick={sendDocumentHandler}
                       disabled={isSending || fields.length === 0}
                       className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 disabled:opacity-50"
                     >

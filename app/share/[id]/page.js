@@ -27,6 +27,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import './page.css'
+import { shareDocument, sendDocumentWorkflow } from '../../utils/api'
 
 export default function SharePage() {
   const router = useRouter()
@@ -161,23 +162,13 @@ export default function SharePage() {
       setSaving(true)
       setError('')
       
-      const response = await fetch(`http://localhost:5000/api/documents/${params.id}/share`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          signers,
-          workflowType,
-          message,
-          senderName,
-          senderEmail
-        }),
+      const result = await shareDocument(params.id, {
+        signers,
+        workflowType,
+        message,
+        senderName,
+        senderEmail
       })
-
-      if (!response.ok) {
-        throw new Error('Failed to save configuration')
-      }
 
       setSuccess('Configuration saved successfully!')
       setTimeout(() => setSuccess(''), 3000)
@@ -200,18 +191,8 @@ export default function SharePage() {
       await saveConfiguration()
       
       // Then send the document
-      const response = await fetch(`http://localhost:5000/api/documents/${params.id}/send-workflow`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      const data = await sendDocumentWorkflow(params.id)
 
-      if (!response.ok) {
-        throw new Error('Failed to send document')
-      }
-
-      const data = await response.json()
       setSuccess(`Document sent successfully to ${data.notifiedSigners} signers!`)
       
       // Redirect to editor after a delay

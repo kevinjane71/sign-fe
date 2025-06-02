@@ -35,6 +35,7 @@ import {
   File
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { getDocument, updateDocument, sendDocument, getDocumentFile } from '../../utils/api'
 
 // Field type configurations
 const FIELD_TYPES = {
@@ -1525,14 +1526,8 @@ export default function EditDocumentEditor() {
       try {
         setLoading(true)
         
-        // Fetch document data from API
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'}/api/documents/${documentId}`)
-        
-        if (!response.ok) {
-          throw new Error('Failed to load document')
-        }
-        
-        const result = await response.json()
+        // Fetch document data from API using authenticated function
+        const result = await getDocument(documentId)
         const docData = result.document
         
         setDocumentData(docData)
@@ -1545,14 +1540,8 @@ export default function EditDocumentEditor() {
           const file = docData.files[i]
           
           try {
-            // Fetch the actual file content
-            const fileResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'}/api/documents/${documentId}/file/${file.fileId}`)
-            
-            if (!fileResponse.ok) {
-              throw new Error(`Failed to load file: ${file.originalName}`)
-            }
-            
-            const fileBlob = await fileResponse.blob()
+            // Fetch the actual file content using authenticated function
+            const fileBlob = await getDocumentFile(documentId, file.fileId)
             
             // Convert blob to base64 data URL for the viewer
             const reader = new FileReader()
@@ -1595,7 +1584,7 @@ export default function EditDocumentEditor() {
       } catch (error) {
         console.error('Error loading document:', error)
         toast.error('Failed to load document')
-        router.push('/')
+        setError(error.message)
       } finally {
         setLoading(false)
       }
@@ -1923,17 +1912,17 @@ export default function EditDocumentEditor() {
       // Prepare update data
       const updateData = {
         fileFields: fileFields,
-          signers: config.signers,
-          subject: config.subject,
-          message: config.message,
-          configuration: {
+        signers: config.signers,
+        subject: config.subject,
+        message: config.message,
+        configuration: {
           requireAuthentication: config.requireAuthentication,
           allowDelegation: config.allowDelegation,
           allowComments: config.allowComments,
           sendReminders: config.sendReminders,
           reminderFrequency: config.reminderFrequency,
           expirationEnabled: config.expirationEnabled,
-            expirationDays: config.expirationDays,
+          expirationDays: config.expirationDays,
           signingOrder: config.signingOrder,
           requireAllSigners: config.requireAllSigners,
           allowPrinting: config.allowPrinting,
@@ -1941,37 +1930,17 @@ export default function EditDocumentEditor() {
         }
       }
 
-      // Update the existing document
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'}/api/documents/${documentId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(updateData)
+      // Update the existing document using authenticated function
+      await updateDocument(documentId, updateData)
+
+      // Send the document using authenticated function
+      await sendDocument(documentId, {
+        fileFields: fileFields,
+        signers: config.signers,
+        subject: config.subject,
+        message: config.message,
+        configuration: updateData.configuration
       })
-
-      if (!response.ok) {
-        throw new Error('Failed to update document')
-      }
-
-      // Send the document
-      const sendResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'}/api/documents/${documentId}/send`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          fileFields: fileFields,
-          signers: config.signers,
-          subject: config.subject,
-          message: config.message,
-          configuration: updateData.configuration
-        })
-      })
-
-      if (!sendResponse.ok) {
-        throw new Error('Failed to send document')
-      }
 
       toast.success('Document updated and sent successfully!', { id: 'updating' })
       

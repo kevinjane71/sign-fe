@@ -1,134 +1,42 @@
 'use client'
 
 import { useRouter, usePathname } from 'next/navigation'
-import { FileText, User, LogIn, LogOut, Menu, X } from 'lucide-react'
-import { useState, useEffect, useRef } from 'react'
+import { FileText, User, LogIn, LogOut, Menu, X, Home, FileIcon, RotateCcw } from 'lucide-react'
+import { useState } from 'react'
+import useAuth from '../hooks/useAuth'
 
 export default function Header() {
   const router = useRouter()
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [user, setUser] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const isMountedRef = useRef(true)
-
-  useEffect(() => {
-    isMountedRef.current = true
-
-    // Check if user is logged in
-    const checkUser = () => {
-      if (!isMountedRef.current) return
-
-      const userData = localStorage.getItem('user')
-      if (userData) {
-        try {
-          const parsedUser = JSON.parse(userData)
-          if (parsedUser && (parsedUser.id || parsedUser.email)) {
-            if (isMountedRef.current) {
-              setUser(parsedUser)
-            }
-          } else {
-            localStorage.removeItem('user')
-            if (isMountedRef.current) {
-              setUser(null)
-            }
-          }
-        } catch (error) {
-          console.error('Error parsing user data:', error)
-          localStorage.removeItem('user')
-          if (isMountedRef.current) {
-            setUser(null)
-          }
-        }
-      } else {
-        if (isMountedRef.current) {
-          setUser(null)
-        }
-      }
-      
-      if (isMountedRef.current) {
-        setIsLoading(false)
-      }
-    }
-
-    checkUser()
-
-    // Listen for storage changes (when user logs in/out in another tab)
-    const handleStorageChange = (e) => {
-      if (e.key === 'user' && isMountedRef.current) {
-        checkUser()
-      }
-    }
-
-    // Also listen for custom events when user state changes in same tab
-    const handleUserChange = () => {
-      if (isMountedRef.current) {
-        checkUser()
-      }
-    }
-
-    window.addEventListener('storage', handleStorageChange)
-    window.addEventListener('userStateChanged', handleUserChange)
-
-    return () => {
-      isMountedRef.current = false
-      window.removeEventListener('storage', handleStorageChange)
-      window.removeEventListener('userStateChanged', handleUserChange)
-    }
-  }, [])
-
-  const handleLogout = async () => {
-    if (!isMountedRef.current) return
-
-    try {
-      // Call logout endpoint if user is logged in
-      if (user && user.id) {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${user.id}`,
-            'Content-Type': 'application/json'
-          }
-        })
-      }
-    } catch (error) {
-      console.error('Logout API error:', error)
-    } finally {
-      if (isMountedRef.current) {
-        // Clear local storage and update state
-        localStorage.removeItem('user')
-        setUser(null)
-        
-        // Dispatch custom event to notify other components
-        window.dispatchEvent(new Event('userStateChanged'))
-        
-        // Use setTimeout to prevent navigation during render
-        setTimeout(() => {
-          if (isMountedRef.current) {
-            router.push('/')
-          }
-        }, 0)
-      }
-    }
-  }
+  const { user, isLoading, isRefreshing, logout: handleLogout } = useAuth()
 
   const handleLogin = () => {
-    if (!isMountedRef.current) return
     router.push('/login')
   }
 
   const handleDashboard = () => {
-    if (!isMountedRef.current) return
     router.push('/dashboard')
   }
 
   const handleNavigation = (path) => {
-    if (!isMountedRef.current) return
     setMobileMenuOpen(false)
     router.push(path)
   }
 
-  // Don't render anything while checking user state
+  const handleLogoClick = () => {
+    // If on "/" page, always navigate to "/"
+    if (pathname === '/') {
+      router.push('/')
+    } else {
+      // If user is logged in and not on "/", navigate to "/home"
+      // If user is not logged in, navigate to "/"
+      const targetPath = user ? '/home' : '/'
+      router.push(targetPath)
+    }
+  }
+
+  // Show loading state while checking authentication
   if (isLoading) {
     return (
       <header className="bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 border-b border-purple-800/30 sticky top-0 z-50 shadow-lg">
@@ -163,7 +71,7 @@ export default function Header() {
           {/* Logo Section */}
           <div className="flex items-center">
             <button
-              onClick={() => handleNavigation('/')}
+              onClick={handleLogoClick}
               className="flex items-center space-x-3 hover:opacity-90 transition-opacity group"
             >
               <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
@@ -184,31 +92,44 @@ export default function Header() {
 
           {/* Right Side - Navigation and User */}
           <div className="flex items-center space-x-6">
-            {/* Navigation */}
-            <nav className="hidden md:flex items-center space-x-1">
-              <button
-                onClick={() => handleNavigation('/price')}
-                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
-              >
-                <span>Pricing</span>
-              </button>
-              <button
-                onClick={() => handleNavigation('/contact-us')}
-                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
-              >
-                <span>Contact</span>
-              </button>
-            </nav>
+            {/* Navigation - Show Home and Documents when logged in and not on "/" page */}
+            {user && pathname !== '/' && (
+              <nav className="hidden md:flex items-center space-x-1">
+                <button
+                  onClick={() => handleNavigation('/home')}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
+                >
+                  <Home className="w-4 h-4" />
+                  <span>Home</span>
+                </button>
+                <button
+                  onClick={() => handleNavigation('/dashboard')}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
+                >
+                  <FileIcon className="w-4 h-4" />
+                  <span>Documents</span>
+                </button>
+              </nav>
+            )}
 
             {/* User Authentication */}
             {user ? (
               <div className="flex items-center space-x-4">
-                <button
-                  onClick={handleDashboard}
-                  className="hidden md:flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-all duration-200"
-                >
-                  <span>Dashboard</span>
-                </button>
+                {pathname === '/' && (
+                  <button
+                    onClick={handleDashboard}
+                    className="hidden md:flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-all duration-200"
+                  >
+                    <span>Dashboard</span>
+                  </button>
+                )}
+                {/* Token refresh indicator */}
+                {isRefreshing && (
+                  <div className="flex items-center space-x-2 px-3 py-1 bg-orange-500/20 border border-orange-500/30 rounded-lg">
+                    <RotateCcw className="w-3 h-3 text-orange-300 animate-spin" />
+                    <span className="text-xs text-orange-300 font-medium">Refreshing...</span>
+                  </div>
+                )}
                 <div className="flex items-center space-x-2">
                   <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
                     {user.picture ? (
@@ -257,30 +178,39 @@ export default function Header() {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-white/20 py-6">
             <div className="space-y-3">
-              <button
-                onClick={() => handleNavigation('/price')}
-                className="w-full flex items-center space-x-4 px-6 py-4 rounded-xl text-left transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
-              >
-                <span className="font-medium text-base">Pricing</span>
-              </button>
-              <button
-                onClick={() => handleNavigation('/contact-us')}
-                className="w-full flex items-center space-x-4 px-6 py-4 rounded-xl text-left transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
-              >
-                <span className="font-medium text-base">Contact</span>
-              </button>
+              {/* Show Home and Documents in mobile menu when logged in and not on "/" page */}
+              {user && pathname !== '/' && (
+                <>
+                  <button
+                    onClick={() => handleNavigation('/home')}
+                    className="w-full flex items-center space-x-4 px-6 py-4 rounded-xl text-left transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
+                  >
+                    <Home className="w-6 h-6" />
+                    <span className="font-medium text-base">Home</span>
+                  </button>
+                  <button
+                    onClick={() => handleNavigation('/dashboard')}
+                    className="w-full flex items-center space-x-4 px-6 py-4 rounded-xl text-left transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
+                  >
+                    <FileIcon className="w-6 h-6" />
+                    <span className="font-medium text-base">Documents</span>
+                  </button>
+                </>
+              )}
 
               {user ? (
                 <>
-                  <button
-                    onClick={() => {
-                      handleDashboard()
-                      setMobileMenuOpen(false)
-                    }}
-                    className="w-full flex items-center space-x-4 px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-200"
-                  >
-                    <span className="font-medium text-base">Dashboard</span>
-                  </button>
+                  {pathname === '/' && (
+                    <button
+                      onClick={() => {
+                        handleDashboard()
+                        setMobileMenuOpen(false)
+                      }}
+                      className="w-full flex items-center space-x-4 px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-200"
+                    >
+                      <span className="font-medium text-base">Dashboard</span>
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       handleLogout()
