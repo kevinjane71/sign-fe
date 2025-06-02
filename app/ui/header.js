@@ -83,7 +83,7 @@ export default function Header() {
     try {
       // Call logout endpoint if user is logged in
       if (user && user.id) {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/meetflow/auth/logout`, {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${user.id}`,

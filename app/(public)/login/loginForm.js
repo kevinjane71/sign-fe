@@ -21,8 +21,7 @@ import ForgotPassword from './forgotpassword';
 // ];
 
 const GOOGLE_SCOPES = [
-  'https://www.googleapis.com/auth/calendar.events',  // Calendar events access
-  'https://www.googleapis.com/auth/gmail.send',       // Gmail send access
+
   'https://www.googleapis.com/auth/userinfo.profile', // Basic profile info
   'https://www.googleapis.com/auth/userinfo.email'    // Email address
 ];
@@ -91,7 +90,7 @@ const LoginForm = () => {
     
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/meetflow/auth/${provider}`, {
+      const response = await fetch(`${API_BASE_URL}/auth/${provider}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -253,7 +252,7 @@ const LoginForm = () => {
       localStorage.clear();
       const redirectUri = encodeURIComponent(`${window.location.origin}/login`);
       const scope = encodeURIComponent(GOOGLE_SCOPES.join(' '));
-      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=1087929121342-sq0cd1gq0oo85ond6c11in1u83spc0mv.apps.googleusercontent.com&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=offline&prompt=consent&include_granted_scopes=true`;
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=606105812193-7ldf8ofiset6impsavns11ib7nd71mfn.apps.googleusercontent.com&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=offline&prompt=consent&include_granted_scopes=true`;
       window.location.assign(authUrl);
     } catch (error) {
       console.error('Google login error:', error);
