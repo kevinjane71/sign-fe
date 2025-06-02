@@ -47,17 +47,20 @@ export default function AuthGuard({ children }) {
           } else {
             // Invalid user data, redirect to login
             localStorage.removeItem('user')
+            setIsAuthenticated(false)
             router.push('/login')
             return
           }
         } else {
           // No user data, redirect to login
+          setIsAuthenticated(false)
           router.push('/login')
           return
         }
       } catch (error) {
         console.error('Error checking authentication:', error)
         localStorage.removeItem('user')
+        setIsAuthenticated(false)
         router.push('/login')
         return
       }
@@ -66,6 +69,26 @@ export default function AuthGuard({ children }) {
     }
 
     checkAuth()
+
+    // Listen for storage changes (when user logs in/out in another tab)
+    const handleStorageChange = (e) => {
+      if (e.key === 'user') {
+        checkAuth()
+      }
+    }
+
+    // Listen for custom events when user state changes in same tab
+    const handleUserChange = () => {
+      checkAuth()
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('userStateChanged', handleUserChange)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('userStateChanged', handleUserChange)
+    }
   }, [pathname, router])
 
   // Show loading spinner while checking authentication

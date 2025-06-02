@@ -9,24 +9,81 @@ export default function Header() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [user, setUser] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     // Check if user is logged in
-    const userData = localStorage.getItem('user')
-    if (userData) {
-      try {
-        setUser(JSON.parse(userData))
-      } catch (error) {
-        console.error('Error parsing user data:', error)
-        localStorage.removeItem('user')
+    const checkUser = () => {
+      const userData = localStorage.getItem('user')
+      if (userData) {
+        try {
+          const parsedUser = JSON.parse(userData)
+          if (parsedUser && (parsedUser.id || parsedUser.email)) {
+            setUser(parsedUser)
+          } else {
+            localStorage.removeItem('user')
+            setUser(null)
+          }
+        } catch (error) {
+          console.error('Error parsing user data:', error)
+          localStorage.removeItem('user')
+          setUser(null)
+        }
+      } else {
+        setUser(null)
       }
+      setIsLoading(false)
+    }
+
+    checkUser()
+
+    // Listen for storage changes (when user logs in/out in another tab)
+    const handleStorageChange = (e) => {
+      if (e.key === 'user') {
+        checkUser()
+      }
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    
+    // Also listen for custom events when user state changes in same tab
+    const handleUserChange = () => {
+      checkUser()
+    }
+
+    window.addEventListener('userStateChanged', handleUserChange)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('userStateChanged', handleUserChange)
     }
   }, [])
 
-  const handleLogout = () => {
-    localStorage.removeItem('user')
-    setUser(null)
-    router.push('/')
+  const handleLogout = async () => {
+    try {
+      // Call logout endpoint if user is logged in
+      if (user && user.id) {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/meetflow/auth/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${user.id}`,
+            'Content-Type': 'application/json'
+          }
+        })
+      }
+    } catch (error) {
+      console.error('Logout API error:', error)
+    } finally {
+      // Clear local storage and update state
+      localStorage.removeItem('user')
+      setUser(null)
+      
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new Event('userStateChanged'))
+      
+      // Redirect to home page
+      router.push('/')
+    }
   }
 
   const handleLogin = () => {
@@ -35,6 +92,34 @@ export default function Header() {
 
   const handleDashboard = () => {
     router.push('/dashboard')
+  }
+
+  // Don't render anything while checking user state
+  if (isLoading) {
+    return (
+      <header className="bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 border-b border-purple-800/30 sticky top-0 z-50 shadow-lg">
+        <div className="w-full px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            <div className="flex items-center">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                  <FileText className="w-7 h-7 text-white" />
+                </div>
+                <div className="hidden sm:block">
+                  <div className="flex flex-col">
+                    <span className="text-2xl font-bold text-white">SignFlow</span>
+                    <span className="text-sm text-white/70">Professional Document Signing</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center space-x-6">
+              <div className="w-8 h-8 bg-white/20 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </header>
+    )
   }
 
   return (
@@ -92,9 +177,17 @@ export default function Header() {
                 </button>
                 <div className="flex items-center space-x-2">
                   <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-white" />
+                    {user.picture ? (
+                      <img 
+                        src={user.picture} 
+                        alt={user.name || user.email} 
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="w-4 h-4 text-white" />
+                    )}
                   </div>
-                  <span className="hidden lg:block text-sm font-medium text-white">
+                  <span className="hidden lg:block text-sm font-medium text-white max-w-32 truncate">
                     {user.name || user.email}
                   </span>
                   <button

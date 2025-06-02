@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Phone, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
-import { auth } from '../../../../firebase';
+import { auth } from '../../../firebase';
 import {  RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import ForgotPassword from './forgotpassword';
 // const GOOGLE_SCOPES = [
@@ -71,9 +71,14 @@ const LoginForm = () => {
       const result = await response.json();
 
       if (result.success) {
+        // Store user data in localStorage
         localStorage.setItem('user', JSON.stringify(result.data));
         toast.success(result.message || 'Authentication successful');
-        window.location.href = '/home';
+        
+        // Redirect to dashboard after successful login
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 1000);
       } else {
         throw new Error(result.error || 'Authentication failed');
       }
@@ -220,6 +225,9 @@ const LoginForm = () => {
           if (formData.password !== formData.confirmPassword) {
             throw new Error('Passwords do not match');
           }
+          if (formData.password.length < 6) {
+            throw new Error('Password must be at least 6 characters long');
+          }
           await handleAuthRequest('email-signup', {
             email: formData.email,
             password: formData.password,
@@ -267,7 +275,7 @@ const LoginForm = () => {
         <ForgotPassword onBack={() => setShowForgotPassword(false)} />
       ) : (
         <>
-          <h2 className="text-2xl md:text-2xl font-bold text-center mb-6 text-blue-600">MeetSynk</h2>
+          <h2 className="text-2xl md:text-2xl font-bold text-center mb-6 text-blue-600">SignFlow</h2>
 {/* Social Login Options */}
 <div className="space-y-3 mb-6">
           <button

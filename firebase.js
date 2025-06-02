@@ -1,21 +1,24 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from 'firebase/app';
+import { initializeApp } from "firebase/app";
 import { getAuth } from 'firebase/auth';
+//import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "demo-api-key",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "demo-project.firebaseapp.com",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "demo-project",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "demo-project.appspot.com",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "123456789",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:123456789:web:abcdef123456"
+  apiKey: "AIzaSyD9JzIJb0BOCQrYqD7_caCC7J83zZBbZns",
+  authDomain: "meetsynk-7b9ec.firebaseapp.com",
+  projectId: "meetsynk-7b9ec",
+  storageBucket: "meetsynk-7b9ec.firebasestorage.app",
+  messagingSenderId: "895565222127",
+  appId: "1:895565222127:web:f8c3aa0dc003dfa7314b1a",
+  measurementId: "G-EDT3SNSN97"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-// Initialize Firebase Authentication and get a reference to the service
-export const auth = getAuth(app);
-
-export default app; 
+export { auth };
