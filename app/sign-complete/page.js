@@ -1,82 +1,202 @@
 'use client'
 
+import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { CheckCircle, Download, ArrowLeft, Mail } from 'lucide-react'
-import Link from 'next/link'
+import { CheckCircle, Download, Mail, AlertCircle, Loader2 } from 'lucide-react'
 
-export default function SignComplete() {
+export default function SignCompletePage() {
   const searchParams = useSearchParams()
-  const success = searchParams.get('success') === 'true'
+  const documentId = searchParams.get('document')
+  const signerEmail = searchParams.get('signer')
+  
+  const [status, setStatus] = useState('loading') // loading, success, error
+  const [documentData, setDocumentData] = useState(null)
+  const [error, setError] = useState('')
 
-  if (!success) {
+  useEffect(() => {
+    if (!documentId || !signerEmail) {
+      setStatus('error')
+      setError('Missing document or signer information')
+      return
+    }
+
+    // Check the signing status
+    const checkSigningStatus = async () => {
+      try {
+        const response = await fetch(`http://localhost:5002/api/documents/${documentId}/status`)
+        const result = await response.json()
+
+        if (response.ok) {
+          setDocumentData(result.document)
+          
+          // Check if this signer has completed signing
+          const signer = result.document.signers?.find(s => s.email === signerEmail)
+          if (signer && signer.signed) {
+            setStatus('success')
+          } else {
+            setStatus('error')
+            setError('Document signing not completed. Please complete the signing process first.')
+          }
+        } else {
+          setStatus('error')
+          setError(result.error || 'Failed to verify signing status')
+        }
+      } catch (err) {
+        console.error('Error checking signing status:', err)
+        setStatus('error')
+        setError('Unable to verify signing status. Please check your connection and try again.')
+      }
+    }
+
+    checkSigningStatus()
+  }, [documentId, signerEmail])
+
+  const handleDownloadDocument = async () => {
+    try {
+      const response = await fetch(`http://localhost:5002/api/documents/${documentId}/download`)
+      
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${documentData?.title || 'signed-document'}.pdf`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+      } else {
+        throw new Error('Failed to download document')
+      }
+    } catch (err) {
+      console.error('Download error:', err)
+      alert('Failed to download document. Please try again.')
+    }
+  }
+
+  if (status === 'loading') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="max-w-md w-full mx-4">
-          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-red-600 text-2xl">✕</span>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Something went wrong
-            </h1>
-            <p className="text-gray-600 mb-6">
-              We couldn't complete your signing request. Please try again or contact support.
-            </p>
-            <Link href="/" className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Go to Homepage
-            </Link>
-          </div>
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Verifying signing status...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (status === 'error') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center p-8">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-6" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Something went wrong
+          </h1>
+          <p className="text-gray-600 mb-6">
+            {error || "We couldn't complete your signing request. Please try again or contact support."}
+          </p>
+          <button 
+            onClick={() => window.location.href = '/'}
+            className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Go to Home
+          </button>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="max-w-md w-full mx-4">
-        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="w-8 h-8 text-green-600" />
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-4xl mx-auto px-4 py-6">
+          <div className="text-center">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Document Signed Successfully!
+            </h1>
+            <p className="text-gray-600">
+              Your signature has been added to the document
+            </p>
           </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Document Details
+          </h2>
           
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Document Signed Successfully!
-          </h1>
-          
-          <p className="text-gray-600 mb-6">
-            Thank you for signing the document. All parties will be notified via email once the signing process is complete.
-          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label className="text-sm font-medium text-gray-500">Document Title</label>
+              <p className="text-gray-900">{documentData?.title || 'Signed Document'}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-500">Signed By</label>
+              <p className="text-gray-900">{signerEmail}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-500">Signed On</label>
+              <p className="text-gray-900">{new Date().toLocaleDateString()}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-500">Status</label>
+              <div className="flex items-center">
+                <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                <span className="text-green-700 font-medium">Completed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">
+            What's Next?
+          </h3>
           
           <div className="space-y-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-center justify-center space-x-2 text-blue-800">
-                <Mail className="w-5 h-5" />
-                <span className="text-sm font-medium">
-                  You'll receive an email confirmation shortly
-                </span>
+            <div className="flex items-start space-x-3">
+              <Mail className="w-5 h-5 text-blue-500 mt-0.5" />
+              <div>
+                <p className="font-medium text-gray-900">Email Notification Sent</p>
+                <p className="text-sm text-gray-600">
+                  All parties involved will receive an email with the signed document attached.
+                </p>
               </div>
             </div>
             
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-              <h3 className="font-medium text-gray-900 mb-2">What happens next?</h3>
-              <ul className="text-sm text-gray-600 space-y-1 text-left">
-                <li>• You'll receive a copy of the signed document via email</li>
-                <li>• Other signers will be notified to complete their signatures</li>
-                <li>• Once all signatures are collected, everyone will receive the final document</li>
-              </ul>
+            <div className="flex items-start space-x-3">
+              <Download className="w-5 h-5 text-green-500 mt-0.5" />
+              <div>
+                <p className="font-medium text-gray-900">Download Available</p>
+                <p className="text-sm text-gray-600 mb-2">
+                  You can download a copy of the signed document anytime.
+                </p>
+                <button
+                  onClick={handleDownloadDocument}
+                  className="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors"
+                >
+                  Download Signed Document
+                </button>
+              </div>
             </div>
           </div>
-          
-          <div className="mt-8">
-            <Link 
-              href="/" 
-              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Return to Homepage
-            </Link>
-          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center mt-8 text-sm text-gray-500">
+          <p>
+            This document has been digitally signed and is legally binding.
+          </p>
+          <p className="mt-2">
+            If you have any questions, please contact support.
+          </p>
         </div>
       </div>
     </div>

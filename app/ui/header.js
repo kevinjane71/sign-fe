@@ -111,7 +111,7 @@ export default function Header() {
                 {pathname === '/' && (
                   <button
                     onClick={handleDashboard}
-                    className="hidden md:flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-all duration-200"
+                    className="hidden md:flex items-center space-x-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-all duration-200"
                   >
                     <span>Dashboard</span>
                   </button>
@@ -150,7 +150,7 @@ export default function Header() {
             ) : (
               <button
                 onClick={handleLogin}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-all duration-200"
+                className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-all duration-200"
               >
                 <LogIn className="w-4 h-4" />
                 <span>Login</span>
@@ -190,7 +190,7 @@ export default function Header() {
                         handleDashboard()
                         setMobileMenuOpen(false)
                       }}
-                      className="w-full flex items-center space-x-4 px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-200"
+                      className="w-full flex items-center space-x-4 px-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-all duration-200"
                     >
                       <span className="font-medium text-base">Dashboard</span>
                     </button>
@@ -212,7 +212,7 @@ export default function Header() {
                     handleLogin()
                     setMobileMenuOpen(false)
                   }}
-                  className="w-full flex items-center space-x-4 px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-200"
+                  className="w-full flex items-center space-x-4 px-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-all duration-200"
                 >
                   <LogIn className="w-6 h-6" />
                   <span className="font-medium text-base">Login</span>

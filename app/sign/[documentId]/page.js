@@ -413,7 +413,6 @@ const SigningFieldComponent = ({
   const [isEditing, setIsEditing] = useState(false)
   const [localValue, setLocalValue] = useState(fieldValue || field.defaultValue || '')
   const [showSignatureModal, setShowSignatureModal] = useState(false)
-  const [showDatePicker, setShowDatePicker] = useState(false)
   const fieldRef = useRef(null)
   
   const fieldConfig = FIELD_CONFIGS[field.type] || FIELD_CONFIGS[FIELD_TYPES.TEXT]
@@ -474,9 +473,8 @@ const SigningFieldComponent = ({
       const newValue = !localValue
       setLocalValue(newValue)
       onFieldUpdate(field.id, newValue)
-    } else if (field.type === FIELD_TYPES.DATE) {
-      setShowDatePicker(true)
     } else {
+      // For text, date, name, email, phone fields - just enter edit mode
       setIsEditing(true)
       // Focus the input after a short delay to ensure it's rendered
       setTimeout(() => {
@@ -494,12 +492,6 @@ const SigningFieldComponent = ({
     if (field.type !== FIELD_TYPES.TEXT) {
       setIsEditing(false)
     }
-  }
-
-  const handleDateSelect = (dateValue) => {
-    setLocalValue(dateValue)
-    onFieldUpdate(field.id, dateValue)
-    setShowDatePicker(false)
   }
 
   const isCompleted = Boolean(localValue)
@@ -576,14 +568,30 @@ const SigningFieldComponent = ({
           )}
 
           {field.type === FIELD_TYPES.DATE && (
-            <div 
-              className="w-full h-full flex items-center justify-center px-2 text-gray-700 cursor-pointer"
-              style={{ fontSize: `${fontSize}px` }}
-            >
-              {localValue || (
-                <span className="text-gray-400 italic">Date</span>
-              )}
-            </div>
+            isEditing ? (
+              <input
+                ref={fieldRef}
+                type="date"
+                value={localValue}
+                onChange={(e) => handleValueChange(e.target.value)}
+                onBlur={() => setIsEditing(false)}
+                className="w-full h-full bg-transparent border-none outline-none text-gray-700"
+                style={{ 
+                  fontSize: `${fontSize}px`,
+                  padding: '2px 4px'
+                }}
+                autoFocus
+              />
+            ) : (
+              <div 
+                className="w-full h-full flex items-center justify-start px-2 text-gray-700"
+                style={{ fontSize: `${fontSize}px` }}
+              >
+                {localValue || (
+                  <span className="text-gray-400 italic">Date</span>
+                )}
+              </div>
+            )
           )}
 
           {field.type === FIELD_TYPES.SIGNATURE && (
@@ -646,45 +654,6 @@ const SigningFieldComponent = ({
           )}
         </div>
       </div>
-
-      {/* Date Picker Modal */}
-      {showDatePicker && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Select Date</h3>
-              <button onClick={() => setShowDatePicker(false)} className="text-gray-500 hover:text-gray-700">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <input
-                type="date"
-                value={localValue}
-                onChange={(e) => handleDateSelect(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                autoFocus
-              />
-              
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleDateSelect(new Date().toISOString().split('T')[0])}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
-                >
-                  Today
-                </button>
-                <button
-                  onClick={() => setShowDatePicker(false)}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Done
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Signature Modal */}
       {showSignatureModal && (
@@ -855,6 +824,13 @@ export default function SigningPage() {
           throw new Error(result.error || 'Failed to load document')
         }
 
+        // Check if user has already signed
+        if (result.alreadySigned) {
+          // Redirect to completion page immediately
+          router.push(`/sign-complete?document=${documentId}&signer=${encodeURIComponent(signerEmail)}`)
+          return
+        }
+
         setDocumentData(result.document)
 
         // Convert document data to format expected by DocumentViewer
@@ -919,7 +895,7 @@ export default function SigningPage() {
     }
 
     loadSigningDocument()
-  }, [documentId, signerEmail, token])
+  }, [documentId, signerEmail, token, router])
 
   // Get all fields from all files
   const getAllFields = () => {
