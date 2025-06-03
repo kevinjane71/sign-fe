@@ -1346,6 +1346,7 @@ export default function NewDocumentEditor() {
   
   // 2-Step Process State
   const [currentStep, setCurrentStep] = useState(1) // 1 = Configuration, 2 = Editor
+  const [isStepLoading, setIsStepLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   // Drag state
@@ -1691,18 +1692,42 @@ export default function NewDocumentEditor() {
   }
 
   // Step navigation
-  const handleNextStep = () => {
-    if (documents.length === 0) {
-      toast.error('Please upload at least one document first')
+  const handleNextStep = async () => {
+    if (currentStep === 1) {
+      // Moving from configuration to editor
+      if (documents.length === 0) {
+        toast.error('Please upload at least one document first')
+        return
+      }
+      
+      setIsStepLoading(true)
+      
+      // Smooth transition delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+      setCurrentStep(2)
+      setIsStepLoading(false)
+    } else {
+      // From step 2, call final send
+      handleFinalSend()
+    }
+  }
+
+  const handleBackToConfiguration = async () => {
+    if (currentStep === 1) {
+      // From step 1, go back to dashboard
+      router.push('/dashboard')
       return
     }
     
-    // Just move to step 2 - configuration should already be stored by DocumentConfiguration
-    setCurrentStep(2)
-  }
-
-  const handleBackToConfiguration = () => {
+    // From step 2, go back to step 1 with smooth transition
+    setIsStepLoading(true)
+    
+    // Smooth transition delay for better UX
+    await new Promise(resolve => setTimeout(resolve, 300))
+    
     setCurrentStep(1)
+    setIsStepLoading(false)
   }
 
   // Handle final send (only called from Step 2)
@@ -1803,6 +1828,11 @@ export default function NewDocumentEditor() {
     return <LoadingSpinner type="submit" />
   }
 
+  // Show step loading overlay
+  if (isStepLoading) {
+    return <LoadingSpinner message="Loading..." />
+  }
+
   // Step 1: Document Configuration
   if (currentStep === 1) {
     return (
@@ -1813,7 +1843,7 @@ export default function NewDocumentEditor() {
         fields={getAllFields()} // All fields from all documents
         onBack={handleBackToConfiguration}
         onNext={handleNextStep}
-        isLoading={isSubmitting}
+        isLoading={isStepLoading}
         documentData={documents[0]}
       />
     )
@@ -1893,12 +1923,36 @@ export default function NewDocumentEditor() {
               </button>
               
               <button
-                onClick={handleFinalSend}
-                className="flex items-center space-x-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-xs font-semibold shadow-sm"
+                onClick={handleBackToConfiguration}
+                disabled={isStepLoading}
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 rounded-md transition-colors text-xs font-semibold text-gray-700 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span className="hidden sm:inline">Share Document</span>
-                <span className="sm:hidden">Share</span>
-                <Send className="w-4 h-4" />
+                {isStepLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Settings className="w-4 h-4" />
+                )}
+                <span className="hidden sm:inline">
+                  {isStepLoading ? 'Loading...' : 'Configure'}
+                </span>
+              </button>
+              
+              <button
+                onClick={handleNextStep}
+                disabled={isStepLoading}
+                className="flex items-center space-x-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-xs font-semibold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span className="hidden sm:inline">
+                  {isStepLoading ? 'Loading...' : 'Share Document'}
+                </span>
+                <span className="sm:hidden">
+                  {isStepLoading ? 'Loading...' : 'Share'}
+                </span>
+                {isStepLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
               </button>
             </div>
           </div>
@@ -1918,11 +1972,18 @@ export default function NewDocumentEditor() {
           <div className="p-4 flex-1">
             {/* Back Button */}
             <button 
-              onClick={() => router.push('/')}
-              className="w-full flex items-center space-x-2 p-2.5 mb-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors"
+              onClick={handleBackToConfiguration}
+              disabled={isStepLoading}
+              className="w-full flex items-center space-x-2 p-2.5 mb-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ArrowLeft className="w-4 h-4 text-gray-600" />
-              <span className="text-sm font-medium text-gray-900">Back to Dashboard</span>
+              {isStepLoading ? (
+                <Loader2 className="w-4 h-4 text-gray-600 animate-spin" />
+              ) : (
+                <ArrowLeft className="w-4 h-4 text-gray-600" />
+              )}
+              <span className="text-sm font-medium text-gray-900">
+                {currentStep === 1 ? 'Back to Dashboard' : 'Back to Configure'}
+              </span>
             </button>
 
             {/* Mobile Close Button */}

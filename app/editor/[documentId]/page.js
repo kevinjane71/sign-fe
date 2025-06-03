@@ -1487,7 +1487,8 @@ export default function EditDocumentEditor() {
   const [isMobile, setIsMobile] = useState(false)
   
   // 2-Step Process State
-  const [currentStep, setCurrentStep] = useState(2) // 1 = Configuration, 2 = Editor (start at editor for existing docs)
+  const [currentStep, setCurrentStep] = useState(1) // 1 = Configuration, 2 = Editor (start at configuration for consistent flow)
+  const [isStepLoading, setIsStepLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   // Document data for pre-filling configuration
@@ -1874,23 +1875,52 @@ export default function EditDocumentEditor() {
     window.open('/live/preview', '_blank')
   }
 
-  // Step navigation
-  const handleNextStep = () => {
-    // Get the configuration from step 1 (stored in sessionStorage)
-    const storedConfig = sessionStorage.getItem('documentConfiguration')
-    if (!storedConfig) {
-      toast.error('Configuration missing. Please go back to step 1.')
-      setCurrentStep(1)
+  // Step navigation functions
+  const handleNextStep = async () => {
+    if (currentStep === 1) {
+      // Moving from configuration to editor
+      if (documents.length === 0) {
+        toast.error('Please load documents first')
+        return
+      }
+      
+      setIsStepLoading(true)
+      
+      // Smooth transition delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+      setCurrentStep(2)
+      setIsStepLoading(false)
+    } else {
+      // From step 2, get configuration and send
+      const storedConfig = sessionStorage.getItem('documentConfiguration')
+      if (!storedConfig) {
+        toast.error('Configuration missing. Please go back to step 1.')
+        setCurrentStep(1)
+        return
+      }
+      
+      // Parse config and call the API to update and send document
+      const config = JSON.parse(storedConfig)
+      handleSend(config)
+    }
+  }
+
+  const handleBackToConfiguration = async () => {
+    if (currentStep === 1) {
+      // From step 1, go back to dashboard
+      router.push('/dashboard')
       return
     }
     
-    // Parse config and call the API to update and send document
-    const config = JSON.parse(storedConfig)
-    handleSend(config)
-  }
-
-  const handleBackToConfiguration = () => {
+    // From step 2, go back to step 1 with smooth transition
+    setIsStepLoading(true)
+    
+    // Smooth transition delay for better UX
+    await new Promise(resolve => setTimeout(resolve, 300))
+    
     setCurrentStep(1)
+    setIsStepLoading(false)
   }
 
   // Send handler (final step) - Modified for updating existing document
@@ -1964,6 +1994,11 @@ export default function EditDocumentEditor() {
     return <LoadingSpinner type="submit" />
   }
 
+  // Show step loading overlay
+  if (isStepLoading) {
+    return <LoadingSpinner message="Loading..." />
+  }
+
   // Step 1: Document Configuration
   if (currentStep === 1) {
     return (
@@ -1973,8 +2008,8 @@ export default function EditDocumentEditor() {
         allFields={allFields}
         fields={getAllFields()} // All fields from all documents
         onBack={handleBackToConfiguration}
-        onNext={() => setCurrentStep(2)}
-        isLoading={isSubmitting}
+        onNext={handleNextStep}
+        isLoading={isStepLoading}
         documentData={documentData}
       />
     )
@@ -2054,20 +2089,36 @@ export default function EditDocumentEditor() {
               </button>
               
               <button
-                onClick={() => setCurrentStep(1)}
-                className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 rounded-md transition-colors text-xs font-semibold text-gray-700 shadow-sm"
+                onClick={handleBackToConfiguration}
+                disabled={isStepLoading}
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 rounded-md transition-colors text-xs font-semibold text-gray-700 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Settings className="w-4 h-4" />
-                <span className="hidden sm:inline">Configure</span>
+                {isStepLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Settings className="w-4 h-4" />
+                )}
+                <span className="hidden sm:inline">
+                  {isStepLoading ? 'Loading...' : 'Configure'}
+                </span>
               </button>
               
               <button
                 onClick={handleNextStep}
-                className="flex items-center space-x-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-xs font-semibold shadow-sm"
+                disabled={isStepLoading}
+                className="flex items-center space-x-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-xs font-semibold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span className="hidden sm:inline">Share Document</span>
-                <span className="sm:hidden">Share</span>
-                <Send className="w-4 h-4" />
+                <span className="hidden sm:inline">
+                  {isStepLoading ? 'Loading...' : 'Share Document'}
+                </span>
+                <span className="sm:hidden">
+                  {isStepLoading ? 'Loading...' : 'Share'}
+                </span>
+                {isStepLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
               </button>
             </div>
           </div>
@@ -2087,11 +2138,18 @@ export default function EditDocumentEditor() {
           <div className="p-4 flex-1">
             {/* Back Button */}
             <button 
-              onClick={() => router.push('/dashboard')}
-              className="w-full flex items-center space-x-2 p-2.5 mb-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors"
+              onClick={handleBackToConfiguration}
+              disabled={isStepLoading}
+              className="w-full flex items-center space-x-2 p-2.5 mb-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ArrowLeft className="w-4 h-4 text-gray-600" />
-              <span className="text-sm font-medium text-gray-900">Back to Dashboard</span>
+              {isStepLoading ? (
+                <Loader2 className="w-4 h-4 text-gray-600 animate-spin" />
+              ) : (
+                <ArrowLeft className="w-4 h-4 text-gray-600" />
+              )}
+              <span className="text-sm font-medium text-gray-900">
+                {currentStep === 1 ? 'Back to Dashboard' : 'Back to Configure'}
+              </span>
             </button>
 
             {/* Mobile Close Button */}
