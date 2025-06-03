@@ -19,7 +19,8 @@ export default function AuthGuard({ children }) {
     '/privacy',
     '/refund',
     '/price',
-    '/contact-us'
+    '/contact-us',
+    '/sign'
   ]
 
   useEffect(() => {

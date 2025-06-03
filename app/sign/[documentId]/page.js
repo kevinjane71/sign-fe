@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import SignatureCanvas from 'react-signature-canvas'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { Document, Page, pdfjs } from 'react-pdf'
 import { 
   CheckCircle,
   PenTool,
@@ -13,88 +13,138 @@ import {
   Loader2,
   FileText,
   User,
-  Mail
+  Mail,
+  ChevronLeft,
+  ChevronRight,
+  Eye
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import axios from 'axios'
+import SignatureCanvas from 'react-signature-canvas'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
+// Configure PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`
 
-const FIELD_TYPES = {
-  TEXT: 'text',
-  SIGNATURE: 'signature',
-  CHECKBOX: 'checkbox',
-  DATE: 'date'
-}
-
-export default function DocumentSigning() {
-  const params = useParams()
-  const router = useRouter()
+export default function SignDocumentPage({ params }) {
+  const { documentId } = params
   const searchParams = useSearchParams()
-  const documentId = params.documentId
-  const signerEmail = searchParams.get('signer')
+  const router = useRouter()
   
+  const signer = searchParams.get('signer')
+  const token = searchParams.get('token')
+  
+  const signatureCanvasRef = useRef(null)
+  
+  // State management
   const [document, setDocument] = useState(null)
-  const [signer, setSigner] = useState(null)
+  const [signerInfo, setSignerInfo] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
-  const [fieldValues, setFieldValues] = useState({})
-  const [documentDimensions, setDocumentDimensions] = useState({ width: 0, height: 0 })
+  const [error, setError] = useState(null)
+  const [currentFileIndex, setCurrentFileIndex] = useState(0)
+  const [currentPageIndex, setCurrentPageIndex] = useState(0)
+  const [numPages, setNumPages] = useState(0)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSignatureModal, setShowSignatureModal] = useState(false)
   const [currentSignatureField, setCurrentSignatureField] = useState(null)
-  
-  const documentRef = useRef(null)
-  const signatureCanvasRef = useRef(null)
+  const [fieldValues, setFieldValues] = useState({})
+  const [scale, setScale] = useState(1.2)
+  const [pageSize, setPageSize] = useState({ width: 0, height: 0 })
 
-  // Load document data
+  // Check for required parameters
   useEffect(() => {
-    const loadDocument = async () => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/api/sign/${documentId}?signer=${encodeURIComponent(signerEmail)}`)
-        if (response.data.success) {
-          setDocument(response.data.document)
-          setSigner(response.data.signer)
-          
-          // Initialize field values
-          const initialValues = {}
-          response.data.document.fields?.forEach(field => {
-            if (field.assignedTo === signerEmail) {
-              initialValues[field.id] = ''
-            }
-          })
-          setFieldValues(initialValues)
-        } else {
-          throw new Error('Failed to load document')
+    if (!signer || !token) {
+      setError('Missing required access parameters. Please use the link from your email.')
+      setLoading(false)
+      return
+    }
+    
+    loadDocument()
+  }, [documentId, signer, token])
+
+  const loadDocument = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      console.log('🔍 Loading document:', documentId)
+      console.log('�� Signer:', signer)
+      console.log('🔐 Token provided:', !!token)
+
+      const response = await fetch(
+        `http://localhost:5002/api/sign/${documentId}?signer=${encodeURIComponent(signer)}&token=${encodeURIComponent(token)}`, 
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
         }
-      } catch (error) {
-        console.error('Load document error:', error)
-        toast.error('Failed to load document or unauthorized access')
-        router.push('/')
-      } finally {
-        setLoading(false)
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.details || errorData.error || 'Failed to load document')
       }
-    }
 
-    if (documentId && signerEmail) {
-      loadDocument()
-    } else {
-      toast.error('Invalid signing link')
-      router.push('/')
-    }
-  }, [documentId, signerEmail, router])
+      const data = await response.json()
+      console.log('✅ Document loaded:', data)
 
-  // Handle document image load to get dimensions
-  const handleDocumentLoad = () => {
-    if (documentRef.current) {
-      const rect = documentRef.current.getBoundingClientRect()
-      setDocumentDimensions({
-        width: rect.width,
-        height: rect.height
-      })
+      setDocument(data.document)
+      setSignerInfo(data.signer)
+      
+      // Initialize field values from existing signatures
+      if (data.signer.fieldValues) {
+        setFieldValues(data.signer.fieldValues)
+      }
+
+    } catch (err) {
+      console.error('❌ Load document error:', err)
+      setError(err.message)
+    } finally {
+      setLoading(false)
     }
   }
 
-  // Handle field value change
+  const getCurrentFile = () => {
+    if (!document?.files || document.files.length === 0) {
+      // Legacy single file support
+      return {
+        fileId: 'main',
+        originalName: document?.originalName || 'Document',
+        title: document?.title || 'Document',
+        mimeType: document?.mimeType || 'application/pdf',
+        fields: document?.fields || []
+      }
+    }
+    
+    return document.files[currentFileIndex] || null
+  }
+
+  const getCurrentFileUrl = () => {
+    const currentFile = getCurrentFile()
+    if (!currentFile) return null
+    
+    // Use public signing endpoint with token
+    return `http://localhost:5002/api/sign/${documentId}/file/${currentFile.fileId}?signer=${encodeURIComponent(signer)}&token=${encodeURIComponent(token)}`
+  }
+
+  const onDocumentLoadSuccess = ({ numPages }) => {
+    console.log('📄 PDF loaded with', numPages, 'pages')
+    setNumPages(numPages)
+    setCurrentPageIndex(0)
+  }
+
+  const onPageLoadSuccess = (page) => {
+    const { width, height } = page
+    setPageSize({ width, height })
+    console.log('📏 Page size:', width, 'x', height)
+  }
+
+  const getFieldsForCurrentPage = () => {
+    const currentFile = getCurrentFile()
+    if (!currentFile?.fields) return []
+    
+    return currentFile.fields.filter(field => field.page === currentPageIndex + 1)
+  }
+
   const handleFieldChange = (fieldId, value) => {
     setFieldValues(prev => ({
       ...prev,
@@ -102,276 +152,457 @@ export default function DocumentSigning() {
     }))
   }
 
-  // Handle signature field click
   const handleSignatureClick = (field) => {
     setCurrentSignatureField(field)
     setShowSignatureModal(true)
   }
 
-  // Save signature
   const saveSignature = () => {
-    if (signatureCanvasRef.current && currentSignatureField) {
-      const signatureData = signatureCanvasRef.current.toDataURL()
-      handleFieldChange(currentSignatureField.id, signatureData)
-      setShowSignatureModal(false)
-      setCurrentSignatureField(null)
-    }
+    if (!signatureCanvasRef.current || !currentSignatureField) return
+
+    const signatureDataURL = signatureCanvasRef.current.toDataURL()
+    handleFieldChange(currentSignatureField.id, signatureDataURL)
+    setShowSignatureModal(false)
+    setCurrentSignatureField(null)
+    signatureCanvasRef.current.clear()
   }
 
-  // Clear signature
   const clearSignature = () => {
     if (signatureCanvasRef.current) {
       signatureCanvasRef.current.clear()
     }
   }
 
-  // Submit signature
-  const submitSignature = async () => {
-    // Validate required fields
-    const requiredFields = document.fields?.filter(field => 
-      field.assignedTo === signerEmail && field.required
-    ) || []
+  const renderField = (field) => {
+    const fieldValue = fieldValues[field.id] || ''
+    
+    // Calculate position based on page size and scale
+    const left = (field.x / 100) * pageSize.width * scale
+    const top = (field.y / 100) * pageSize.height * scale
+    const width = (field.width / 100) * pageSize.width * scale
+    const height = (field.height / 100) * pageSize.height * scale
 
-    const missingFields = requiredFields.filter(field => 
-      !fieldValues[field.id] || fieldValues[field.id].trim() === ''
-    )
-
-    if (missingFields.length > 0) {
-      toast.error('Please fill in all required fields')
-      return
+    const baseStyle = {
+      position: 'absolute',
+      left: `${left}px`,
+      top: `${top}px`,
+      width: `${width}px`,
+      height: `${height}px`,
+      zIndex: 10,
+      border: '2px solid #4F46E5',
+      borderRadius: '4px',
+      background: 'rgba(79, 70, 229, 0.1)',
     }
 
-    setSubmitting(true)
-    try {
-      const response = await axios.post(`${API_BASE_URL}/api/sign/${documentId}/submit`, {
-        signerEmail: signerEmail,
-        signatureData: fieldValues,
-        fieldValues: fieldValues
-      })
+    switch (field.type) {
+      case 'text':
+        return (
+          <input
+            key={field.id}
+            type="text"
+            value={fieldValue}
+            onChange={(e) => handleFieldChange(field.id, e.target.value)}
+            placeholder={field.placeholder || 'Enter text'}
+            style={{
+              ...baseStyle,
+              padding: '8px',
+              fontSize: '14px',
+              outline: 'none',
+            }}
+          />
+        )
 
-      if (response.data.success) {
-        toast.success('Document signed successfully!')
-        router.push(`/preview/${documentId}`)
-      } else {
-        throw new Error('Failed to submit signature')
-      }
-    } catch (error) {
-      console.error('Submit signature error:', error)
-      toast.error('Failed to submit signature')
-    } finally {
-      setSubmitting(false)
+      case 'signature':
+        return (
+          <div
+            key={field.id}
+            onClick={() => handleSignatureClick(field)}
+            style={{
+              ...baseStyle,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '12px',
+              color: '#4F46E5',
+              fontWeight: 'bold',
+              textAlign: 'center',
+              background: fieldValue ? 'rgba(34, 197, 94, 0.1)' : 'rgba(79, 70, 229, 0.1)',
+              border: fieldValue ? '2px solid #22C55E' : '2px solid #4F46E5',
+            }}
+          >
+            {fieldValue ? (
+              <img
+                src={fieldValue}
+                alt="Signature"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                }}
+              />
+            ) : (
+              'Click to Sign'
+            )}
+          </div>
+        )
+
+      case 'checkbox':
+        return (
+          <input
+            key={field.id}
+            type="checkbox"
+            checked={fieldValue === 'true'}
+            onChange={(e) => handleFieldChange(field.id, e.target.checked.toString())}
+            style={{
+              ...baseStyle,
+              width: '20px',
+              height: '20px',
+              margin: 'auto',
+            }}
+          />
+        )
+
+      case 'date':
+        return (
+          <input
+            key={field.id}
+            type="date"
+            value={fieldValue}
+            onChange={(e) => handleFieldChange(field.id, e.target.value)}
+            style={{
+              ...baseStyle,
+              padding: '8px',
+              fontSize: '14px',
+              outline: 'none',
+            }}
+          />
+        )
+
+      default:
+        return null
     }
   }
 
-  // Get fields assigned to current signer
-  const assignedFields = document?.fields?.filter(field => field.assignedTo === signerEmail) || []
+  const validateFields = () => {
+    const currentFile = getCurrentFile()
+    if (!currentFile?.fields) return true
+
+    const requiredFields = currentFile.fields.filter(field => field.required)
+    const missingFields = requiredFields.filter(field => !fieldValues[field.id])
+
+    if (missingFields.length > 0) {
+      toast.error(`Please fill in all required fields: ${missingFields.map(f => f.placeholder || f.type).join(', ')}`)
+      return false
+    }
+
+    return true
+  }
+
+  const submitSignature = async () => {
+    if (!validateFields()) return
+
+    try {
+      setIsSubmitting(true)
+
+      // Get signature data - use the first signature field value as the main signature
+      const signatureField = getCurrentFile()?.fields?.find(f => f.type === 'signature')
+      const signatureData = signatureField ? fieldValues[signatureField.id] : null
+
+      if (!signatureData) {
+        toast.error('Please provide your signature before submitting')
+        return
+      }
+
+      const response = await fetch(`http://localhost:5002/api/sign/${documentId}/submit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          signerEmail: signer,
+          signatureData: signatureData,
+          fieldValues: fieldValues,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to submit signature')
+      }
+
+      const result = await response.json()
+      console.log('✅ Signature submitted:', result)
+
+      toast.success('Signature submitted successfully!')
+      
+      // Redirect to completion page
+      setTimeout(() => {
+        router.push('/sign-complete')
+      }, 2000)
+
+    } catch (err) {
+      console.error('❌ Submit signature error:', err)
+      toast.error(err.message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const navigateFile = (direction) => {
+    if (!document?.files) return
+    
+    const newIndex = direction === 'prev' 
+      ? Math.max(0, currentFileIndex - 1)
+      : Math.min(document.files.length - 1, currentFileIndex + 1)
+    
+    setCurrentFileIndex(newIndex)
+    setCurrentPageIndex(0) // Reset to first page of new file
+  }
+
+  const navigatePage = (direction) => {
+    const newIndex = direction === 'prev' 
+      ? Math.max(0, currentPageIndex - 1)
+      : Math.min(numPages - 1, currentPageIndex + 1)
+    
+    setCurrentPageIndex(newIndex)
+  }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-          <p>Loading document...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading document...</p>
         </div>
       </div>
     )
   }
 
-  if (!document || !signer) {
+  if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600">Document not found or unauthorized access</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h2 className="text-xl font-semibold text-red-800 mb-2">Access Error</h2>
+            <p className="text-red-600 mb-4">{error}</p>
+            <p className="text-sm text-red-500">
+              Please check your email for the correct signing link or contact the document sender.
+            </p>
+          </div>
         </div>
       </div>
     )
   }
+
+  if (!document) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Document not found</p>
+        </div>
+      </div>
+    )
+  }
+
+  const currentFile = getCurrentFile()
+  const fileUrl = getCurrentFileUrl()
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <FileText className="w-8 h-8 text-primary-600" />
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900">
-                  {document.originalName}
-                </h1>
-                <p className="text-sm text-gray-500">
-                  Please review and sign this document
-                </p>
-              </div>
+          <div className="flex items-center justify-between h-16">
+            <div>
+              <h1 className="text-xl font-semibold text-gray-900">
+                {document.title || 'Document Signing'}
+              </h1>
+              <p className="text-sm text-gray-500">
+                Signing as: {signer}
+              </p>
             </div>
-            
             <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <div className="flex items-center space-x-2">
-                  <User className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm font-medium text-gray-900">{signer.name}</span>
-                </div>
-                <div className="flex items-center space-x-2 mt-1">
-                  <Mail className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-500">{signer.email}</span>
-                </div>
-              </div>
+              {document.files && document.files.length > 1 && (
+                <span className="text-sm text-gray-500">
+                  File {currentFileIndex + 1} of {document.files.length}
+                </span>
+              )}
+              {numPages > 1 && (
+                <span className="text-sm text-gray-500">
+                  Page {currentPageIndex + 1} of {numPages}
+                </span>
+              )}
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="flex gap-8">
           {/* Document Viewer */}
-          <div className="lg:col-span-3">
+          <div className="flex-1">
             <div className="bg-white rounded-lg shadow-sm border">
-              <div className="p-6">
-                <div className="relative inline-block">
-                  <img
-                    ref={documentRef}
-                    src={document.fileUrl}
-                    alt="Document"
-                    className="max-w-full h-auto border border-gray-200 rounded"
-                    onLoad={handleDocumentLoad}
-                  />
+              {/* Navigation Controls */}
+              <div className="flex items-center justify-between p-4 border-b">
+                <div className="flex items-center space-x-4">
+                  {document.files && document.files.length > 1 && (
+                    <>
+                      <button
+                        onClick={() => navigateFile('prev')}
+                        disabled={currentFileIndex === 0}
+                        className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200"
+                      >
+                        ← Previous File
+                      </button>
+                      <button
+                        onClick={() => navigateFile('next')}
+                        disabled={currentFileIndex === document.files.length - 1}
+                        className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200"
+                      >
+                        Next File →
+                      </button>
+                    </>
+                  )}
+                </div>
+                
+                <div className="flex items-center space-x-4">
+                  {numPages > 1 && (
+                    <>
+                      <button
+                        onClick={() => navigatePage('prev')}
+                        disabled={currentPageIndex === 0}
+                        className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200"
+                      >
+                        ← Previous Page
+                      </button>
+                      <button
+                        onClick={() => navigatePage('next')}
+                        disabled={currentPageIndex === numPages - 1}
+                        className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200"
+                      >
+                        Next Page →
+                      </button>
+                    </>
+                  )}
                   
-                  {/* Field Overlays */}
-                  {assignedFields.map(field => {
-                    const scaleX = documentDimensions.width / (document.originalWidth || documentDimensions.width)
-                    const scaleY = documentDimensions.height / (document.originalHeight || documentDimensions.height)
-                    
-                    return (
-                      <div
-                        key={field.id}
-                        className="absolute border-2 border-primary-500 bg-primary-50 bg-opacity-50"
-                        style={{
-                          left: field.x * scaleX,
-                          top: field.y * scaleY,
-                          width: field.width * scaleX,
-                          height: field.height * scaleY,
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => setScale(Math.max(0.5, scale - 0.1))}
+                      className="px-2 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                    >
+                      -
+                    </button>
+                    <span className="text-sm text-gray-600">
+                      {Math.round(scale * 100)}%
+                    </span>
+                    <button
+                      onClick={() => setScale(Math.min(2, scale + 0.1))}
+                      className="px-2 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Document Display */}
+              <div className="p-4">
+                <div className="flex justify-center">
+                  <div className="relative">
+                    {currentFile?.mimeType?.includes('pdf') ? (
+                      <Document
+                        file={fileUrl}
+                        onLoadSuccess={onDocumentLoadSuccess}
+                        onLoadError={(error) => {
+                          console.error('PDF load error:', error)
+                          toast.error('Failed to load PDF')
                         }}
                       >
-                        {field.type === FIELD_TYPES.TEXT && (
-                          <input
-                            type="text"
-                            value={fieldValues[field.id] || ''}
-                            onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                            placeholder={field.placeholder}
-                            className="w-full h-full px-2 text-sm border-none bg-transparent focus:outline-none focus:bg-white"
-                            required={field.required}
-                          />
-                        )}
+                        <Page
+                          pageNumber={currentPageIndex + 1}
+                          scale={scale}
+                          onLoadSuccess={onPageLoadSuccess}
+                          renderTextLayer={false}
+                          renderAnnotationLayer={false}
+                        />
                         
-                        {field.type === FIELD_TYPES.DATE && (
-                          <input
-                            type="date"
-                            value={fieldValues[field.id] || ''}
-                            onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                            className="w-full h-full px-2 text-sm border-none bg-transparent focus:outline-none focus:bg-white"
-                            required={field.required}
-                          />
-                        )}
+                        {/* Render form fields on top of PDF */}
+                        {getFieldsForCurrentPage().map(renderField)}
+                      </Document>
+                    ) : (
+                      <div className="relative">
+                        <img
+                          src={fileUrl}
+                          alt={currentFile?.originalName}
+                          style={{ 
+                            width: `${pageSize.width * scale}px`,
+                            height: 'auto'
+                          }}
+                          onLoad={(e) => {
+                            setPageSize({ 
+                              width: e.target.naturalWidth, 
+                              height: e.target.naturalHeight 
+                            })
+                            setNumPages(1)
+                          }}
+                        />
                         
-                        {field.type === FIELD_TYPES.CHECKBOX && (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <input
-                              type="checkbox"
-                              checked={fieldValues[field.id] || false}
-                              onChange={(e) => handleFieldChange(field.id, e.target.checked)}
-                              className="w-4 h-4"
-                              required={field.required}
-                            />
-                          </div>
-                        )}
-                        
-                        {field.type === FIELD_TYPES.SIGNATURE && (
-                          <button
-                            onClick={() => handleSignatureClick(field)}
-                            className="w-full h-full flex items-center justify-center text-primary-600 hover:bg-primary-100 transition-colors"
-                          >
-                            {fieldValues[field.id] ? (
-                              <img 
-                                src={fieldValues[field.id]} 
-                                alt="Signature" 
-                                className="max-w-full max-h-full object-contain"
-                              />
-                            ) : (
-                              <div className="flex items-center space-x-2">
-                                <PenTool className="w-4 h-4" />
-                                <span className="text-sm">Click to sign</span>
-                              </div>
-                            )}
-                          </button>
-                        )}
+                        {/* Render form fields on top of image */}
+                        {getFieldsForCurrentPage().map(renderField)}
                       </div>
-                    )
-                  })}
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="w-80">
             <div className="bg-white rounded-lg shadow-sm border p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Signing Progress
               </h3>
               
-              <div className="space-y-4">
-                {assignedFields.map(field => {
-                  const isCompleted = fieldValues[field.id] && fieldValues[field.id] !== ''
-                  const fieldConfig = {
-                    [FIELD_TYPES.TEXT]: { icon: Type, label: 'Text Field' },
-                    [FIELD_TYPES.SIGNATURE]: { icon: PenTool, label: 'Signature' },
-                    [FIELD_TYPES.CHECKBOX]: { icon: CheckSquare, label: 'Checkbox' },
-                    [FIELD_TYPES.DATE]: { icon: Calendar, label: 'Date' }
-                  }[field.type]
-                  
-                  const Icon = fieldConfig.icon
-                  
-                  return (
-                    <div key={field.id} className="flex items-center space-x-3">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                        isCompleted ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
-                      }`}>
-                        {isCompleted ? (
-                          <CheckCircle className="w-4 h-4" />
-                        ) : (
-                          <Icon className="w-4 h-4" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <p className={`text-sm font-medium ${
-                          isCompleted ? 'text-green-600' : 'text-gray-900'
-                        }`}>
-                          {fieldConfig.label}
-                          {field.required && <span className="text-red-500 ml-1">*</span>}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {isCompleted ? 'Completed' : 'Required'}
-                        </p>
-                      </div>
+              {currentFile && (
+                <>
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">
+                      Current File: {currentFile.title || currentFile.originalName}
+                    </h4>
+                    <div className="text-sm text-gray-500">
+                      {getFieldsForCurrentPage().length} fields on this page
                     </div>
-                  )
-                })}
-              </div>
-              
-              <div className="mt-8">
-                <button
-                  onClick={submitSignature}
-                  disabled={submitting}
-                  className="w-full btn-primary flex items-center justify-center space-x-2"
-                >
-                  {submitting ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4" />
-                  )}
-                  <span>{submitting ? 'Submitting...' : 'Complete Signing'}</span>
-                </button>
-              </div>
+                  </div>
+
+                  {/* Field Summary */}
+                  <div className="space-y-2 mb-6">
+                    {currentFile.fields?.map(field => {
+                      const isCompleted = fieldValues[field.id]
+                      return (
+                        <div key={field.id} className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">
+                            {field.placeholder || field.type} {field.required && '*'}
+                          </span>
+                          <span className={isCompleted ? 'text-green-600' : 'text-gray-400'}>
+                            {isCompleted ? '✓' : '○'}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </>
+              )}
+
+              {/* Submit Button */}
+              <button
+                onClick={submitSignature}
+                disabled={isSubmitting}
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Signature'}
+              </button>
             </div>
           </div>
         </div>
@@ -381,11 +612,9 @@ export default function DocumentSigning() {
       {showSignatureModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Add Your Signature
-            </h3>
+            <h3 className="text-lg font-semibold mb-4">Add Your Signature</h3>
             
-            <div className="border border-gray-300 rounded-lg mb-4">
+            <div className="border border-gray-300 rounded mb-4">
               <SignatureCanvas
                 ref={signatureCanvasRef}
                 canvasProps={{
@@ -399,21 +628,20 @@ export default function DocumentSigning() {
             <div className="flex justify-between">
               <button
                 onClick={clearSignature}
-                className="btn-outline"
+                className="px-4 py-2 text-gray-600 bg-gray-100 rounded hover:bg-gray-200"
               >
                 Clear
               </button>
-              
               <div className="space-x-2">
                 <button
                   onClick={() => setShowSignatureModal(false)}
-                  className="btn-outline"
+                  className="px-4 py-2 text-gray-600 bg-gray-100 rounded hover:bg-gray-200"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={saveSignature}
-                  className="btn-primary"
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                 >
                   Save Signature
                 </button>
