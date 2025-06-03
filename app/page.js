@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Upload, FileText, Zap, Shield, Users, ArrowRight, Loader2 } from 'lucide-react'
+import { Upload, FileText, Zap, Shield, Users, ArrowRight, Loader2, CheckCircle, Clock, Star } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function HomePage() {
@@ -135,46 +135,26 @@ export default function HomePage() {
     }
   }
 
-  const features = [
-    {
-      icon: Zap,
-      title: 'Lightning Fast',
-      description: 'Upload and start editing documents in seconds'
-    },
-    {
-      icon: Shield,
-      title: 'Secure & Compliant',
-      description: 'Bank-level security with legal compliance'
-    },
-    {
-      icon: Users,
-      title: 'Multi-Signer Support',
-      description: 'Add multiple signers with custom workflows'
-    }
-  ]
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Professional Document
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                Signing Made Simple
-              </span>
-            </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
-              Upload any document and transform it into a professional signing experience. 
-              Add fields, manage signers, and track progress all in one place.
-            </p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section - Minimalist Design */}
+      <div className="relative bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-24 pb-20 sm:pb-28">
+          {/* Main Content */}
+          <div className="text-center space-y-10 sm:space-y-16">
+            {/* Headline */}
+            <div className="space-y-6 sm:space-y-8">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
+                Document Signing
+                <span className="block text-indigo-600">Made Simple</span>
+              </h1>
+              <p className="text-lg sm:text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                Upload, add fields, send for signatures. Professional document workflows in minutes.
+              </p>
+            </div>
 
-            {/* Upload Area */}
-            <div className="max-w-2xl mx-auto mb-16">
+            {/* Upload Area - Enhanced Prominence */}
+            <div className="max-w-2xl mx-auto">
               <div
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
@@ -182,29 +162,33 @@ export default function HomePage() {
               >
                 <label
                   htmlFor="file-upload"
-                  className="block w-full p-16 border-2 border-dashed border-gray-300 rounded-2xl hover:border-blue-400 hover:bg-blue-50/30 transition-all duration-300 cursor-pointer group-hover:scale-[1.02]"
+                  className="block w-full p-12 sm:p-16 border-3 border-dashed border-indigo-200 bg-white rounded-3xl hover:border-indigo-400 hover:bg-indigo-50/50 transition-all duration-300 cursor-pointer group-hover:scale-[1.02] shadow-lg hover:shadow-xl"
                 >
                   <div className="text-center">
                     {isProcessing ? (
-                      <div className="flex flex-col items-center">
-                        <Loader2 className="w-16 h-16 text-blue-500 animate-spin mb-4" />
-                        <span className="text-xl font-medium text-blue-600">Processing documents...</span>
-                        <p className="text-gray-500 mt-2">Please wait while we prepare your documents</p>
+                      <div className="flex flex-col items-center space-y-4">
+                        <Loader2 className="w-16 h-16 sm:w-20 sm:h-20 text-indigo-500 animate-spin" />
+                        <span className="text-xl sm:text-2xl font-semibold text-indigo-600">Processing...</span>
+                        <p className="text-indigo-500">Preparing your documents</p>
                       </div>
                     ) : (
-                      <>
-                        <Upload className="w-16 h-16 text-gray-400 group-hover:text-blue-500 mx-auto mb-6 transition-colors" />
-                        <span className="text-2xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors block mb-2">
-                          Drop your documents here
-                        </span>
-                        <span className="text-lg text-gray-600 block mb-4">
-                          or click to browse files
-                        </span>
-                        <div className="inline-flex items-center space-x-2 text-sm text-gray-500 bg-gray-100 px-4 py-2 rounded-full">
-                          <FileText className="w-4 h-4" />
-                          <span>PDF, Images, Word, Text files up to 50MB • Multiple files supported</span>
+                      <div className="space-y-6">
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto group-hover:bg-indigo-200 transition-colors">
+                          <Upload className="w-10 h-10 sm:w-12 sm:h-12 text-indigo-600" />
                         </div>
-                      </>
+                        <div className="space-y-3">
+                          <span className="text-2xl sm:text-3xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors block">
+                            Drop files or click to upload
+                          </span>
+                          <p className="text-lg text-gray-600">
+                            PDF, Images, Word • Up to 50MB • Multiple files supported
+                          </p>
+                        </div>
+                        <div className="inline-flex items-center space-x-2 bg-indigo-100 px-4 py-2 rounded-full group-hover:bg-indigo-200 transition-colors">
+                          <FileText className="w-5 h-5 text-indigo-600" />
+                          <span className="text-indigo-700 font-medium">Start your workflow now</span>
+                        </div>
+                      </div>
                     )}
                   </div>
                   <input
@@ -220,91 +204,136 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Quick Action */}
-            <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+            {/* Quick Access */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8">
               <button
                 onClick={() => router.push('/dashboard')}
-                className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                className="inline-flex items-center space-x-2 text-gray-600 hover:text-indigo-600 font-semibold transition-colors text-base sm:text-lg"
               >
                 <span>View existing documents</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-5 h-5" />
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Features Section */}
-      <div className="py-24 bg-white">
+      {/* Features Section - Light Border Cards */}
+      <div className="py-20 sm:py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Everything you need for document signing
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              From simple signatures to complex workflows, we've got you covered
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
-              <div className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Zap className="w-8 h-8 text-white" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
+            
+            {/* Speed Feature */}
+            <div className="bg-white border-2 border-orange-200 p-8 sm:p-10 rounded-3xl hover:border-orange-400 hover:bg-orange-50/50 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+              <div className="flex items-center space-x-4 mb-6">
+                <div className="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center">
+                  <Zap className="w-7 h-7 text-orange-600" />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Lightning Fast</h3>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Lightning Fast</h3>
-              <p className="text-gray-600">
-                Upload, configure, and send documents in minutes. No complex setup required.
+              <p className="text-gray-600 leading-relaxed text-lg">
+                Upload and configure documents in minutes. No complex setup required.
               </p>
             </div>
 
-            <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 border border-green-200">
-              <div className="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Shield className="w-8 h-8 text-white" />
+            {/* Security Feature */}
+            <div className="bg-white border-2 border-teal-200 p-8 sm:p-10 rounded-3xl hover:border-teal-400 hover:bg-teal-50/50 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+              <div className="flex items-center space-x-4 mb-6">
+                <div className="w-14 h-14 bg-teal-100 rounded-xl flex items-center justify-center">
+                  <Shield className="w-7 h-7 text-teal-600" />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Bank-Level Security</h3>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Secure & Compliant</h3>
-              <p className="text-gray-600">
-                Bank-level security with audit trails and compliance features built-in.
+              <p className="text-gray-600 leading-relaxed text-lg">
+                Enterprise-grade security with audit trails and compliance features.
               </p>
             </div>
 
-            <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200">
-              <div className="w-16 h-16 bg-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Users className="w-8 h-8 text-white" />
+            {/* Collaboration Feature */}
+            <div className="bg-white border-2 border-rose-200 p-8 sm:p-10 rounded-3xl hover:border-rose-400 hover:bg-rose-50/50 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl sm:col-span-2 lg:col-span-1">
+              <div className="flex items-center space-x-4 mb-6">
+                <div className="w-14 h-14 bg-rose-100 rounded-xl flex items-center justify-center">
+                  <Users className="w-7 h-7 text-rose-600" />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Multi-Signer</h3>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Team Collaboration</h3>
-              <p className="text-gray-600">
-                Manage multiple signers, set signing orders, and track progress in real-time.
+              <p className="text-gray-600 leading-relaxed text-lg">
+                Manage multiple signers with custom workflows and real-time tracking.
               </p>
             </div>
+
           </div>
         </div>
       </div>
 
-      {/* CTA Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 py-16">
+      {/* Social Proof - Clean */}
+      <div className="py-16 sm:py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center space-y-12">
+            
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-6 sm:gap-12">
+              <div className="text-center">
+                <div className="text-3xl sm:text-4xl font-bold text-gray-900">10K+</div>
+                <div className="text-base sm:text-lg text-gray-600 font-medium">Documents Signed</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl sm:text-4xl font-bold text-gray-900">99.9%</div>
+                <div className="text-base sm:text-lg text-gray-600 font-medium">Uptime</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl sm:text-4xl font-bold text-gray-900">5min</div>
+                <div className="text-base sm:text-lg text-gray-600 font-medium">Average Setup</div>
+              </div>
+            </div>
+
+            {/* Trust Indicators */}
+            <div className="flex flex-col sm:flex-row items-center justify-center space-y-6 sm:space-y-0 sm:space-x-12 text-base text-gray-600">
+              <div className="flex items-center space-x-3">
+                <CheckCircle className="w-5 h-5 text-green-500" />
+                <span className="font-medium">GDPR Compliant</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Shield className="w-5 h-5 text-blue-500" />
+                <span className="font-medium">256-bit Encryption</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Clock className="w-5 h-5 text-purple-500" />
+                <span className="font-medium">24/7 Support</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      {/* CTA Section - Vibrant & Powerful */}
+      <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 py-20 sm:py-24">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to streamline your document workflow?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Join thousands of professionals who trust SignFlow for their document signing needs
-          </p>
-          <label
-            htmlFor="cta-file-upload"
-            className="inline-flex items-center space-x-3 bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            <Upload className="w-5 h-5" />
-            <span>Upload Your First Document</span>
-            <input
-              id="cta-file-upload"
-              type="file"
-              multiple
-              className="sr-only"
-              accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.txt,.rtf"
-              onChange={handleFileChange}
-              disabled={isProcessing}
-            />
-          </label>
+          <div className="space-y-8 sm:space-y-10">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
+              Ready to streamline your workflow?
+            </h2>
+            <p className="text-xl sm:text-2xl text-violet-100 leading-relaxed max-w-2xl mx-auto">
+              Join professionals who trust SignFlow for their document signing needs
+            </p>
+            <label
+              htmlFor="cta-file-upload"
+              className="inline-flex items-center space-x-4 bg-white text-purple-600 px-8 sm:px-10 py-4 sm:py-5 rounded-2xl font-bold hover:bg-gray-50 transition-all cursor-pointer shadow-2xl hover:shadow-3xl transform hover:scale-105 text-lg sm:text-xl"
+            >
+              <Upload className="w-6 h-6" />
+              <span>Start with your first document</span>
+              <input
+                id="cta-file-upload"
+                type="file"
+                multiple
+                className="sr-only"
+                accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.txt,.rtf"
+                onChange={handleFileChange}
+                disabled={isProcessing}
+              />
+            </label>
+          </div>
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_MEETSYNK_API_BASE_URL
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'
 const ForgotPassword = ({ onBack }) => {
   const [step, setStep] = useState(1); // 1: email, 2: OTP, 3: new password
   const [isLoading, setIsLoading] = useState(false);
@@ -28,7 +28,7 @@ const ForgotPassword = ({ onBack }) => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/meetflow/forgot-password`, {
+      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email })
@@ -60,9 +60,14 @@ const ForgotPassword = ({ onBack }) => {
       return;
     }
 
+    if (formData.newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters long');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/meetflow/reset-password`, {
+      const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -74,7 +79,7 @@ const ForgotPassword = ({ onBack }) => {
 
       const result = await response.json();
       if (result.success) {
-        toast.success('Password reset successful');
+        toast.success('Password reset successful! You can now login with your new password.');
         onBack(); // Return to login
       } else {
         throw new Error(result.error || 'Failed to reset password');

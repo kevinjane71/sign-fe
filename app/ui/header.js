@@ -28,6 +28,9 @@ export default function Header() {
     // If on "/" page, always navigate to "/"
     if (pathname === '/') {
       router.push('/')
+    } else if (pathname === '/login') {
+      // Special handling for login page - force complete navigation to home
+      window.location.href = '/'
     } else {
       // If user is logged in and not on "/", navigate to "/dashboard"
       // If user is not logged in, navigate to "/"
@@ -105,6 +108,16 @@ export default function Header() {
               </nav>
             )}
 
+            {/* Pricing/Billing Link */}
+            <nav className="hidden md:flex items-center">
+              <button
+                onClick={() => handleNavigation(user ? '/billing' : '/pricing')}
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
+              >
+                {user ? 'Billing' : 'Pricing'}
+              </button>
+            </nav>
+
             {/* User Authentication */}
             {user ? (
               <div className="flex items-center space-x-4">
@@ -181,6 +194,17 @@ export default function Header() {
                   <span className="font-medium text-base">Documents</span>
                 </button>
               )}
+
+              {/* Pricing/Billing in mobile menu */}
+              <button
+                onClick={() => {
+                  handleNavigation(user ? '/billing' : '/pricing')
+                  setMobileMenuOpen(false)
+                }}
+                className="w-full flex items-center space-x-4 px-6 py-4 rounded-xl text-left transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
+              >
+                <span className="font-medium text-base">{user ? 'Billing' : 'Pricing'}</span>
+              </button>
 
               {user ? (
                 <>

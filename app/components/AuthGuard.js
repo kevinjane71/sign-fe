@@ -15,6 +15,7 @@ export default function AuthGuard({ children }) {
   const publicRoutes = [
     '/',
     '/login',
+    '/pricing',
     '/terms',
     '/privacy',
     '/refund',
