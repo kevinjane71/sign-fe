@@ -21,7 +21,11 @@ export default function Header() {
 
   const handleNavigation = (path) => {
     setMobileMenuOpen(false)
-    router.push(path)
+    if (pathname === '/login') {
+      window.location.href = path
+    } else {
+      router.push(path)
+    }
   }
 
   const handleLogoClick = () => {
@@ -83,7 +87,7 @@ export default function Header() {
               <div className="hidden sm:block">
                 <div className="flex flex-col">
                   <span className="text-2xl font-bold text-white">
-                    SignFlow
+                    eSignTap
                   </span>
                   <span className="text-sm text-white/70">
                     Professional Document Signing

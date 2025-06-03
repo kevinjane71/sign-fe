@@ -31,7 +31,7 @@ export default function PricingPage() {
     {
       name: "Pro",
       description: "Great for individuals & small teams",
-      price: { monthly: 6, annual: 5 },
+      price: { monthly: 5, annual: 4 },
       features: [
         "50 documents per month",
         "Unlimited signers",

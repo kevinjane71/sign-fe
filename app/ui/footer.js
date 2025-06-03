@@ -32,7 +32,7 @@ export default function Footer() {
                 <FileText className="w-6 h-6 text-white" />
               </div>
               <div>
-                <span className="text-xl font-bold text-white">SignFlow</span>
+                <span className="text-xl font-bold text-white">eSignTap</span>
                 <div className="text-sm text-gray-400 -mt-1">Professional Document Signing</div>
               </div>
             </div>
@@ -42,12 +42,9 @@ export default function Footer() {
             <div className="space-y-2 text-sm text-gray-400">
               <div className="flex items-center space-x-2">
                 <Mail className="w-4 h-4" />
-                <span>support@signflow.com</span>
+                <span>info@esigntap.com</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <Phone className="w-4 h-4" />
-                <span>+1 (555) 123-4567</span>
-              </div>
+              
               <div className="flex items-center space-x-2">
                 <MapPin className="w-4 h-4" />
                 <span>San Francisco, CA</span>
@@ -112,7 +109,7 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             {/* Copyright */}
             <div className="flex items-center space-x-2 text-sm text-gray-400">
-              <span>© 2024 SignFlow</span>
+              <span>© 2024 eSignTap</span>
               <span>•</span>
               <div className="flex items-center space-x-1">
                 <span>Made with</span>
@@ -124,7 +121,7 @@ export default function Footer() {
             {/* Social Links */}
             <div className="flex items-center space-x-4">
               <a
-                href="https://twitter.com/signflow"
+                href="https://twitter.com/esigntap"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors"
@@ -134,7 +131,7 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href="https://linkedin.com/company/signflow"
+                href="https://linkedin.com/company/esigntap"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors"
@@ -144,7 +141,7 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href="https://github.com/signflow"
+                href="https://github.com/esigntap"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors"

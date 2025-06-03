@@ -4,13 +4,22 @@ import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, FileText, Zap, Shield, Users, ArrowRight, Loader2, CheckCircle, Clock, Star } from 'lucide-react'
 import toast from 'react-hot-toast'
+import useAuth from './hooks/useAuth'
 
 export default function HomePage() {
   const router = useRouter()
   const [isProcessing, setIsProcessing] = useState(false)
+  const { user } = useAuth()
 
   // Handle file drop - support multiple files
   const onDrop = useCallback((acceptedFiles) => {
+    // Check if user is logged in
+    if (!user) {
+      toast.error('Please login to upload documents')
+      router.push('/login')
+      return
+    }
+
     if (!acceptedFiles || acceptedFiles.length === 0) return
 
     // Validate each file
@@ -112,7 +121,7 @@ export default function HomePage() {
 
       reader.readAsDataURL(file)
     })
-  }, [router])
+  }, [router, user])
 
   // Handle file input change - support multiple files
   const handleFileChange = (e) => {

@@ -405,7 +405,7 @@ export default function Dashboard() {
         />
       )}
 
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+      <div className="w-full px-2 sm:px-6 lg:px-24 py-6 lg:py-8">
         {/* Header Section */}
         <div className="mb-8">
           <div className="bg-white rounded-lg p-6 lg:p-8 border border-gray-200">
@@ -418,14 +418,14 @@ export default function Dashboard() {
                   Manage your documents and track signing progress
                 </p>
               </div>
-              <div className="flex items-center space-x-2 text-gray-500">
-                <Calendar className="w-4 h-4" />
-                <span className="text-sm">{new Date().toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}</span>
+              <div className="flex justify-end w-full lg:w-auto mt-4 lg:mt-0">
+                <button
+                  onClick={() => document.getElementById('file-upload').click()}
+                  className="inline-flex items-center px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow font-semibold text-base transition-all duration-200"
+                >
+                  <Upload className="w-5 h-5 mr-2" />
+                  Upload
+                </button>
               </div>
             </div>
           </div>
@@ -599,20 +599,20 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
             {/* Upload Section - Left Column */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+              <div className="bg-gradient-to-br from-gray-50 via-white to-rose-50 rounded-2xl p-8 border border-gray-100 shadow-xl">
                 <div className="text-center mb-4">
-                  <div className="w-12 h-12 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
-                    <Upload className="w-6 h-6 text-gray-600" />
+                  <div className="w-14 h-14 mx-auto mb-3 bg-gray-200 rounded-full flex items-center justify-center">
+                    <Upload className="w-8 h-8 text-emerald-500" />
                   </div>
                   <h3 className="text-lg font-semibold mb-2 text-gray-900">Upload Documents</h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-600">
                     Add new documents to get started
                   </p>
                 </div>
 
                 <div 
-                  className={`border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 cursor-pointer ${
-                    isDragOver ? 'border-gray-400 bg-gray-50' : ''
+                  className={`border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 cursor-pointer ${
+                    isDragOver ? 'border-emerald-400 bg-emerald-50' : ''
                   }`}
                   onDrop={handleDrop}
                   onDragOver={handleDragOver}
@@ -620,8 +620,8 @@ export default function Dashboard() {
                   onClick={() => document.getElementById('file-upload').click()}
                 >
                   <div className="py-4">
-                    <FolderOpen className="w-10 h-10 mx-auto mb-3 text-gray-400" />
-                    <p className="text-sm font-medium text-gray-700 mb-2">
+                    <FolderOpen className="w-10 h-10 mx-auto mb-3 text-gray-300" />
+                    <p className="text-sm font-medium text-gray-900 mb-2">
                       Drop files here or click to browse
                     </p>
                     <p className="text-xs text-gray-500">

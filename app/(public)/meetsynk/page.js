@@ -4,15 +4,15 @@ import Script from 'next/script';
 
 export async function generateMetadata() {
   return {
-    title: "SignFlow: Professional Document Signing & E-Signature Platform",
+    title: "eSigntap: Professional Document Signing & E-Signature Platform",
     description: "Streamline your document signing process with SignFlow's intelligent platform. Upload documents, add signature fields, manage signers, and track signing progress all in one place.",
     
     // Basic meta tags
-    metadataBase: new URL('https://signflow.com'),
+    metadataBase: new URL('https://esigntap.com'),
     
     // OpenGraph metadata
     openGraph: {
-      title: 'SignFlow - Professional Document Signing Platform',
+      title: 'esigntap - Professional Document Signing Platform',
       description: 'Transform any document into a professional signing experience. Add fields, manage multiple signers, and track progress with our secure e-signature solution.',
       type: 'website',
       images: [
@@ -20,20 +20,20 @@ export async function generateMetadata() {
           url: '/og-image.png',
           width: 1200,
           height: 630,
-          alt: 'SignFlow Document Signing Platform'
+          alt: 'esigntap Document Signing Platform'
         }
       ],
       locale: 'en_US',
-      siteName: 'SignFlow'
+      siteName: 'esigntap'
     },
 
     // Twitter metadata
     twitter: {
       card: 'summary_large_image',
-      title: 'SignFlow - Professional Document Signing Made Simple',
+      title: 'esigntap - Professional Document Signing Made Simple',
       description: 'Upload any document and transform it into a professional signing experience. Secure, compliant, and easy to use.',
       images: ['/twitter-image.png'],
-      creator: '@signflow'
+      creator: '@esigntap'
     },
 
     // Icons

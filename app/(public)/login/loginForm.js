@@ -334,7 +334,7 @@ const LoginForm = () => {
         <ForgotPassword onBack={() => setShowForgotPassword(false)} />
       ) : (
         <>
-          <h2 className="text-2xl md:text-2xl font-bold text-center mb-6 text-blue-600">SignFlow</h2>
+          <h2 className="text-2xl md:text-2xl font-bold text-center mb-6 text-blue-600">eSignTap</h2>
 {/* Social Login Options */}
 <div className="space-y-3 mb-6">
           <button

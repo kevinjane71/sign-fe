@@ -9,7 +9,7 @@ import AuthGuard from './components/AuthGuard'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'SignFlow - Professional Document Signing',
+  title: 'esigntap - Professional Document Signing',
   description: 'Professional document signing made simple. Create, share, and sign documents with ease.',
 }
 
