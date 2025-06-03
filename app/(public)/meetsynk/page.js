@@ -1,4 +1,4 @@
-import HomePage from '../../homepage';
+import HomePage from '../../page';
 import '../../globals.css';
 import Script from 'next/script';
 

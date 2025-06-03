@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, usePathname } from 'next/navigation'
-import { FileText, User, LogIn, LogOut, Menu, X, Home, FileIcon, RotateCcw } from 'lucide-react'
+import { FileText, User, LogIn, LogOut, Menu, X, FileIcon, RotateCcw } from 'lucide-react'
 import { useState } from 'react'
 import useAuth from '../hooks/useAuth'
 
@@ -29,9 +29,9 @@ export default function Header() {
     if (pathname === '/') {
       router.push('/')
     } else {
-      // If user is logged in and not on "/", navigate to "/home"
+      // If user is logged in and not on "/", navigate to "/dashboard"
       // If user is not logged in, navigate to "/"
-      const targetPath = user ? '/home' : '/'
+      const targetPath = user ? '/dashboard' : '/'
       router.push(targetPath)
     }
   }
@@ -92,16 +92,9 @@ export default function Header() {
 
           {/* Right Side - Navigation and User */}
           <div className="flex items-center space-x-6">
-            {/* Navigation - Show Home and Documents when logged in and not on "/" page */}
+            {/* Navigation - Show Documents when logged in and not on "/" page */}
             {user && pathname !== '/' && (
               <nav className="hidden md:flex items-center space-x-1">
-                <button
-                  onClick={() => handleNavigation('/home')}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
-                >
-                  <Home className="w-4 h-4" />
-                  <span>Home</span>
-                </button>
                 <button
                   onClick={() => handleNavigation('/dashboard')}
                   className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
@@ -178,24 +171,15 @@ export default function Header() {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-white/20 py-6">
             <div className="space-y-3">
-              {/* Show Home and Documents in mobile menu when logged in and not on "/" page */}
+              {/* Show Documents in mobile menu when logged in and not on "/" page */}
               {user && pathname !== '/' && (
-                <>
-                  <button
-                    onClick={() => handleNavigation('/home')}
-                    className="w-full flex items-center space-x-4 px-6 py-4 rounded-xl text-left transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
-                  >
-                    <Home className="w-6 h-6" />
-                    <span className="font-medium text-base">Home</span>
-                  </button>
-                  <button
-                    onClick={() => handleNavigation('/dashboard')}
-                    className="w-full flex items-center space-x-4 px-6 py-4 rounded-xl text-left transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
-                  >
-                    <FileIcon className="w-6 h-6" />
-                    <span className="font-medium text-base">Documents</span>
-                  </button>
-                </>
+                <button
+                  onClick={() => handleNavigation('/dashboard')}
+                  className="w-full flex items-center space-x-4 px-6 py-4 rounded-xl text-left transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
+                >
+                  <FileIcon className="w-6 h-6" />
+                  <span className="font-medium text-base">Documents</span>
+                </button>
               )}
 
               {user ? (
