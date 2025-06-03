@@ -1,12 +1,8 @@
 'use client'
 
-import { FileText, Heart, Mail, Phone, MapPin, DollarSign, MessageCircle } from 'lucide-react'
-import { useRouter, usePathname } from 'next/navigation'
+import { FileText, Heart, Mail, Phone, MapPin } from 'lucide-react'
 
 export default function Footer() {
-  const router = useRouter()
-  const pathname = usePathname()
-
   const footerLinks = {
     company: [
       { name: 'About Us', href: '/about' },
@@ -27,30 +23,6 @@ export default function Footer() {
 
   return (
     <footer className="bg-gray-900 text-white mt-auto">
-      {/* Pricing and Contact Navigation - Show on all pages except "/" */}
-      {pathname !== '/' && (
-        <div className="border-b border-gray-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-8">
-              <button
-                onClick={() => router.push('/price')}
-                className="flex items-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-all duration-200 min-w-[140px] justify-center"
-              >
-                <DollarSign className="w-4 h-4" />
-                <span>Pricing</span>
-              </button>
-              <button
-                onClick={() => router.push('/contact-us')}
-                className="flex items-center space-x-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-all duration-200 min-w-[140px] justify-center"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>Contact</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand Section */}
@@ -89,12 +61,12 @@ export default function Footer() {
             <ul className="space-y-2">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
-                  <button
-                    onClick={() => router.push(link.href)}
+                  <a
+                    href={link.href}
                     className="text-gray-400 hover:text-white transition-colors text-sm"
                   >
                     {link.name}
-                  </button>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -106,12 +78,12 @@ export default function Footer() {
             <ul className="space-y-2">
               {footerLinks.legal.map((link) => (
                 <li key={link.name}>
-                  <button
-                    onClick={() => router.push(link.href)}
+                  <a
+                    href={link.href}
                     className="text-gray-400 hover:text-white transition-colors text-sm"
                   >
                     {link.name}
-                  </button>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -123,12 +95,12 @@ export default function Footer() {
             <ul className="space-y-2">
               {footerLinks.support.map((link) => (
                 <li key={link.name}>
-                  <button
-                    onClick={() => router.push(link.href)}
+                  <a
+                    href={link.href}
                     className="text-gray-400 hover:text-white transition-colors text-sm"
                   >
                     {link.name}
-                  </button>
+                  </a>
                 </li>
               ))}
             </ul>

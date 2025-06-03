@@ -2174,7 +2174,7 @@ export default function EditDocumentEditor() {
             </div>
             
             {/* Quick Tip Section */}
-            <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+            {/* <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
               <div className="flex items-start space-x-2">
                 <div className="text-lg">💡</div>
                 <div>
@@ -2184,7 +2184,7 @@ export default function EditDocumentEditor() {
                   </p>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Document Manager - Bottom - Disabled in edit mode */}
