@@ -28,6 +28,7 @@ import {
 import toast from 'react-hot-toast'
 import './page.css'
 import { shareDocument, sendDocumentWorkflow } from '../../utils/api'
+import LoadingSpinner from '../../components/LoadingSpinner'
 
 export default function SharePage() {
   const router = useRouter()
@@ -195,9 +196,9 @@ export default function SharePage() {
 
       setSuccess(`Document sent successfully to ${data.notifiedSigners} signers!`)
       
-      // Redirect to editor after a delay
+      // Redirect to dashboard after a delay
       setTimeout(() => {
-        router.push(`/editor/new?id=${params.id}`)
+        router.push('/dashboard')
       }, 2000)
     } catch (err) {
       setError('Failed to send document. Please try again.')
@@ -205,6 +206,11 @@ export default function SharePage() {
     } finally {
       setSending(false)
     }
+  }
+
+  // Show loading overlay when sending
+  if (sending) {
+    return <LoadingSpinner type="submit" />
   }
 
   return (

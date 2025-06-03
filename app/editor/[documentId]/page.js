@@ -36,6 +36,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { getDocument, updateDocument, sendDocument, getDocumentFile } from '../../utils/api'
+import LoadingSpinner from '../../components/LoadingSpinner'
 
 // Field type configurations
 const FIELD_TYPES = {
@@ -1901,7 +1902,6 @@ export default function EditDocumentEditor() {
 
     try {
       setIsSubmitting(true)
-      toast.loading('Updating document...', { id: 'updating' })
 
       // Prepare fileFields data for the API
       const fileFields = documents.map((document, index) => ({
@@ -1942,28 +1942,26 @@ export default function EditDocumentEditor() {
         configuration: updateData.configuration
       })
 
-      toast.success('Document updated and sent successfully!', { id: 'updating' })
+      toast.success('Document shared successfully!')
       
-      // Redirect to dashboard or stay on the same page
+      // Redirect to dashboard
       router.push('/dashboard')
       
     } catch (error) {
       console.error('Error updating document:', error)
-      toast.error('Failed to update document', { id: 'updating' })
+      toast.error('Failed to share document. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
   }, [documents, allFields, documentId, router])
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600">Loading documents...</p>
-        </div>
-      </div>
-    )
+    return <LoadingSpinner message="Loading document..." />
+  }
+
+  // Show loading overlay when submitting
+  if (isSubmitting) {
+    return <LoadingSpinner type="submit" />
   }
 
   // Step 1: Document Configuration

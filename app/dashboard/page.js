@@ -27,10 +27,11 @@ import {
 import { useRouter } from 'next/navigation'
 import { getStoredUser, getDocuments, getDocumentStats, isAuthenticated, logout } from '../utils/api'
 import { useCustomToast } from '../components/CustomToast'
+import LoadingSpinner from '../components/LoadingSpinner'
 
 export default function Dashboard() {
   const router = useRouter()
-  const toast = useCustomToast()
+  const { toast, toasts, ToastContainer } = useCustomToast()
   const [user, setUser] = useState(null)
   const [stats, setStats] = useState({
     total: 0,
@@ -46,8 +47,6 @@ export default function Dashboard() {
   const [totalPages, setTotalPages] = useState(1)
   const [isProcessing, setIsProcessing] = useState(false)
   const [isDragOver, setIsDragOver] = useState(false)
-  const [uploading, setUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 })
 
   // Helper functions for status handling
   const getStatusColor = (status) => {
@@ -266,14 +265,6 @@ export default function Dashboard() {
     })
   }, [router])
 
-  // Handle file input change - support multiple files
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files)
-    if (files.length > 0) {
-      onDrop(files)
-    }
-  }
-
   // Handle drag events
   const handleDragOver = (e) => {
     e.preventDefault()
@@ -290,58 +281,14 @@ export default function Dashboard() {
     setIsDragOver(false)
     const files = Array.from(e.dataTransfer.files)
     if (files.length > 0) {
-      handleFileUpload(files)
+      onDrop(files)
     }
   }
 
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files)
     if (files.length > 0) {
-      handleFileUpload(files)
-    }
-  }
-
-  const handleFileUpload = async (files) => {
-    setUploading(true)
-    setUploadProgress({ current: 0, total: files.length })
-
-    try {
-      const formData = new FormData()
-      
-      files.forEach((file, index) => {
-        formData.append('documents', file)
-      })
-
-      // Add empty signers array and basic metadata
-      formData.append('signers', JSON.stringify([]))
-      formData.append('subject', `Document Upload - ${new Date().toLocaleDateString()}`)
-      formData.append('message', '')
-      formData.append('configuration', JSON.stringify({}))
-
-      const response = await fetch('/api/documents/upload', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        },
-        body: formData
-      })
-
-      if (response.ok) {
-        const result = await response.json()
-        toast.success('Documents uploaded successfully!')
-        
-        // Refresh the documents list
-        fetchDocuments()
-      } else {
-        const error = await response.json()
-        toast.error(error.error || 'Upload failed')
-      }
-    } catch (error) {
-      console.error('Upload error:', error)
-      toast.error('Upload failed. Please try again.')
-    } finally {
-      setUploading(false)
-      setUploadProgress({ current: 0, total: 0 })
+      onDrop(files)
     }
   }
 
@@ -435,13 +382,10 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-50">
       {/* Processing Overlay */}
       {isProcessing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg border border-gray-200 flex flex-col items-center max-w-sm mx-4">
-            <Loader2 className="w-12 h-12 animate-spin text-blue-600 mb-4" />
-            <p className="text-gray-700 text-center">Processing your documents...</p>
-            <p className="text-sm text-gray-500 mt-2">This may take a few moments</p>
-          </div>
-        </div>
+        <LoadingSpinner 
+          type="upload"
+          size="default"
+        />
       )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
@@ -451,7 +395,7 @@ export default function Dashboard() {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
               <div className="mb-4 lg:mb-0">
                 <h1 className="text-2xl lg:text-3xl font-bold mb-2 text-gray-900">
-                  Welcome back, {user?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'User'}! 👋
+                  Welcome, {user?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'User'}! 👋
                 </h1>
                 <p className="text-gray-600 text-sm lg:text-base">
                   Manage your documents and track signing progress
@@ -472,99 +416,163 @@ export default function Dashboard() {
 
         {/* Check if user has documents */}
         {!loading && documents.length === 0 ? (
-          /* First Time User Experience - Centered Upload */
-          <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8">
-            {/* Large Upload Component */}
-            <div className="w-full max-w-2xl">
-              <div className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden shadow-lg">
-                <div className="bg-gray-100 p-8 text-gray-700 text-center">
-                  <div className="flex items-center justify-center mb-4">
-                    <Upload className="w-12 h-12 mr-3" />
-                    <h2 className="text-3xl font-bold">Upload Your Documents</h2>
+          /* First Time User Experience - Compact Design */
+          <div className="max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Upload Widget - Smaller and Centered */}
+              <div className="lg:col-span-2">
+                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                  <div className="text-center mb-6">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                      <Upload className="w-8 h-8 text-gray-600" />
+                    </div>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">Upload Your First Document</h2>
+                    <p className="text-gray-600">
+                      Get started by uploading a document for signing
+                    </p>
                   </div>
-                  <p className="text-gray-500 text-lg">
-                    Get started by uploading your first document for signing
-                  </p>
-                </div>
-                
-                <div className="p-8">
-                  <div
-                    className={`relative border-3 border-dashed rounded-2xl p-12 text-center transition-all duration-300 ${
-                      isDragOver 
-                        ? 'border-gray-400 bg-gray-50' 
-                        : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+
+                  <div 
+                    className={`border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 cursor-pointer ${
+                      isDragOver ? 'border-gray-400 bg-gray-50' : ''
                     }`}
+                    onDrop={handleDrop}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
+                    onClick={() => document.getElementById('file-upload-empty').click()}
                   >
+                    <div className="py-6">
+                      <FolderOpen className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                      <p className="text-base font-medium text-gray-700 mb-2">
+                        Drop files here or click to browse
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        PDF, Images, Word documents • Maximum 50MB per file
+                      </p>
+                    </div>
+
                     <input
+                      id="file-upload-empty"
                       type="file"
                       multiple
-                      accept=".pdf,.doc,.docx,.txt,.rtf,.jpg,.jpeg,.png,.gif,.webp"
+                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
                       onChange={handleFileSelect}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      disabled={isProcessing}
+                      className="hidden"
                     />
-                    
-                    <div className="space-y-6">
-                      <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center transition-colors ${
-                        isDragOver ? 'bg-gray-200' : 'bg-gray-100'
-                      }`}>
-                        <Upload className={`w-12 h-12 ${isDragOver ? 'text-gray-600' : 'text-gray-500'}`} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Start Guide - Sidebar */}
+              <div className="lg:col-span-1">
+                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Start</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-sm font-semibold text-blue-600">1</span>
                       </div>
-                      
                       <div>
-                        <p className="text-xl text-gray-700 font-semibold mb-3">
-                          Drop files here or click to browse
-                        </p>
-                        <p className="text-gray-500 leading-relaxed">
-                          Supports PDF, Word documents, and images<br />
-                          Maximum 50MB per file • Multiple files supported
-                        </p>
+                        <h4 className="font-medium text-gray-900 text-sm">Upload Document</h4>
+                        <p className="text-xs text-gray-600">Choose your file to get started</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-sm font-semibold text-purple-600">2</span>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900 text-sm">Add Signature Fields</h4>
+                        <p className="text-xs text-gray-600">Place fields where signatures are needed</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-sm font-semibold text-green-600">3</span>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900 text-sm">Send for Signing</h4>
+                        <p className="text-xs text-gray-600">Share with signers and track progress</p>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-                    <p className="text-gray-600 mb-4">Or start with a blank document</p>
+                  {/* <div className="mt-6 pt-4 border-t border-gray-100">
                     <button
                       onClick={() => router.push('/editor/new')}
-                      className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl transition-all duration-300 text-lg font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+                      className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
                     >
-                      Create from Scratch
+                      <Plus className="w-4 h-4 mr-2" />
+                      Start from Scratch
                     </button>
-                  </div>
+                  </div> */}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : loading ? (
+          /* Loading State with Shimmer */
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
+            {/* Upload Section Shimmer */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm animate-pulse">
+                <div className="text-center mb-4">
+                  <div className="w-12 h-12 mx-auto mb-3 bg-gray-200 rounded-full"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2 mx-auto"></div>
+                </div>
+                <div className="border-2 border-dashed border-gray-200 rounded-lg p-8">
+                  <div className="w-10 h-10 mx-auto mb-3 bg-gray-200 rounded"></div>
+                  <div className="h-3 bg-gray-200 rounded w-2/3 mx-auto mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2 mx-auto"></div>
                 </div>
               </div>
             </div>
 
-            {/* Quick Stats Widget Below */}
-            <div className="w-full max-w-2xl">
-              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-lg">
-                <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">Quick Start Guide</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Upload className="w-8 h-8 text-blue-600" />
+            {/* Main Content Shimmer */}
+            <div className="lg:col-span-3">
+              {/* Header Shimmer */}
+              <div className="bg-white rounded-xl p-6 mb-6 border border-gray-200 shadow-sm animate-pulse">
+                <div className="h-6 bg-gray-200 rounded w-1/3 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+              </div>
+
+              {/* Stats Shimmer */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 animate-pulse">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+                        <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                      </div>
+                      <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
                     </div>
-                    <h4 className="font-semibold text-gray-900 mb-2">1. Upload</h4>
-                    <p className="text-sm text-gray-600">Upload your document or create from scratch</p>
                   </div>
-                  <div className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-purple-100 rounded-full flex items-center justify-center">
-                      <Edit className="w-8 h-8 text-purple-600" />
+                ))}
+              </div>
+
+              {/* Documents Section Shimmer */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 animate-pulse">
+                <div className="p-6 border-b border-gray-100">
+                  <div className="h-5 bg-gray-200 rounded w-1/4"></div>
+                </div>
+                <div className="p-6 space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex items-center space-x-4">
+                      <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                      </div>
+                      <div className="h-6 bg-gray-200 rounded w-16"></div>
+                      <div className="h-3 bg-gray-200 rounded w-20"></div>
+                      <div className="flex space-x-2">
+                        <div className="h-8 bg-gray-200 rounded w-16"></div>
+                        <div className="h-8 bg-gray-200 rounded w-16"></div>
+                      </div>
                     </div>
-                    <h4 className="font-semibold text-gray-900 mb-2">2. Edit</h4>
-                    <p className="text-sm text-gray-600">Add signature fields and customize</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
-                      <Send className="w-8 h-8 text-green-600" />
-                    </div>
-                    <h4 className="font-semibold text-gray-900 mb-2">3. Send</h4>
-                    <p className="text-sm text-gray-600">Send to signers and track progress</p>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -594,27 +602,15 @@ export default function Dashboard() {
                   onDragLeave={handleDragLeave}
                   onClick={() => document.getElementById('file-upload').click()}
                 >
-                  {uploading ? (
-                    <div className="py-4">
-                      <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3 text-gray-600" />
-                      <p className="text-sm text-gray-600 font-medium">
-                        Uploading files...
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {uploadProgress.current}/{uploadProgress.total} files
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="py-4">
-                      <FolderOpen className="w-10 h-10 mx-auto mb-3 text-gray-400" />
-                      <p className="text-sm font-medium text-gray-700 mb-2">
-                        Drop files here or click to browse
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        PDF, Images, Word docs • Max 50MB
-                      </p>
-                    </div>
-                  )}
+                  <div className="py-4">
+                    <FolderOpen className="w-10 h-10 mx-auto mb-3 text-gray-400" />
+                    <p className="text-sm font-medium text-gray-700 mb-2">
+                      Drop files here or click to browse
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      PDF, Images, Word docs • Max 50MB
+                    </p>
+                  </div>
 
                   <input
                     id="file-upload"
@@ -623,7 +619,6 @@ export default function Dashboard() {
                     accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
                     onChange={handleFileSelect}
                     className="hidden"
-                    disabled={uploading}
                   />
                 </div>
               </div>
@@ -989,6 +984,9 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+      
+      {/* Custom Toast Container */}
+      <ToastContainer toasts={toasts} />
     </div>
   )
 } 

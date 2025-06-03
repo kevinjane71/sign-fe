@@ -36,6 +36,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { uploadDocument } from '../../utils/api'
+import LoadingSpinner from '../../components/LoadingSpinner'
 
 // Field type configurations
 const FIELD_TYPES = {
@@ -1727,7 +1728,6 @@ export default function NewDocumentEditor() {
 
     try {
       setIsSubmitting(true)
-      toast.loading('Sending documents...', { id: 'sending' })
 
       // Create single FormData for all documents
       const formData = new FormData()
@@ -1777,36 +1777,30 @@ export default function NewDocumentEditor() {
       // Use authenticated upload function instead of direct fetch
       const result = await uploadDocument(formData)
       
-      toast.success(`${documents.length} document(s) sent successfully!`, { id: 'sending' })
+      toast.success(`${documents.length} document(s) sent successfully!`)
       
       // Clear session storage
       sessionStorage.removeItem('pendingDocument')
       sessionStorage.removeItem('pendingDocuments')
       
-      // Redirect to the editor for the created document
-      if (result.documentId) {
-        router.push(`/editor/${result.documentId}`)
-      } else {
-        router.push('/dashboard')
-      }
+      // Redirect to dashboard
+      router.push('/dashboard')
       
     } catch (error) {
       console.error('Error sending documents:', error)
-      toast.error('Failed to send documents', { id: 'sending' })
+      toast.error('Failed to send documents. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
   }, [documents, allFields, router])
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600">Loading documents...</p>
-        </div>
-      </div>
-    )
+    return <LoadingSpinner message="Loading documents..." />
+  }
+
+  // Show loading overlay when submitting
+  if (isSubmitting) {
+    return <LoadingSpinner type="submit" />
   }
 
   // Step 1: Document Configuration
