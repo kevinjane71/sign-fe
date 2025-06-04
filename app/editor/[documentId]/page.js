@@ -164,7 +164,7 @@ const FIELD_CONFIGS = {
 }
 
 // Document Configuration Component (Step 1) - Enhanced with pre-filling
-function DocumentConfiguration({ documentFile, documents, allFields, fields, onBack, onNext, isLoading, documentData }) {
+function DocumentConfiguration({ documentFile, documents, allFields, fields, onBack, onNext, isLoading, documentData, toast, onAddDocument, onRemoveDocument }) {
   const [signers, setSigners] = useState([])
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
@@ -400,8 +400,9 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
           <DocumentPreviewGrid
             documents={documents}
             allFields={allFields}
-            onAddDocument={() => toast.info('Cannot add documents in configuration step')}
-            onRemoveDocument={() => toast.info('Cannot remove documents in configuration step')}
+            onAddDocument={onAddDocument}
+            onRemoveDocument={onRemoveDocument}
+            toast={toast}
           />
 
           {/* Signers - Compact */}
@@ -1274,7 +1275,7 @@ const MobileFloatingButton = ({ onFieldTypeSelect, selectedFieldType }) => {
 }
 
 // Document Manager Component - Compact chip-style design
-function DocumentManager({ documents, allFields, onAddDocument, onRemoveDocument }) {
+function DocumentManager({ documents, allFields, onAddDocument, onRemoveDocument, toast }) {
   const fileInputRef = useRef(null)
 
   const handleFileSelect = (e) => {
@@ -1422,7 +1423,7 @@ function DocumentManager({ documents, allFields, onAddDocument, onRemoveDocument
 }
 
 // Document Preview Grid Component - Google Drive style
-function DocumentPreviewGrid({ documents, allFields, onAddDocument, onRemoveDocument }) {
+function DocumentPreviewGrid({ documents, allFields, onAddDocument, onRemoveDocument, toast }) {
   const fileInputRef = useRef(null)
 
   const handleFileSelect = (e) => {
@@ -2418,14 +2419,17 @@ export default function EditDocumentEditor() {
   if (currentStep === 1) {
     return (
       <DocumentConfiguration
-        documentFile={documents[0]} // Pass first document for compatibility
+        documentFile={documents[0]}
         documents={documents}
         allFields={allFields}
-        fields={getAllFields()} // All fields from all documents
+        fields={getAllFields()}
         onBack={handleBackToConfiguration}
         onNext={handleNextStep}
         isLoading={isStepLoading}
         documentData={documentData}
+        toast={toast}
+        onAddDocument={handleAddDocument}
+        onRemoveDocument={handleRemoveDocument}
       />
     )
   }
@@ -2661,14 +2665,13 @@ export default function EditDocumentEditor() {
           </div>
 
           {/* Document Manager - Bottom - Disabled in edit mode */}
-          {/* 
-          <DocumentManager
+          <DocumentManager 
             documents={documents}
             allFields={allFields}
             onAddDocument={handleAddDocument}
             onRemoveDocument={handleRemoveDocument}
+            toast={toast}
           />
-          */}
           
           {/* Compact Zoom Controls - Very Bottom */}
           <div className="p-3 border-t border-gray-200">
