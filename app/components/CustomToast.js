@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { CheckCircle, AlertCircle, Info, X, AlertTriangle } from 'lucide-react'
+import { CheckCircle, AlertCircle, Info, X, AlertTriangle, Loader2 } from 'lucide-react'
 
 const CustomToast = ({ message, type = 'info', duration = 4000, onClose }) => {
   const [isVisible, setIsVisible] = useState(true)
@@ -32,30 +32,48 @@ const CustomToast = ({ message, type = 'info', duration = 4000, onClose }) => {
       case 'success':
         return {
           icon: CheckCircle,
-          bgColor: 'bg-gradient-to-r from-green-500 to-emerald-500',
-          iconColor: 'text-white',
-          borderColor: 'border-green-400'
+          bgColor: 'bg-gradient-to-r from-emerald-500 to-green-500',
+          textColor: 'text-white',
+          borderColor: 'border-emerald-400',
+          shadowColor: 'shadow-emerald-500/30',
+          iconBg: 'bg-emerald-600'
         }
       case 'error':
         return {
           icon: AlertCircle,
           bgColor: 'bg-gradient-to-r from-red-500 to-rose-500',
-          iconColor: 'text-white',
-          borderColor: 'border-red-400'
+          textColor: 'text-white',
+          borderColor: 'border-red-400',
+          shadowColor: 'shadow-red-500/30',
+          iconBg: 'bg-red-600'
         }
       case 'warning':
         return {
           icon: AlertTriangle,
-          bgColor: 'bg-gradient-to-r from-yellow-500 to-amber-500',
-          iconColor: 'text-white',
-          borderColor: 'border-yellow-400'
+          bgColor: 'bg-gradient-to-r from-amber-500 to-yellow-500',
+          textColor: 'text-white',
+          borderColor: 'border-amber-400',
+          shadowColor: 'shadow-amber-500/30',
+          iconBg: 'bg-amber-600'
+        }
+      case 'loading':
+        return {
+          icon: Loader2,
+          bgColor: 'bg-gradient-to-r from-blue-500 to-indigo-500',
+          textColor: 'text-white',
+          borderColor: 'border-blue-400',
+          shadowColor: 'shadow-blue-500/30',
+          iconBg: 'bg-blue-600',
+          spin: true
         }
       default:
         return {
           icon: Info,
           bgColor: 'bg-gradient-to-r from-blue-500 to-indigo-500',
-          iconColor: 'text-white',
-          borderColor: 'border-blue-400'
+          textColor: 'text-white',
+          borderColor: 'border-blue-400',
+          shadowColor: 'shadow-blue-500/30',
+          iconBg: 'bg-blue-600'
         }
     }
   }
@@ -66,52 +84,63 @@ const CustomToast = ({ message, type = 'info', duration = 4000, onClose }) => {
   return (
     <div
       className={`
-        ${config.bgColor} ${config.borderColor}
-        border-l-4 rounded-lg shadow-lg backdrop-blur-sm
+        relative ${config.bgColor} ${config.borderColor} ${config.shadowColor}
+        border rounded-2xl shadow-2xl backdrop-blur-md
         p-4 max-w-sm w-full
-        transform transition-all duration-300 ease-in-out
+        transform transition-all duration-300 ease-out
         ${isExiting 
-          ? 'translate-x-full opacity-0 scale-95' 
-          : 'translate-x-0 opacity-100 scale-100'
+          ? 'translate-y-2 opacity-0 scale-95' 
+          : 'translate-y-0 opacity-100 scale-100'
         }
-        hover:shadow-xl hover:scale-105
+        hover:scale-105 hover:shadow-2xl
+        before:absolute before:inset-0 before:rounded-2xl before:bg-white/10 before:backdrop-blur-sm
       `}
+      style={{
+        backdropFilter: 'blur(16px)',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+      }}
     >
-      <div className="flex items-start">
-        <div className="flex-shrink-0">
-          <Icon className={`w-5 h-5 ${config.iconColor}`} />
+      {/* Animated background effect */}
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/10 via-transparent to-white/10 animate-pulse"></div>
+      
+      <div className="relative flex items-start space-x-3">
+        {/* Icon with pulse effect */}
+        <div className={`flex-shrink-0 w-8 h-8 ${config.iconBg} rounded-xl flex items-center justify-center shadow-lg`}>
+          <Icon className={`w-5 h-5 text-white ${config.spin ? 'animate-spin' : ''}`} />
         </div>
-        <div className="ml-3 flex-1">
-          <p className="text-sm font-medium text-white leading-relaxed">
+        
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <p className={`text-sm font-semibold ${config.textColor} leading-relaxed`}>
             {message}
           </p>
         </div>
-        <div className="ml-4 flex-shrink-0">
-          <button
-            onClick={handleClose}
-            className="inline-flex text-white hover:text-gray-200 focus:outline-none focus:text-gray-200 transition-colors duration-200"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+        
+        {/* Close button */}
+        <button
+          onClick={handleClose}
+          className="flex-shrink-0 w-6 h-6 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center transition-colors duration-200 group"
+        >
+          <X className="w-4 h-4 text-white group-hover:scale-110 transition-transform duration-200" />
+        </button>
       </div>
     </div>
   )
 }
 
-// Toast Container Component
+// Enhanced Toast Container Component
 export const ToastContainer = ({ toasts }) => {
   return (
     <>
-      {/* Desktop - Bottom Left */}
-      <div className="hidden md:block fixed bottom-4 left-4 z-50 space-y-3">
+      {/* Desktop - Bottom Left with better spacing */}
+      <div className="hidden md:block fixed bottom-6 left-6 z-50 space-y-3 max-w-sm">
         {toasts.map((toast) => (
           <CustomToast key={toast.id} {...toast} />
         ))}
       </div>
       
-      {/* Mobile - Top */}
-      <div className="md:hidden fixed top-4 left-4 right-4 z-50 space-y-3">
+      {/* Mobile - Top Center with safe area */}
+      <div className="md:hidden fixed top-4 left-4 right-4 z-50 space-y-3 flex flex-col items-center">
         {toasts.map((toast) => (
           <CustomToast key={toast.id} {...toast} />
         ))}
@@ -120,7 +149,7 @@ export const ToastContainer = ({ toasts }) => {
   )
 }
 
-// Toast Hook
+// Enhanced Toast Hook with new features
 export const useCustomToast = () => {
   const [toasts, setToasts] = useState([])
 
@@ -142,14 +171,34 @@ export const useCustomToast = () => {
     setToasts(prev => prev.filter(toast => toast.id !== id))
   }
 
-  const toast = {
-    success: (message, duration) => addToast(message, 'success', duration),
-    error: (message, duration) => addToast(message, 'error', duration),
-    warning: (message, duration) => addToast(message, 'warning', duration),
-    info: (message, duration) => addToast(message, 'info', duration),
+  const clearAllToasts = () => {
+    setToasts([])
   }
 
-  return { toast, toasts, ToastContainer }
+  const toast = {
+    success: (message, duration = 3000) => addToast(message, 'success', duration),
+    error: (message, duration = 5000) => addToast(message, 'error', duration),
+    warning: (message, duration = 4000) => addToast(message, 'warning', duration),
+    info: (message, duration = 4000) => addToast(message, 'info', duration),
+    loading: (message, duration = 10000) => addToast(message, 'loading', duration),
+    // Utility methods
+    clear: clearAllToasts,
+    promise: async (promise, { loading, success, error }) => {
+      const loadingId = addToast(loading, 'loading', 30000)
+      try {
+        const result = await promise
+        removeToast(loadingId)
+        addToast(success, 'success')
+        return result
+      } catch (err) {
+        removeToast(loadingId)
+        addToast(error || err.message, 'error')
+        throw err
+      }
+    }
+  }
+
+  return { toast, toasts, ToastContainer, clearAllToasts }
 }
 
 export default CustomToast 

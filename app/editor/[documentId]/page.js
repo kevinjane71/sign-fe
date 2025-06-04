@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import { 
   Upload, 
   Type, 
@@ -35,7 +35,7 @@ import {
   File,
   ChevronDown
 } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { useToast } from '../../components/LayoutWrapper'
 import { getDocument, updateDocument, sendDocument, getDocumentFile } from '../../utils/api'
 import LoadingSpinner from '../../components/LoadingSpinner'
 
@@ -163,7 +163,7 @@ const FIELD_CONFIGS = {
   }
 }
 
-// Document Configuration Component (Step 2)
+// Document Configuration Component (Step 1) - Enhanced with pre-filling
 function DocumentConfiguration({ documentFile, documents, allFields, fields, onBack, onNext, isLoading, documentData }) {
   const [signers, setSigners] = useState([])
   const [subject, setSubject] = useState('')
@@ -183,23 +183,74 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
   const [allowPrinting, setAllowPrinting] = useState(true)
   const [allowDownload, setAllowDownload] = useState(true)
 
-  // Initialize with default values
+  // Enhanced initialization with pre-filling from documentData
   useEffect(() => {
-    const documentName = documentData?.title || documents?.[0]?.name || 'Document'
-    
-    setSubject(`Please sign: ${documentName}`)
-    setMessage('Please review and sign this document at your earliest convenience.')
-    
-    // Add a default signer if none exist
-    if (signers.length === 0) {
-      setSigners([{
-        id: Date.now(),
-        name: '',
-        email: '',
-        role: 'Signer'
-      }])
+    // Pre-fill from existing document data if available
+    if (documentData) {
+      // Pre-fill signers if they exist
+      if (documentData.signers && documentData.signers.length > 0) {
+        const existingSigners = documentData.signers.map((signer, index) => ({
+          id: signer.id || Date.now() + index,
+          name: signer.name || '',
+          email: signer.email || '',
+          role: signer.role || 'Signer'
+        }))
+        setSigners(existingSigners)
+      } else if (signers.length === 0) {
+        // Add default signer if none exist
+        setSigners([{
+          id: Date.now(),
+          name: '',
+          email: '',
+          role: 'Signer'
+        }])
+      }
+
+      // Pre-fill subject and message
+      if (documentData.subject) {
+        setSubject(documentData.subject)
+      } else {
+        const documentName = documentData.title || documents?.[0]?.name || 'Document'
+        setSubject(`Please sign: ${documentName}`)
+      }
+
+      if (documentData.message) {
+        setMessage(documentData.message)
+      } else {
+        setMessage('Please review and sign this document at your earliest convenience.')
+      }
+
+      // Pre-fill advanced configuration if it exists
+      if (documentData.configuration) {
+        const config = documentData.configuration
+        setRequireAuthentication(config.requireAuthentication || false)
+        setAllowDelegation(config.allowDelegation !== false)
+        setAllowComments(config.allowComments !== false)
+        setSendReminders(config.sendReminders !== false)
+        setReminderFrequency(config.reminderFrequency || 3)
+        setExpirationEnabled(config.expirationEnabled || false)
+        setExpirationDays(config.expirationDays || 30)
+        setSigningOrder(config.signingOrder || 'any')
+        setRequireAllSigners(config.requireAllSigners !== false)
+        setAllowPrinting(config.allowPrinting !== false)
+        setAllowDownload(config.allowDownload !== false)
+      }
+    } else {
+      // Fallback to defaults for new documents
+      const documentName = documents?.[0]?.name || 'Document'
+      setSubject(`Please sign: ${documentName}`)
+      setMessage('Please review and sign this document at your earliest convenience.')
+      
+      if (signers.length === 0) {
+        setSigners([{
+          id: Date.now(),
+          name: '',
+          email: '',
+          role: 'Signer'
+        }])
+      }
     }
-  }, [documentData?.title, documents, signers.length])
+  }, [documentData, documents, signers.length])
 
   const addSigner = () => {
     const newSigner = {
@@ -1684,7 +1735,7 @@ function FieldConfigurationPanel({ field, onUpdate, onClose, signers }) {
               style={{
                 borderColor: selectedSigner ? selectedSigner.color.border : undefined,
                 backgroundColor: selectedSigner ? selectedSigner.color.bg : undefined,
-                color: selectedSigner ? selectedSigner.color.text : undefined
+                color: selectedSigner ? '#111827' : undefined // Always use dark text for visibility
               }}
               onClick={() => setDropdownOpen((open) => !open)}
             >
@@ -1692,7 +1743,7 @@ function FieldConfigurationPanel({ field, onUpdate, onClose, signers }) {
                 {selectedSigner && (
                   <span className="w-4 h-4 rounded-full mr-2 border border-white" style={{ backgroundColor: selectedSigner.color.bg, borderColor: selectedSigner.color.border }} />
                 )}
-                {selectedSigner ? (selectedSigner.name || selectedSigner.email) : 'Select a signer...'}
+                <span className="font-semibold text-gray-900">{selectedSigner ? (selectedSigner.name || selectedSigner.email) : 'Select a signer...'}</span>
               </span>
               <ChevronDown className="w-4 h-4 text-gray-500 ml-2" />
             </button>
@@ -1703,11 +1754,11 @@ function FieldConfigurationPanel({ field, onUpdate, onClose, signers }) {
                     key={signer.id}
                     type="button"
                     className={`w-full flex items-center px-3 py-2 text-sm hover:bg-gray-100 ${config.assignedSigner === signer.id ? 'bg-gray-50 font-semibold' : ''}`}
-                    style={{ color: signer.color.text }}
+                    style={{ color: '#111827' }} // Always use dark text for visibility
                     onClick={() => { handleChange('assignedSigner', signer.id); setDropdownOpen(false); }}
                   >
                     <span className="w-4 h-4 rounded-full mr-2 border" style={{ backgroundColor: signer.color.bg, borderColor: signer.color.border }} />
-                    {signer.name || signer.email}
+                    <span className="font-semibold text-gray-900">{signer.name || signer.email}</span>
                   </button>
                 ))}
               </div>
@@ -1767,11 +1818,17 @@ function FieldConfigurationPanel({ field, onUpdate, onClose, signers }) {
   )
 }
 
-// Main Editor Component
+// Main Editor Component with step persistence
 export default function EditDocumentEditor() {
   const router = useRouter()
   const params = useParams()
+  const searchParams = useSearchParams()
   const documentId = params.documentId
+  const toast = useToast()
+  
+  // Get step from URL parameter, default to 1
+  const urlStep = searchParams.get('step')
+  const initialStep = urlStep ? parseInt(urlStep) : 1
   
   // State - Modified to support multiple documents in continuous view
   const [documents, setDocuments] = useState([])
@@ -1783,8 +1840,8 @@ export default function EditDocumentEditor() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   
-  // 2-Step Process State
-  const [currentStep, setCurrentStep] = useState(1) // 1 = Configuration, 2 = Editor (start at configuration for consistent flow)
+  // 2-Step Process State with URL persistence
+  const [currentStep, setCurrentStep] = useState(initialStep)
   const [isStepLoading, setIsStepLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
@@ -1796,6 +1853,14 @@ export default function EditDocumentEditor() {
   const [draggedField, setDraggedField] = useState(null)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 })
+
+  // Update URL when step changes
+  useEffect(() => {
+    const newSearchParams = new URLSearchParams(searchParams)
+    newSearchParams.set('step', currentStep.toString())
+    const newUrl = `${window.location.pathname}?${newSearchParams.toString()}`
+    window.history.replaceState({}, '', newUrl)
+  }, [currentStep, searchParams])
 
   // Get all fields from all documents
   const getAllFields = () => {
@@ -1813,7 +1878,7 @@ export default function EditDocumentEditor() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Load documents from API - Modified to load existing document
+  // Load documents from API - Enhanced to preserve step on refresh
   useEffect(() => {
     const loadDocumentFromAPI = async () => {
       if (!documentId) {
@@ -1829,6 +1894,7 @@ export default function EditDocumentEditor() {
         const result = await getDocument(documentId)
         const docData = result.document
         
+        console.log('📋 Loaded document data for pre-filling:', docData)
         setDocumentData(docData)
         
         // Convert API files to document format for the viewer
@@ -1878,6 +1944,21 @@ export default function EditDocumentEditor() {
         setDocuments(loadedDocuments)
         setAllFields(fieldsData)
         
+        // If URL has step parameter, ensure it's valid
+        const urlStep = searchParams.get('step')
+        if (urlStep) {
+          const step = parseInt(urlStep)
+          if (step >= 1 && step <= 2) {
+            setCurrentStep(step)
+          } else {
+            // Invalid step, redirect to step 1
+            const newSearchParams = new URLSearchParams(searchParams)
+            newSearchParams.set('step', '1')
+            router.replace(`${window.location.pathname}?${newSearchParams.toString()}`)
+            setCurrentStep(1)
+          }
+        }
+        
         toast.success(`Loaded ${loadedDocuments.length} document(s)`)
         
       } catch (error) {
@@ -1890,7 +1971,7 @@ export default function EditDocumentEditor() {
     }
 
     loadDocumentFromAPI()
-  }, [documentId, router])
+  }, [documentId, router, searchParams])
 
   // Document management functions
   const handleAddDocument = (newDocument) => {
@@ -2183,6 +2264,11 @@ export default function EditDocumentEditor() {
       
       setIsStepLoading(true)
       
+      // Update URL first
+      const newSearchParams = new URLSearchParams(searchParams)
+      newSearchParams.set('step', '2')
+      router.replace(`${window.location.pathname}?${newSearchParams.toString()}`)
+      
       // Smooth transition delay for better UX
       await new Promise(resolve => setTimeout(resolve, 300))
       
@@ -2193,6 +2279,9 @@ export default function EditDocumentEditor() {
       const storedConfig = sessionStorage.getItem('documentConfiguration')
       if (!storedConfig) {
         toast.error('Configuration missing. Please go back to step 1.')
+        const newSearchParams = new URLSearchParams(searchParams)
+        newSearchParams.set('step', '1')
+        router.replace(`${window.location.pathname}?${newSearchParams.toString()}`)
         setCurrentStep(1)
         return
       }
@@ -2212,6 +2301,11 @@ export default function EditDocumentEditor() {
     
     // From step 2, go back to step 1 with smooth transition
     setIsStepLoading(true)
+    
+    // Update URL first
+    const newSearchParams = new URLSearchParams(searchParams)
+    newSearchParams.set('step', '1')
+    router.replace(`${window.location.pathname}?${newSearchParams.toString()}`)
     
     // Smooth transition delay for better UX
     await new Promise(resolve => setTimeout(resolve, 300))

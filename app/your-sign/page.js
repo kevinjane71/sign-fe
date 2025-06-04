@@ -3,8 +3,11 @@
 import React, { useState, useEffect } from "react";
 import SignatureModal from "../components/SignatureModal";
 import { Plus, Trash2, Edit2, Loader2, PenTool, Stamp, MoreVertical, Copy, Download, Grid, List } from "lucide-react";
+import { useToast } from "../components/LayoutWrapper";
+import { isAuthenticated } from "../utils/api";
 
-const API_URL = "http://localhost:5002/api/user/signatures";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
+const API_URL = `${API_BASE_URL}/api/user/signatures`;
 const MAX_SIGNS = 10;
 const MAX_SIZE_MB = 20;
 
@@ -29,21 +32,6 @@ function getAuthHeaders() {
     }
   }
   return {};
-}
-
-function isAuthenticated() {
-  if (typeof window !== 'undefined') {
-    try {
-      const userData = localStorage.getItem('user');
-      if (userData) {
-        const user = JSON.parse(userData);
-        return !!(user && (user.id || user.userId) && user.accessToken);
-      }
-    } catch (error) {
-      console.error('Error checking authentication:', error);
-    }
-  }
-  return false;
 }
 
 // Generate default alias names
@@ -168,6 +156,7 @@ async function deleteSignature(id) {
 }
 
 export default function YourSignPage() {
+  const toast = useToast()
   const [tab, setTab] = useState("sign");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);

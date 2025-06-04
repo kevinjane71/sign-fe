@@ -1,37 +1,55 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { 
-  FileText, 
-  Users, 
-  Clock, 
-  CheckCircle, 
-  Eye, 
-  Edit, 
-  Trash2, 
+  Plus, 
   Search, 
   Filter, 
+  Grid, 
+  List, 
   MoreVertical, 
-  Download, 
-  Send, 
-  Upload,
-  Plus,
-  FolderOpen,
-  TrendingUp,
   Calendar,
-  Loader2,
+  Users,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Eye,
+  Edit,
+  Trash2,
+  Download,
+  Share2,
+  Copy,
+  Send,
+  Pause,
+  Play,
+  XCircle,
+  FileText,
+  User,
+  Mail,
+  RefreshCw,
+  TrendingUp,
+  BarChart3,
+  Archive,
+  Star,
+  Settings,
+  Bell,
+  LogOut,
+  Menu,
   X,
-  FileCheck,
-  RotateCcw
+  ChevronDown,
+  ChevronRight,
+  FolderOpen,
+  Upload,
+  Loader2
 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { getStoredUser, getDocuments, getDocumentStats, isAuthenticated, logout } from '../utils/api'
-import { useCustomToast } from '../components/CustomToast'
+import { useToast } from '../components/LayoutWrapper'
+import { getUserDocuments, deleteDocument, duplicateDocument, isAuthenticated, getStoredUser, getDocuments, getDocumentStats } from '../utils/api'
 import LoadingSpinner from '../components/LoadingSpinner'
 
 export default function Dashboard() {
   const router = useRouter()
-  const { toast, toasts, ToastContainer } = useCustomToast()
+  const toast = useToast()
   const [user, setUser] = useState(null)
   const [stats, setStats] = useState({
     total: 0,
@@ -298,23 +316,17 @@ export default function Dashboard() {
     }
 
     try {
-      const response = await fetch(`/api/documents/${documentId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        }
-      })
+      const response = await deleteDocument(documentId)
 
-      if (response.ok) {
+      if (response.success) {
         toast.success('Document deleted successfully!')
         fetchDocuments()
       } else {
-        const error = await response.json()
-        toast.error(error.error || 'Delete failed')
+        toast.error(response.error || 'Delete failed')
       }
     } catch (error) {
-      console.error('Delete error:', error)
-      toast.error('Delete failed. Please try again.')
+      console.error('Error deleting document:', error)
+      toast.error('Failed to delete document')
     }
   }
 
@@ -892,7 +904,7 @@ export default function Dashboard() {
                             <div className="flex items-start justify-between">
                               <div className="flex items-start space-x-3 flex-1 min-w-0">
                                 <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                                  <FileCheck className="w-4 h-4 text-blue-600" />
+                                  <FileText className="w-4 h-4 text-blue-600" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-medium text-gray-900 truncate" title={doc.title || doc.originalName || 'Untitled Document'}>
@@ -964,7 +976,7 @@ export default function Dashboard() {
                           }}
                           className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
                         >
-                          <RotateCcw className="w-4 h-4 mr-2" />
+                          <RefreshCw className="w-4 h-4 mr-2" />
                           Clear Filters
                         </button>
                       </div>
@@ -1006,9 +1018,6 @@ export default function Dashboard() {
           </div>
         )}
       </div>
-      
-      {/* Custom Toast Container */}
-      <ToastContainer toasts={toasts} />
     </div>
   )
 } 

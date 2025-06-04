@@ -21,6 +21,7 @@ import {
   ChevronRight
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import SignatureModal from '../../components/SignatureModal'
 
 // Load PDF.js
 import * as pdfjsLib from 'pdfjs-dist'
@@ -417,6 +418,7 @@ const SigningFieldComponent = ({
   
   const fieldConfig = FIELD_CONFIGS[field.type] || FIELD_CONFIGS[FIELD_TYPES.TEXT]
   const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  const Icon = fieldConfig.icon || FileText // Fallback to FileText if icon is undefined
 
   // Update local value when fieldValue prop changes
   useEffect(() => {
@@ -521,24 +523,27 @@ const SigningFieldComponent = ({
           </div>
         )}
 
-        {/* Field Content - Same as editor */}
+        {/* Field Content */}
         <div className="w-full h-full flex items-center justify-center p-1">
           {(field.type === FIELD_TYPES.TEXT || field.type === FIELD_TYPES.NAME || field.type === FIELD_TYPES.EMAIL || field.type === FIELD_TYPES.PHONE) && (
             isEditing ? (
-              <input
-                ref={fieldRef}
-                type={field.type === FIELD_TYPES.EMAIL ? 'email' : field.type === FIELD_TYPES.PHONE ? 'tel' : 'text'}
-                value={localValue}
-                onChange={(e) => handleValueChange(e.target.value)}
-                onBlur={() => setIsEditing(false)}
-                onKeyPress={(e) => e.key === 'Enter' && setIsEditing(false)}
-                className="w-full h-full bg-transparent border-none outline-none text-gray-700"
-                style={{ 
-                  fontSize: `${fontSize}px`,
-                  padding: '2px 4px'
-                }}
-                autoFocus
-              />
+              <div className="w-full h-full flex flex-col">
+                <input
+                  ref={fieldRef}
+                  type={field.type === FIELD_TYPES.EMAIL ? 'email' : field.type === FIELD_TYPES.PHONE ? 'tel' : 'text'}
+                  value={localValue}
+                  onChange={(e) => {
+                    if (e.target.value.length <= 200) handleValueChange(e.target.value)
+                  }}
+                  onBlur={() => setIsEditing(false)}
+                  onKeyPress={(e) => e.key === 'Enter' && setIsEditing(false)}
+                  className="w-full h-full bg-transparent border-none outline-none text-gray-700"
+                  style={{ fontSize: `${fontSize}px`, padding: '2px 4px' }}
+                  maxLength={200}
+                  autoFocus
+                />
+                <div className="text-xs text-gray-400 text-right pr-1">{localValue.length}/200</div>
+              </div>
             ) : (
               <div 
                 className="w-full h-full flex items-center justify-start px-2 text-gray-700"
@@ -596,7 +601,14 @@ const SigningFieldComponent = ({
 
           {field.type === FIELD_TYPES.SIGNATURE && (
             <div className="flex flex-col items-center justify-center text-gray-600 w-full h-full cursor-pointer">
-              {localValue ? (
+              {localValue && localValue.startsWith('data:image') ? (
+                <img
+                  src={localValue}
+                  alt="Signature"
+                  className="w-full h-full object-contain"
+                  style={{ maxHeight: '100%', maxWidth: '100%' }}
+                />
+              ) : localValue ? (
                 <span style={{ 
                   fontSize: `${fontSize}px`,
                   fontFamily: 'cursive',
@@ -608,7 +620,7 @@ const SigningFieldComponent = ({
                 </span>
               ) : (
                 <>
-                  <fieldConfig.icon 
+                  <Icon 
                     style={{ 
                       width: `${Math.min(fieldWidth * 0.3, fieldHeight * 0.5)}px`,
                       height: `${Math.min(fieldWidth * 0.3, fieldHeight * 0.5)}px`,
@@ -637,7 +649,7 @@ const SigningFieldComponent = ({
                 </span>
               ) : (
                 <>
-                  <fieldConfig.icon 
+                  <Icon 
                     style={{ 
                       width: `${Math.min(fieldWidth * 0.4, fieldHeight * 0.6)}px`,
                       height: `${Math.min(fieldWidth * 0.4, fieldHeight * 0.6)}px`,
@@ -663,105 +675,10 @@ const SigningFieldComponent = ({
             handleValueChange(signature)
             setShowSignatureModal(false)
           }}
+          maxSizeMB={20}
         />
       )}
     </>
-  )
-}
-
-// Signature Modal Component
-const SignatureModal = ({ onClose, onSave }) => {
-  const canvasRef = useRef(null)
-  const [isDrawing, setIsDrawing] = useState(false)
-  const [hasSignature, setHasSignature] = useState(false)
-
-  const startDrawing = (e) => {
-    setIsDrawing(true)
-    setHasSignature(true)
-    draw(e)
-  }
-
-  const stopDrawing = () => {
-    setIsDrawing(false)
-  }
-
-  const draw = (e) => {
-    if (!isDrawing) return
-
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    const rect = canvas.getBoundingClientRect()
-    
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-
-    ctx.lineWidth = 2
-    ctx.lineCap = 'round'
-    ctx.strokeStyle = '#000'
-
-    ctx.lineTo(x, y)
-    ctx.stroke()
-    ctx.beginPath()
-    ctx.moveTo(x, y)
-  }
-
-  const clearSignature = () => {
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    setHasSignature(false)
-  }
-
-  const saveSignature = () => {
-    if (!hasSignature) {
-      toast.error('Please provide a signature first')
-      return
-    }
-
-    const canvas = canvasRef.current
-    const signatureData = canvas.toDataURL()
-    onSave(signatureData)
-  }
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Add Your Signature</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="mb-4">
-          <canvas
-            ref={canvasRef}
-            width={400}
-            height={200}
-            className="border border-gray-300 w-full cursor-crosshair"
-            onMouseDown={startDrawing}
-            onMouseUp={stopDrawing}
-            onMouseMove={draw}
-            onMouseLeave={stopDrawing}
-          />
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            onClick={clearSignature}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
-          >
-            Clear
-          </button>
-          <button
-            onClick={saveSignature}
-            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            Save Signature
-          </button>
-        </div>
-      </div>
-    </div>
   )
 }
 
@@ -781,6 +698,8 @@ export default function SigningPage() {
   const [error, setError] = useState(null)
   const [zoom, setZoom] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'
 
   // Convert pixel-based fields to percentage-based fields
   const convertFieldToPercentage = useCallback((field, containerWidth = 800, containerHeight = 1000) => {
@@ -817,7 +736,7 @@ export default function SigningPage() {
         setError(null)
 
         // Fetch document data from backend
-        const response = await fetch(`http://localhost:5002/api/sign/${documentId}?signer=${encodeURIComponent(signerEmail)}&token=${token}`)
+        const response = await fetch(`${API_BASE_URL}/api/sign/${documentId}?signer=${encodeURIComponent(signerEmail)}&token=${token}`)
         const result = await response.json()
 
         if (!response.ok) {
@@ -843,7 +762,7 @@ export default function SigningPage() {
             const file = result.document.files[i]
             
             // Fetch file content with token
-            const fileUrl = `http://localhost:5002/api/sign/${documentId}/file/${file.fileId}?signer=${encodeURIComponent(signerEmail)}&token=${token}`
+            const fileUrl = `${API_BASE_URL}/api/sign/${documentId}/file/${file.fileId}?signer=${encodeURIComponent(signerEmail)}&token=${token}`
             
             const documentObj = {
               name: file.originalName,
@@ -865,7 +784,7 @@ export default function SigningPage() {
           }
         } else {
           // Legacy single file document
-          const fileUrl = `http://localhost:5002/api/sign/${documentId}/file/main?signer=${encodeURIComponent(signerEmail)}&token=${token}`
+          const fileUrl = `${API_BASE_URL}/api/sign/${documentId}/file/main?signer=${encodeURIComponent(signerEmail)}&token=${token}`
           
           const documentObj = {
             name: result.document.originalName,
@@ -900,20 +819,20 @@ export default function SigningPage() {
   // Get all fields from all files
   const getAllFields = () => {
     if (!documentData) return []
-
     const allFields = []
-
     if (documentData.files && documentData.files.length > 0) {
       // Multi-file document
       documentData.files.forEach((file, fileIndex) => {
         if (file.fields) {
           file.fields.forEach(field => {
-            // Convert to percentage-based positioning for consistent rendering
-            const convertedField = convertFieldToPercentage(field)
-            allFields.push({
-              ...convertedField,
-              documentIndex: fileIndex
-            })
+            // Only include fields assigned to this signer or default fields
+            if (!field.assignedTo || field.assignedTo === signerEmail) {
+              const convertedField = convertFieldToPercentage(field)
+              allFields.push({
+                ...convertedField,
+                documentIndex: fileIndex
+              })
+            }
           })
         }
       })
@@ -921,16 +840,16 @@ export default function SigningPage() {
       // Legacy single file document
       if (documentData.fields) {
         documentData.fields.forEach(field => {
-          // Convert to percentage-based positioning for consistent rendering
-          const convertedField = convertFieldToPercentage(field)
-          allFields.push({
-            ...convertedField,
-            documentIndex: 0
-          })
+          if (!field.assignedTo || field.assignedTo === signerEmail) {
+            const convertedField = convertFieldToPercentage(field)
+            allFields.push({
+              ...convertedField,
+              documentIndex: 0
+            })
+          }
         })
       }
     }
-
     return allFields
   }
 
@@ -963,7 +882,7 @@ export default function SigningPage() {
     try {
       setIsSubmitting(true)
 
-      const response = await fetch(`http://localhost:5002/api/sign/${documentId}/submit`, {
+      const response = await fetch(`${API_BASE_URL}/api/sign/${documentId}/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

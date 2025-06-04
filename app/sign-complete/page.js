@@ -2,7 +2,10 @@
 
 import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { CheckCircle, Download, Mail, AlertCircle, Loader2 } from 'lucide-react'
+import { CheckCircle, FileText, Download, AlertCircle, RefreshCw, ExternalLink, ArrowRight, Users, Clock, Calendar, Eye, Loader2, Mail } from 'lucide-react'
+import LoadingSpinner from '../components/LoadingSpinner'
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'
 
 export default function SignCompletePage() {
   const searchParams = useSearchParams()
@@ -23,7 +26,7 @@ export default function SignCompletePage() {
     // Check the signing status
     const checkSigningStatus = async () => {
       try {
-        const response = await fetch(`http://localhost:5002/api/documents/${documentId}/status`)
+        const response = await fetch(`${API_BASE_URL}/api/documents/${documentId}/status`)
         const result = await response.json()
 
         if (response.ok) {
@@ -53,7 +56,7 @@ export default function SignCompletePage() {
 
   const handleDownloadDocument = async () => {
     try {
-      const response = await fetch(`http://localhost:5002/api/documents/${documentId}/download`)
+      const response = await fetch(`${API_BASE_URL}/api/documents/${documentId}/download`)
       
       if (response.ok) {
         const blob = await response.blob()
