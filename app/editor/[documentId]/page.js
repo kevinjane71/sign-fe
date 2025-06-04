@@ -211,13 +211,13 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
         setSubject(documentData.subject)
       } else {
         const documentName = documentData.title || documents?.[0]?.name || 'Document'
-        setSubject(`Please sign: ${documentName}`)
+    setSubject(`Please sign: ${documentName}`)
       }
 
       if (documentData.message) {
         setMessage(documentData.message)
       } else {
-        setMessage('Please review and sign this document at your earliest convenience.')
+    setMessage('Please review and sign this document at your earliest convenience.')
       }
 
       // Pre-fill advanced configuration if it exists
@@ -241,14 +241,14 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
       setSubject(`Please sign: ${documentName}`)
       setMessage('Please review and sign this document at your earliest convenience.')
       
-      if (signers.length === 0) {
-        setSigners([{
-          id: Date.now(),
-          name: '',
-          email: '',
-          role: 'Signer'
-        }])
-      }
+    if (signers.length === 0) {
+      setSigners([{
+        id: Date.now(),
+        name: '',
+        email: '',
+        role: 'Signer'
+      }])
+    }
     }
   }, [documentData, documents, signers.length])
 
@@ -969,7 +969,7 @@ const FieldComponent = ({
   }))
   const assignedSigner = signersWithColors.find(s => s.id === field.assignedSigner)
   const signerColor = assignedSigner?.color
-
+  
   // Calculate responsive position and size
   const fieldStyle = {
     position: 'absolute',
@@ -1042,8 +1042,8 @@ const FieldComponent = ({
               fontSize: `${fontSize}px`,
               padding: '2px 4px',
               color: field.textColor || '#000000'
-            }}
-          />
+              }}
+            />
         )}
 
         {field.type === FIELD_TYPES.NAME && (
@@ -1185,15 +1185,15 @@ const FieldComponent = ({
           {field.required && (
             <span className="text-red-400 ml-1">*</span>
           )}
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              onDelete(field.id)
-            }}
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onDelete(field.id)
+          }}
             className="text-red-400 hover:text-red-300 ml-1"
-          >
+        >
             <Trash2 className="w-3 h-3" />
-          </button>
+        </button>
         </div>
       )}
     </div>
@@ -2665,7 +2665,7 @@ export default function EditDocumentEditor() {
           </div>
 
           {/* Document Manager - Bottom - Disabled in edit mode */}
-          <DocumentManager 
+          <DocumentManager
             documents={documents}
             allFields={allFields}
             onAddDocument={handleAddDocument}
@@ -2714,29 +2714,29 @@ export default function EditDocumentEditor() {
             <div className="h-full p-4">
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full overflow-hidden flex">
                 <div className="flex-1">
-                  <DocumentViewer
-                    documents={documents}
-                    zoom={zoom}
-                    onZoomChange={setZoom}
-                    onDocumentClick={handleDocumentClick}
+                <DocumentViewer
+                  documents={documents}
+                  zoom={zoom}
+                  onZoomChange={setZoom}
+                  onDocumentClick={handleDocumentClick}
                     signers={documentData?.signers || []} // Pass signers to DocumentViewer
-                  >
-                    {getAllFields().map((field) => (
-                      <FieldComponent
-                        key={field.id}
-                        field={field}
-                        pageNumber={field.pageNumber}
-                        documentIndex={field.documentIndex}
-                        isSelected={selectedField === field.id}
-                        isDragging={isDragging && draggedField?.id === field.id}
-                        onSelect={handleFieldSelect}
-                        onDragStart={handleDragStart}
-                        onDelete={handleFieldDelete}
-                        onValueChange={handleFieldValueChange}
+                >
+                  {getAllFields().map((field) => (
+                    <FieldComponent
+                      key={field.id}
+                      field={field}
+                      pageNumber={field.pageNumber}
+                      documentIndex={field.documentIndex}
+                      isSelected={selectedField === field.id}
+                      isDragging={isDragging && draggedField?.id === field.id}
+                      onSelect={handleFieldSelect}
+                      onDragStart={handleDragStart}
+                      onDelete={handleFieldDelete}
+                      onValueChange={handleFieldValueChange}
                         signers={documentData?.signers || []} // Pass signers to FieldComponent
-                      />
-                    ))}
-                  </DocumentViewer>
+                    />
+                  ))}
+                </DocumentViewer>
                 </div>
 
                 {/* Right Panel for Field Configuration */}

@@ -187,11 +187,7 @@ export default function SignCompletePage() {
                     )}
                   </p>
                   <button
-                    onClick={() => {
-                      if (documentData?.allSigned && documentData?.downloadUrl) {
-                        window.open(documentData.downloadUrl, '_blank')
-                      }
-                    }}
+                    onClick={handleDownloadDocument}
                     disabled={!(documentData?.allSigned && documentData?.downloadUrl)}
                     className={`px-4 py-2 bg-green-600 text-white text-sm rounded-md transition-colors ${
                       documentData?.allSigned && documentData?.downloadUrl
