@@ -32,7 +32,8 @@ import {
   AlertCircle,
   Info,
   FolderOpen,
-  File
+  File,
+  ChevronDown
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { getDocument, updateDocument, sendDocument, getDocumentFile } from '../../utils/api'
@@ -47,7 +48,8 @@ const FIELD_TYPES = {
   DATE: 'date',
   STAMP: 'stamp',
   EMAIL: 'email',
-  PHONE: 'phone'
+  PHONE: 'phone',
+  DROPDOWN: 'dropdown'  // Added dropdown type
 }
 
 const FIELD_CONFIGS = {
@@ -144,6 +146,18 @@ const FIELD_CONFIGS = {
     minWidth: 100,
     minHeight: 28,
     defaultWidth: 140,
+    defaultHeight: 32,
+    category: 'input'
+  },
+  [FIELD_TYPES.DROPDOWN]: {
+    icon: Menu,
+    label: 'Dropdown',
+    color: '#8B5CF6',
+    bgColor: '#F5F3FF',
+    borderColor: '#8B5CF6',
+    minWidth: 120,
+    minHeight: 32,
+    defaultWidth: 160,
     defaultHeight: 32,
     category: 'input'
   }
@@ -627,7 +641,7 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
 }
 
 // Document Viewer Component - Modified to show all documents in continuous scroll
-const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentClick }) => {
+const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentClick, signers }) => {
   const [allPages, setAllPages] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -847,7 +861,8 @@ const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentCli
                       child.props.documentIndex === page.documentIndex) {
                     return React.cloneElement(child, { 
                       containerWidth: displayWidth,
-                      containerHeight: displayHeight
+                      containerHeight: displayHeight,
+                      signers: signers // Pass signers to FieldComponent
                     })
                   }
                   return null
@@ -871,12 +886,38 @@ const FieldComponent = ({
   onDelete, 
   onValueChange,
   containerWidth,
-  containerHeight 
+  containerHeight,
+  signers // Add signers prop
 }) => {
   const config = FIELD_CONFIGS[field.type]
   const Icon = config.icon
   const isMobile = window.innerWidth < 768
   
+  // Get signer color if assigned
+  const userColors = [
+    { bg: '#FF6B6B', border: '#FF4757', text: '#FFFFFF' },
+    { bg: '#4ECDC4', border: '#45B7AF', text: '#FFFFFF' },
+    { bg: '#45B7D1', border: '#3A9DB8', text: '#FFFFFF' },
+    { bg: '#96CEB4', border: '#7DBFA0', text: '#FFFFFF' },
+    { bg: '#FFEEAD', border: '#FFE082', text: '#000000' },
+    { bg: '#D4A5A5', border: '#C49292', text: '#FFFFFF' },
+    { bg: '#9B59B6', border: '#8E44AD', text: '#FFFFFF' },
+    { bg: '#3498DB', border: '#2980B9', text: '#FFFFFF' },
+    { bg: '#E67E22', border: '#D35400', text: '#FFFFFF' },
+    { bg: '#2ECC71', border: '#27AE60', text: '#FFFFFF' },
+    { bg: '#F1C40F', border: '#F39C12', text: '#000000' },
+    { bg: '#1ABC9C', border: '#16A085', text: '#FFFFFF' },
+    { bg: '#E74C3C', border: '#C0392B', text: '#FFFFFF' },
+    { bg: '#34495E', border: '#2C3E50', text: '#FFFFFF' },
+    { bg: '#16A085', border: '#138D75', text: '#FFFFFF' }
+  ]
+  const signersWithColors = signers.map((signer, index) => ({
+    ...signer,
+    color: userColors[index % userColors.length]
+  }))
+  const assignedSigner = signersWithColors.find(s => s.id === field.assignedSigner)
+  const signerColor = assignedSigner?.color
+
   // Calculate responsive position and size
   const fieldStyle = {
     position: 'absolute',
@@ -886,8 +927,8 @@ const FieldComponent = ({
     height: `${field.heightPercent}%`,
     minWidth: `${config.minWidth}px`,
     minHeight: `${config.minHeight}px`,
-    backgroundColor: config.bgColor,
-    border: `1px solid ${isSelected ? config.color : '#e5e7eb'}`,
+    backgroundColor: signerColor ? `${signerColor.bg}22` : config.bgColor, // 13% opacity
+    border: `2px solid ${signerColor ? signerColor.border : isSelected ? config.color : '#e5e7eb'}`,
     borderRadius: '4px',
     cursor: isDragging ? 'grabbing' : 'grab',
     zIndex: isSelected ? 50 : 10,
@@ -904,7 +945,7 @@ const FieldComponent = ({
   // Calculate responsive font size based on field size
   const fieldWidth = (containerWidth * field.widthPercent) / 100
   const fieldHeight = (containerHeight * field.heightPercent) / 100
-  const baseFontSize = Math.max(10, Math.min(14, fieldHeight * 0.4))
+  const baseFontSize = field.fontSize || Math.max(10, Math.min(14, fieldHeight * 0.4))
   const fontSize = isMobile ? Math.max(10, baseFontSize * 0.9) : baseFontSize
 
   const handleMouseDown = (e) => {
@@ -931,20 +972,26 @@ const FieldComponent = ({
       }}
     >
       {/* Field Content */}
-      <div className="w-full h-full flex items-center justify-center p-1">
+      <div className="w-full h-full flex items-center justify-center p-1 relative">
+        {/* Required Indicator */}
+        {field.required && (
+          <div className="absolute -top-1 -right-1 text-red-500 text-xs">*</div>
+        )}
+        
         {field.type === FIELD_TYPES.TEXT && (
           <input
             type="text"
             value={field.value || ''}
             onChange={(e) => onValueChange(field.id, e.target.value)}
             onClick={(e) => e.stopPropagation()}
-            className="w-full h-full bg-transparent border-none outline-none text-gray-700"
-            placeholder="Enter text..."
+            className="w-full h-full bg-transparent border-none outline-none"
+            placeholder={field.placeholder || "Enter text..."}
             style={{ 
               fontSize: `${fontSize}px`,
-              padding: '2px 4px'
-              }}
-            />
+              padding: '2px 4px',
+              color: field.textColor || '#000000'
+            }}
+          />
         )}
 
         {field.type === FIELD_TYPES.NAME && (
@@ -953,11 +1000,12 @@ const FieldComponent = ({
             value={field.value || ''}
             onChange={(e) => onValueChange(field.id, e.target.value)}
             onClick={(e) => e.stopPropagation()}
-            className="w-full h-full bg-transparent border-none outline-none text-gray-700 font-medium"
-            placeholder="Full Name"
+            className="w-full h-full bg-transparent border-none outline-none font-medium"
+            placeholder={field.placeholder || "Full Name"}
             style={{ 
               fontSize: `${fontSize}px`,
-              padding: '2px 4px'
+              padding: '2px 4px',
+              color: field.textColor || '#000000'
             }}
           />
         )}
@@ -968,11 +1016,12 @@ const FieldComponent = ({
             value={field.value || ''}
             onChange={(e) => onValueChange(field.id, e.target.value)}
             onClick={(e) => e.stopPropagation()}
-            className="w-full h-full bg-transparent border-none outline-none text-gray-700"
-            placeholder="email@example.com"
+            className="w-full h-full bg-transparent border-none outline-none"
+            placeholder={field.placeholder || "email@example.com"}
             style={{ 
               fontSize: `${fontSize}px`,
-              padding: '2px 4px'
+              padding: '2px 4px',
+              color: field.textColor || '#000000'
             }}
           />
         )}
@@ -983,11 +1032,12 @@ const FieldComponent = ({
             value={field.value || ''}
             onChange={(e) => onValueChange(field.id, e.target.value)}
             onClick={(e) => e.stopPropagation()}
-            className="w-full h-full bg-transparent border-none outline-none text-gray-700"
-            placeholder="(555) 123-4567"
+            className="w-full h-full bg-transparent border-none outline-none"
+            placeholder={field.placeholder || "(555) 123-4567"}
             style={{ 
               fontSize: `${fontSize}px`,
-              padding: '2px 4px'
+              padding: '2px 4px',
+              color: field.textColor || '#000000'
             }}
           />
         )}
@@ -1002,7 +1052,8 @@ const FieldComponent = ({
               width: `${Math.min(fieldWidth * 0.8, fieldHeight * 0.8)}px`,
               height: `${Math.min(fieldWidth * 0.8, fieldHeight * 0.8)}px`,
               minWidth: '16px',
-              minHeight: '16px'
+              minHeight: '16px',
+              borderColor: field.borderColor || config.borderColor
             }}
           />
         )}
@@ -1013,16 +1064,17 @@ const FieldComponent = ({
             value={field.value || ''}
             onChange={(e) => onValueChange(field.id, e.target.value)}
             onClick={(e) => e.stopPropagation()}
-            className="w-full h-full bg-transparent border-none outline-none text-gray-700"
+            className="w-full h-full bg-transparent border-none outline-none"
             style={{ 
               fontSize: `${fontSize}px`,
-              padding: '2px 4px'
+              padding: '2px 4px',
+              color: field.textColor || '#000000'
             }}
           />
         )}
         
         {field.type === FIELD_TYPES.SIGNATURE && (
-          <div className="flex flex-col items-center justify-center text-gray-600">
+          <div className="flex flex-col items-center justify-center" style={{ color: field.textColor || '#6B7280' }}>
             <Icon 
               style={{ 
                 width: `${Math.min(fieldWidth * 0.3, fieldHeight * 0.5)}px`,
@@ -1032,13 +1084,13 @@ const FieldComponent = ({
               }} 
             />
             <span style={{ fontSize: `${Math.max(8, fontSize * 0.7)}px` }}>
-              Sign here
+              {field.placeholder || "Sign here"}
             </span>
           </div>
         )}
 
         {field.type === FIELD_TYPES.STAMP && (
-          <div className="flex flex-col items-center justify-center text-gray-600">
+          <div className="flex flex-col items-center justify-center" style={{ color: field.textColor || '#6B7280' }}>
             <Icon 
               style={{ 
                 width: `${Math.min(fieldWidth * 0.4, fieldHeight * 0.6)}px`,
@@ -1048,9 +1100,28 @@ const FieldComponent = ({
               }} 
             />
             <span style={{ fontSize: `${Math.max(8, fontSize * 0.6)}px` }}>
-              Stamp
+              {field.placeholder || "Stamp"}
             </span>
           </div>
+        )}
+
+        {field.type === FIELD_TYPES.DROPDOWN && (
+          <select
+            value={field.value || ''}
+            onChange={(e) => onValueChange(field.id, e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full h-full bg-transparent border-none outline-none"
+            style={{ 
+              fontSize: `${fontSize}px`,
+              padding: '2px 4px',
+              color: field.textColor || '#000000'
+            }}
+          >
+            <option value="" disabled>{field.placeholder || "Select an option..."}</option>
+            {field.options?.map((option, index) => (
+              <option key={index} value={option}>{option}</option>
+            ))}
+          </select>
         )}
       </div>
 
@@ -1059,15 +1130,18 @@ const FieldComponent = ({
         <div className="absolute -top-8 left-0 bg-gray-900 text-white px-2 py-1 rounded text-xs flex items-center space-x-1 z-60">
           <Icon className="w-3 h-3" />
           <span className="text-xs">{config.label}</span>
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onDelete(field.id)
-          }}
+          {field.required && (
+            <span className="text-red-400 ml-1">*</span>
+          )}
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onDelete(field.id)
+            }}
             className="text-red-400 hover:text-red-300 ml-1"
-        >
+          >
             <Trash2 className="w-3 h-3" />
-        </button>
+          </button>
         </div>
       )}
     </div>
@@ -1465,6 +1539,229 @@ function DocumentPreviewGrid({ documents, allFields, onAddDocument, onRemoveDocu
           <span>{documents.length} document{documents.length !== 1 ? 's' : ''}</span>
           <span>{Object.values(allFields).reduce((total, fields) => total + fields.length, 0)} total fields</span>
         </div>
+      </div>
+    </div>
+  )
+}
+
+// Field Configuration Panel Component
+function FieldConfigurationPanel({ field, onUpdate, onClose, signers }) {
+  const userColors = [
+    { bg: '#FF6B6B', border: '#FF4757', text: '#FFFFFF' },
+    { bg: '#4ECDC4', border: '#45B7AF', text: '#FFFFFF' },
+    { bg: '#45B7D1', border: '#3A9DB8', text: '#FFFFFF' },
+    { bg: '#96CEB4', border: '#7DBFA0', text: '#FFFFFF' },
+    { bg: '#FFEEAD', border: '#FFE082', text: '#000000' },
+    { bg: '#D4A5A5', border: '#C49292', text: '#FFFFFF' },
+    { bg: '#9B59B6', border: '#8E44AD', text: '#FFFFFF' },
+    { bg: '#3498DB', border: '#2980B9', text: '#FFFFFF' },
+    { bg: '#E67E22', border: '#D35400', text: '#FFFFFF' },
+    { bg: '#2ECC71', border: '#27AE60', text: '#FFFFFF' },
+    { bg: '#F1C40F', border: '#F39C12', text: '#000000' },
+    { bg: '#1ABC9C', border: '#16A085', text: '#FFFFFF' },
+    { bg: '#E74C3C', border: '#C0392B', text: '#FFFFFF' },
+    { bg: '#34495E', border: '#2C3E50', text: '#FFFFFF' },
+    { bg: '#16A085', border: '#138D75', text: '#FFFFFF' }
+  ]
+
+  const signersWithColors = signers.map((signer, index) => ({
+    ...signer,
+    color: userColors[index % userColors.length]
+  }))
+
+  const [config, setConfig] = React.useState({
+    placeholder: field.placeholder || '',
+    required: field.required || false,
+    assignedSigner: field.assignedSigner || null,
+    options: field.options || ['Option 1', 'Option 2', 'Option 3']
+  })
+
+  React.useEffect(() => {
+    setConfig({
+      placeholder: field.placeholder || '',
+      required: field.required || false,
+      assignedSigner: field.assignedSigner || null,
+      options: field.options || ['Option 1', 'Option 2', 'Option 3']
+    })
+  }, [field])
+
+  const handleChange = (key, value) => {
+    const newConfig = { ...config, [key]: value }
+    setConfig(newConfig)
+    onUpdate(field.id, newConfig)
+  }
+
+  const handleOptionsChange = (index, value) => {
+    const newOptions = [...config.options]
+    newOptions[index] = value
+    handleChange('options', newOptions)
+  }
+
+  const addOption = () => {
+    handleChange('options', [...config.options, `Option ${config.options.length + 1}`])
+  }
+
+  const removeOption = (index) => {
+    const newOptions = config.options.filter((_, i) => i !== index)
+    handleChange('options', newOptions)
+  }
+
+  const selectedSigner = signersWithColors.find(s => s.id === config.assignedSigner)
+
+  // Custom dropdown for signer assignment
+  const [dropdownOpen, setDropdownOpen] = React.useState(false)
+  const dropdownRef = React.useRef(null)
+
+  React.useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  return (
+    <div className="w-80 bg-white border-l border-gray-200 h-full overflow-y-auto">
+      {/* Header */}
+      <div className="p-4 border-b border-gray-200 bg-gray-50">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            {/* Large color preview for selected signer */}
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedSigner ? '' : 'bg-gray-100'}`}
+              style={{ backgroundColor: selectedSigner ? selectedSigner.color.bg : undefined, border: selectedSigner ? `2px solid ${selectedSigner.color.border}` : undefined }}>
+              <FileText className={`w-4 h-4 ${selectedSigner ? 'text-white' : 'text-gray-500'}`} />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900">Field Settings</h3>
+              <p className="text-xs text-gray-500">{FIELD_CONFIGS[field.type].label}</p>
+            </div>
+          </div>
+          <button 
+            onClick={onClose}
+            className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors"
+          >
+            <X className="w-4 h-4 text-gray-500" />
+          </button>
+        </div>
+      </div>
+
+      <div className="p-4 space-y-4">
+        {/* Placeholder */}
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1.5">Placeholder Text</label>
+          <input
+            type="text"
+            value={config.placeholder}
+            onChange={(e) => handleChange('placeholder', e.target.value)}
+            className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Enter placeholder text..."
+          />
+        </div>
+
+        {/* Required Field */}
+        <div className="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg">
+          <input
+            type="checkbox"
+            id="required"
+            checked={config.required}
+            onChange={(e) => handleChange('required', e.target.checked)}
+            className="h-3.5 w-3.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+          />
+          <label htmlFor="required" className="text-sm text-gray-700">
+            Required Field
+          </label>
+        </div>
+
+        {/* Custom Signer Assignment Dropdown */}
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1.5">Assign to Signer</label>
+          <div className="relative" ref={dropdownRef}>
+            <button
+              type="button"
+              className="w-full flex items-center justify-between px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              style={{
+                borderColor: selectedSigner ? selectedSigner.color.border : undefined,
+                backgroundColor: selectedSigner ? selectedSigner.color.bg : undefined,
+                color: selectedSigner ? selectedSigner.color.text : undefined
+              }}
+              onClick={() => setDropdownOpen((open) => !open)}
+            >
+              <span className="flex items-center">
+                {selectedSigner && (
+                  <span className="w-4 h-4 rounded-full mr-2 border border-white" style={{ backgroundColor: selectedSigner.color.bg, borderColor: selectedSigner.color.border }} />
+                )}
+                {selectedSigner ? (selectedSigner.name || selectedSigner.email) : 'Select a signer...'}
+              </span>
+              <ChevronDown className="w-4 h-4 text-gray-500 ml-2" />
+            </button>
+            {dropdownOpen && (
+              <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                {signersWithColors.map((signer) => (
+                  <button
+                    key={signer.id}
+                    type="button"
+                    className={`w-full flex items-center px-3 py-2 text-sm hover:bg-gray-100 ${config.assignedSigner === signer.id ? 'bg-gray-50 font-semibold' : ''}`}
+                    style={{ color: signer.color.text }}
+                    onClick={() => { handleChange('assignedSigner', signer.id); setDropdownOpen(false); }}
+                  >
+                    <span className="w-4 h-4 rounded-full mr-2 border" style={{ backgroundColor: signer.color.bg, borderColor: signer.color.border }} />
+                    {signer.name || signer.email}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Color indicator for selected signer */}
+        {selectedSigner && (
+          <div className="mt-2 flex items-center space-x-2 p-2 bg-gray-50 rounded-lg">
+            <div 
+              className="w-5 h-5 rounded-full border-2" 
+              style={{ backgroundColor: selectedSigner.color.bg, borderColor: selectedSigner.color.border }}
+            />
+            <span className="text-sm text-gray-600">
+              {selectedSigner.name || selectedSigner.email}
+            </span>
+          </div>
+        )}
+
+        {/* Dropdown Options */}
+        {field.type === FIELD_TYPES.DROPDOWN && (
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-medium text-gray-700">Dropdown Options</label>
+              <button
+                onClick={addOption}
+                className="text-xs text-blue-600 hover:text-blue-700 flex items-center space-x-1"
+              >
+                <Plus className="w-3 h-3" />
+                <span>Add</span>
+              </button>
+            </div>
+            <div className="space-y-1.5">
+              {config.options.map((option, index) => (
+                <div key={index} className="flex items-center space-x-1.5">
+                  <input
+                    type="text"
+                    value={option}
+                    onChange={(e) => handleOptionsChange(index, e.target.value)}
+                    className="flex-1 px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder={`Option ${index + 1}`}
+                  />
+                  <button
+                    onClick={() => removeOption(index)}
+                    className="p-1 text-gray-500 hover:text-red-500 rounded-lg hover:bg-gray-100"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -1985,6 +2282,30 @@ export default function EditDocumentEditor() {
     }
   }, [documents, allFields, documentId, router])
 
+  // Update field configuration
+  const handleFieldConfigUpdate = (fieldId, updatedConfig) => {
+    // Find which document contains this field
+    for (const [docIndex, fields] of Object.entries(allFields)) {
+      const fieldIndex = fields.findIndex(field => field.id === fieldId)
+      if (fieldIndex !== -1) {
+        setAllFields(prev => ({
+          ...prev,
+          [docIndex]: prev[docIndex].map(field => 
+            field.id === fieldId 
+              ? { 
+                  ...field,
+                  ...updatedConfig,
+                  documentIndex: parseInt(docIndex) // Ensure documentIndex is preserved
+                } 
+              : field
+          )
+        }))
+        break
+      }
+    }
+    setSelectedField(fieldId)
+  }
+
   if (loading) {
     return <LoadingSpinner message="Loading document..." />
   }
@@ -2290,32 +2611,46 @@ export default function EditDocumentEditor() {
           />
         )}
 
-        {/* Main Content - Adjusted for compact sidebar */}
+        {/* Main Content - Adjusted for right panel */}
         <div className="flex-1 overflow-hidden md:ml-72 bg-gray-100">
           {documents.length > 0 && (
             <div className="h-full p-4">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full overflow-hidden">
-                <DocumentViewer
-                  documents={documents}
-                  zoom={zoom}
-                  onZoomChange={setZoom}
-                  onDocumentClick={handleDocumentClick}
-                >
-                  {getAllFields().map((field) => (
-                    <FieldComponent
-                      key={field.id}
-                      field={field}
-                      pageNumber={field.pageNumber}
-                      documentIndex={field.documentIndex}
-                      isSelected={selectedField === field.id}
-                      isDragging={isDragging && draggedField?.id === field.id}
-                      onSelect={handleFieldSelect}
-                      onDragStart={handleDragStart}
-                      onDelete={handleFieldDelete}
-                      onValueChange={handleFieldValueChange}
-                    />
-                  ))}
-                </DocumentViewer>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full overflow-hidden flex">
+                <div className="flex-1">
+                  <DocumentViewer
+                    documents={documents}
+                    zoom={zoom}
+                    onZoomChange={setZoom}
+                    onDocumentClick={handleDocumentClick}
+                    signers={documentData?.signers || []} // Pass signers to DocumentViewer
+                  >
+                    {getAllFields().map((field) => (
+                      <FieldComponent
+                        key={field.id}
+                        field={field}
+                        pageNumber={field.pageNumber}
+                        documentIndex={field.documentIndex}
+                        isSelected={selectedField === field.id}
+                        isDragging={isDragging && draggedField?.id === field.id}
+                        onSelect={handleFieldSelect}
+                        onDragStart={handleDragStart}
+                        onDelete={handleFieldDelete}
+                        onValueChange={handleFieldValueChange}
+                        signers={documentData?.signers || []} // Pass signers to FieldComponent
+                      />
+                    ))}
+                  </DocumentViewer>
+                </div>
+
+                {/* Right Panel for Field Configuration */}
+                {selectedField && (
+                  <FieldConfigurationPanel
+                    field={getAllFields().find(f => f.id === selectedField)}
+                    onUpdate={handleFieldConfigUpdate}
+                    onClose={() => setSelectedField(null)}
+                    signers={documentData?.signers || []}
+                  />
+                )}
               </div>
             </div>
           )}
