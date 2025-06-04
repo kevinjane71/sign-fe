@@ -110,98 +110,113 @@ export default function SignCompletePage() {
     )
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <div className="text-center">
-            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Document Signed Successfully!
-            </h1>
-            <p className="text-gray-600">
-              Your signature has been added to the document
+  if (status === 'success') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-4xl mx-auto px-4 py-6">
+            <div className="text-center">
+              <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Document Signed Successfully!
+              </h1>
+              <p className="text-gray-600">
+                Your signature has been added to the document
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Document Details
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div>
+                <label className="text-sm font-medium text-gray-500">Document Title</label>
+                <p className="text-gray-900">{documentData?.title || 'Signed Document'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">Signed By</label>
+                <p className="text-gray-900">{signerEmail}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">Signed On</label>
+                <p className="text-gray-900">{new Date().toLocaleDateString()}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">Status</label>
+                <div className="flex items-center">
+                  <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                  <span className="text-green-700 font-medium">Completed</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              What's Next?
+            </h3>
+            
+            <div className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <Mail className="w-5 h-5 text-blue-500 mt-0.5" />
+                <div>
+                  <p className="font-medium text-gray-900">Email Notification Sent</p>
+                  <p className="text-sm text-gray-600">
+                    All parties involved will receive an email with the signed document attached.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-3">
+                <Download className="w-5 h-5 text-green-500 mt-0.5" />
+                <div>
+                  <p className="font-medium text-gray-900">Download Available</p>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {documentData?.allSigned && documentData?.downloadUrl ? (
+                      'You can download a copy of the signed document now.'
+                    ) : (
+                      'The final signed document will be available once all parties have signed.'
+                    )}
+                  </p>
+                  <button
+                    onClick={() => {
+                      if (documentData?.allSigned && documentData?.downloadUrl) {
+                        window.open(documentData.downloadUrl, '_blank')
+                      }
+                    }}
+                    disabled={!(documentData?.allSigned && documentData?.downloadUrl)}
+                    className={`px-4 py-2 bg-green-600 text-white text-sm rounded-md transition-colors ${
+                      documentData?.allSigned && documentData?.downloadUrl
+                        ? 'hover:bg-green-700'
+                        : 'opacity-50 cursor-not-allowed'
+                    }`}
+                  >
+                    Download Signed Document
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center mt-8 text-sm text-gray-500">
+            <p>
+              This document has been digitally signed and is legally binding.
+            </p>
+            <p className="mt-2">
+              If you have any questions, please contact support.
             </p>
           </div>
         </div>
       </div>
-
-      {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Document Details
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-              <label className="text-sm font-medium text-gray-500">Document Title</label>
-              <p className="text-gray-900">{documentData?.title || 'Signed Document'}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">Signed By</label>
-              <p className="text-gray-900">{signerEmail}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">Signed On</label>
-              <p className="text-gray-900">{new Date().toLocaleDateString()}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">Status</label>
-              <div className="flex items-center">
-                <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                <span className="text-green-700 font-medium">Completed</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
-            What's Next?
-          </h3>
-          
-          <div className="space-y-4">
-            <div className="flex items-start space-x-3">
-              <Mail className="w-5 h-5 text-blue-500 mt-0.5" />
-              <div>
-                <p className="font-medium text-gray-900">Email Notification Sent</p>
-                <p className="text-sm text-gray-600">
-                  All parties involved will receive an email with the signed document attached.
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-3">
-              <Download className="w-5 h-5 text-green-500 mt-0.5" />
-              <div>
-                <p className="font-medium text-gray-900">Download Available</p>
-                <p className="text-sm text-gray-600 mb-2">
-                  You can download a copy of the signed document anytime.
-                </p>
-                <button
-                  onClick={handleDownloadDocument}
-                  className="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors"
-                >
-                  Download Signed Document
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="text-center mt-8 text-sm text-gray-500">
-          <p>
-            This document has been digitally signed and is legally binding.
-          </p>
-          <p className="mt-2">
-            If you have any questions, please contact support.
-          </p>
-        </div>
-      </div>
-    </div>
-  )
+    )
+  }
 } 
