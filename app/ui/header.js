@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, usePathname } from 'next/navigation'
-import { FileText, User, LogIn, LogOut, Menu, X, FileIcon, RotateCcw } from 'lucide-react'
+import { FileText, User, LogIn, LogOut, Menu, X, FileIcon, RotateCcw, PenTool } from 'lucide-react'
 import { useState } from 'react'
 import useAuth from '../hooks/useAuth'
 
@@ -109,6 +109,13 @@ export default function Header() {
                   <FileIcon className="w-4 h-4" />
                   <span>Documents</span>
                 </button>
+                <button
+                  onClick={() => handleNavigation('/your-sign')}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
+                >
+                  <PenTool className="w-4 h-4" />
+                  <span>Your Sign</span>
+                </button>
               </nav>
             )}
 
@@ -190,13 +197,22 @@ export default function Header() {
             <div className="space-y-3">
               {/* Show Documents in mobile menu when logged in and not on "/" page */}
               {user && pathname !== '/' && (
-                <button
-                  onClick={() => handleNavigation('/dashboard')}
-                  className="w-full flex items-center space-x-4 px-6 py-4 rounded-xl text-left transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
-                >
-                  <FileIcon className="w-6 h-6" />
-                  <span className="font-medium text-base">Documents</span>
-                </button>
+                <>
+                  <button
+                    onClick={() => handleNavigation('/dashboard')}
+                    className="w-full flex items-center space-x-4 px-6 py-4 rounded-xl text-left transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
+                  >
+                    <FileIcon className="w-6 h-6" />
+                    <span className="font-medium text-base">Documents</span>
+                  </button>
+                  <button
+                    onClick={() => handleNavigation('/your-sign')}
+                    className="w-full flex items-center space-x-4 px-6 py-4 rounded-xl text-left transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
+                  >
+                    <PenTool className="w-6 h-6" />
+                    <span className="font-medium text-base">Your Sign</span>
+                  </button>
+                </>
               )}
 
               {/* Pricing/Billing in mobile menu */}
