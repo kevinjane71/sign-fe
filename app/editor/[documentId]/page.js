@@ -252,6 +252,51 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
     }
   }, [documentData, documents, signers.length])
 
+  // On mount, restore from sessionStorage if available
+  useEffect(() => {
+    const stored = sessionStorage.getItem('documentConfiguration');
+    if (stored) {
+      try {
+        const config = JSON.parse(stored);
+        if (config.signers) setSigners(config.signers);
+        if (config.subject) setSubject(config.subject);
+        if (config.message) setMessage(config.message);
+        if (config.requireAuthentication !== undefined) setRequireAuthentication(config.requireAuthentication);
+        if (config.allowDelegation !== undefined) setAllowDelegation(config.allowDelegation);
+        if (config.allowComments !== undefined) setAllowComments(config.allowComments);
+        if (config.sendReminders !== undefined) setSendReminders(config.sendReminders);
+        if (config.reminderFrequency !== undefined) setReminderFrequency(config.reminderFrequency);
+        if (config.expirationEnabled !== undefined) setExpirationEnabled(config.expirationEnabled);
+        if (config.expirationDays !== undefined) setExpirationDays(config.expirationDays);
+        if (config.signingOrder) setSigningOrder(config.signingOrder);
+        if (config.requireAllSigners !== undefined) setRequireAllSigners(config.requireAllSigners);
+        if (config.allowPrinting !== undefined) setAllowPrinting(config.allowPrinting);
+        if (config.allowDownload !== undefined) setAllowDownload(config.allowDownload);
+      } catch {}
+    }
+  }, []);
+
+  // On any change, persist to sessionStorage
+  useEffect(() => {
+    const config = {
+      signers,
+      subject,
+      message,
+      requireAuthentication,
+      allowDelegation,
+      allowComments,
+      sendReminders,
+      reminderFrequency,
+      expirationEnabled,
+      expirationDays,
+      signingOrder,
+      requireAllSigners,
+      allowPrinting,
+      allowDownload
+    };
+    sessionStorage.setItem('documentConfiguration', JSON.stringify(config));
+  }, [signers, subject, message, requireAuthentication, allowDelegation, allowComments, sendReminders, reminderFrequency, expirationEnabled, expirationDays, signingOrder, requireAllSigners, allowPrinting, allowDownload]);
+
   const addSigner = () => {
     const newSigner = {
       id: Date.now(),
@@ -962,13 +1007,18 @@ const FieldComponent = ({
     { bg: '#E74C3C', border: '#C0392B', text: '#FFFFFF' },
     { bg: '#34495E', border: '#2C3E50', text: '#FFFFFF' },
     { bg: '#16A085', border: '#138D75', text: '#FFFFFF' }
-  ]
-  const signersWithColors = signers.map((signer, index) => ({
-    ...signer,
-    color: userColors[index % userColors.length]
-  }))
-  const assignedSigner = signersWithColors.find(s => s.id === field.assignedSigner)
-  const signerColor = assignedSigner?.color
+  ];
+  let signersWithColors = [];
+  if (typeof window !== 'undefined' && window.location.pathname.includes('/editor/local-new')) {
+    try {
+      const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+      signersWithColors = (config.signers || []).map((signer, index) => ({ ...signer, color: userColors[index % userColors.length] }));
+    } catch { signersWithColors = []; }
+  } else {
+    signersWithColors = (signers || []).map((signer, index) => ({ ...signer, color: userColors[index % userColors.length] }));
+  }
+  const assignedSigner = signersWithColors.find(s => s.id === field.assignedSigner);
+  const signerColor = assignedSigner?.color;
   
   // Calculate responsive position and size
   const fieldStyle = {
@@ -1201,13 +1251,13 @@ const FieldComponent = ({
 }
 
 // Mobile Floating Action Button
-const MobileFloatingButton = ({ onFieldTypeSelect, selectedFieldType }) => {
+const MobileFloatingButton = ({ onFieldTypeSelect, selectedFieldType, toast }) => {
   const [isOpen, setIsOpen] = useState(false)
 
   const handleFieldSelect = (type) => {
     const isActive = selectedFieldType === type
     onFieldTypeSelect(isActive ? null : type)
-    if (!isActive) {
+    if (!isActive && toast) {
       toast.info(`Tap on document to place ${FIELD_CONFIGS[type].label}`)
     }
   }
@@ -1597,7 +1647,9 @@ function DocumentPreviewGrid({ documents, allFields, onAddDocument, onRemoveDocu
 }
 
 // Field Configuration Panel Component
-function FieldConfigurationPanel({ field, onUpdate, onClose, signers }) {
+function FieldConfigurationPanel({ field, onUpdate, onClose, signers, panelClassName }) {
+  if (!field) return null;
+
   const userColors = [
     { bg: '#FF6B6B', border: '#FF4757', text: '#FFFFFF' },
     { bg: '#4ECDC4', border: '#45B7AF', text: '#FFFFFF' },
@@ -1675,7 +1727,7 @@ function FieldConfigurationPanel({ field, onUpdate, onClose, signers }) {
   }, [])
 
   return (
-    <div className="w-80 bg-white border-l border-gray-200 h-full overflow-y-auto">
+    <div className={`w-96 min-w-[380px] bg-white border-l border-gray-200 h-full overflow-y-auto ${panelClassName}`}>
       {/* Header */}
       <div className="p-4 border-b border-gray-200 bg-gray-50">
         <div className="flex justify-between items-center">
@@ -1879,43 +1931,69 @@ export default function EditDocumentEditor() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Load documents from API - Enhanced to preserve step on refresh
+  // Load documents from API or sessionStorage
   useEffect(() => {
-    const loadDocumentFromAPI = async () => {
+    const loadDocument = async () => {
       if (!documentId) {
         toast.error('No document ID provided')
         router.push('/')
         return
       }
 
+      if (documentId === 'local-new') {
+        // Load from sessionStorage
+        setLoading(true)
+        try {
+          let docs = []
+          let fieldsData = {}
+          const pendingDocs = sessionStorage.getItem('pendingDocuments')
+          const pendingDoc = sessionStorage.getItem('pendingDocument')
+          if (pendingDocs) {
+            docs = JSON.parse(pendingDocs)
+          } else if (pendingDoc) {
+            docs = [JSON.parse(pendingDoc)]
+          }
+          if (docs.length === 0) {
+            toast.error('No local file found. Please upload again.')
+            router.push('/dashboard')
+            return
+          }
+          // No fields for local files initially
+          docs.forEach((_, idx) => { fieldsData[idx] = [] })
+          setDocuments(docs)
+          setAllFields(fieldsData)
+          setDocumentData(null)
+          toast.success(`Loaded ${docs.length} local document(s)`)
+        } catch (err) {
+          toast.error('Failed to load local file')
+          router.push('/dashboard')
+        } finally {
+          setLoading(false)
+        }
+        return
+      }
+
+      // Default: load from API
       try {
         setLoading(true)
-        
         // Fetch document data from API using authenticated function
         const result = await getDocument(documentId)
         const docData = result.document
-        
-        console.log('📋 Loaded document data for pre-filling:', docData)
         setDocumentData(docData)
-        
         // Convert API files to document format for the viewer
         const loadedDocuments = []
         const fieldsData = {}
-        
         for (let i = 0; i < docData.files.length; i++) {
           const file = docData.files[i]
-          
           try {
             // Fetch the actual file content using authenticated function
             const fileBlob = await getDocumentFile(documentId, file.fileId)
-            
             // Convert blob to base64 data URL for the viewer
             const reader = new FileReader()
             const dataUrl = await new Promise((resolve) => {
               reader.onload = () => resolve(reader.result)
               reader.readAsDataURL(fileBlob)
             })
-            
             // Create document object compatible with the viewer
             const documentObj = {
               name: file.originalName,
@@ -1925,26 +2003,20 @@ export default function EditDocumentEditor() {
               fileId: file.fileId,
               title: file.title
             }
-            
             loadedDocuments.push(documentObj)
-            
             // Convert fields from API format to editor format
             const convertedFields = (file.fields || []).map(field => ({
               ...field,
               documentIndex: i // Ensure document index is set
             }))
-            
             fieldsData[i] = convertedFields
-            
           } catch (fileError) {
             console.error(`Error loading file ${file.originalName}:`, fileError)
             toast.error(`Failed to load ${file.originalName}`)
           }
         }
-        
         setDocuments(loadedDocuments)
         setAllFields(fieldsData)
-        
         // If URL has step parameter, ensure it's valid
         const urlStep = searchParams.get('step')
         if (urlStep) {
@@ -1959,9 +2031,7 @@ export default function EditDocumentEditor() {
             setCurrentStep(1)
           }
         }
-        
         toast.success(`Loaded ${loadedDocuments.length} document(s)`)
-        
       } catch (error) {
         console.error('Error loading document:', error)
         toast.error('Failed to load document')
@@ -1970,8 +2040,7 @@ export default function EditDocumentEditor() {
         setLoading(false)
       }
     }
-
-    loadDocumentFromAPI()
+    loadDocument()
   }, [documentId, router, searchParams])
 
   // Document management functions
@@ -2737,16 +2806,56 @@ export default function EditDocumentEditor() {
                     />
                   ))}
                 </DocumentViewer>
-                </div>
+              </div>
 
                 {/* Right Panel for Field Configuration */}
                 {selectedField && (
-                  <FieldConfigurationPanel
-                    field={getAllFields().find(f => f.id === selectedField)}
-                    onUpdate={handleFieldConfigUpdate}
-                    onClose={() => setSelectedField(null)}
-                    signers={documentData?.signers || []}
-                  />
+                  <>
+                    {/* Desktop: fixed right panel */}
+                    <div className="hidden md:block fixed top-28 right-0 h-[calc(100vh-112px)] w-96 min-w-[380px] bg-white border-l border-gray-200 shadow-lg overflow-y-auto z-40">
+                      <FieldConfigurationPanel
+                        field={getAllFields().find(f => f.id === selectedField)}
+                        onUpdate={handleFieldConfigUpdate}
+                        onClose={() => setSelectedField(null)}
+                        signers={
+                          documentId === 'local-new'
+                            ? (() => {
+                                try {
+                                  const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+                                  return config.signers || [];
+                                } catch { return []; }
+                              })()
+                            : documentData?.signers || []
+                        }
+                        panelClassName="w-96 min-w-[380px]"
+                      />
+                    </div>
+                    {/* Mobile: bottom sheet/modal */}
+                    <div className="fixed md:hidden inset-x-0 bottom-0 z-50 bg-white border-t border-gray-200 rounded-t-2xl shadow-2xl max-h-[80vh] overflow-y-auto animate-slideUp">
+                      <div className="flex justify-between items-center p-4 border-b border-gray-100">
+                        <h3 className="text-base font-semibold text-gray-900">Field Settings</h3>
+                        <button onClick={() => setSelectedField(null)} className="p-2 rounded-full hover:bg-gray-100">
+                          <X className="w-5 h-5 text-gray-500" />
+                        </button>
+                      </div>
+                      <FieldConfigurationPanel
+                        field={getAllFields().find(f => f.id === selectedField)}
+                        onUpdate={handleFieldConfigUpdate}
+                        onClose={() => setSelectedField(null)}
+                        signers={
+                          documentId === 'local-new'
+                            ? (() => {
+                                try {
+                                  const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+                                  return config.signers || [];
+                                } catch { return []; }
+                              })()
+                            : documentData?.signers || []
+                        }
+                        panelClassName="w-full min-w-0 px-2"
+                      />
+                    </div>
+                  </>
                 )}
               </div>
             </div>
@@ -2754,11 +2863,69 @@ export default function EditDocumentEditor() {
         </div>
       </div>
 
-      {/* Compact Mobile Floating Button */}
-      <MobileFloatingButton 
-          onFieldTypeSelect={setSelectedFieldType}
-          selectedFieldType={selectedFieldType}
-      />
+      {/* Mobile: integrated bottom sheet for palette and field config */}
+      {typeof window !== 'undefined' && window.innerWidth < 768 && (
+        <div className="fixed md:hidden inset-x-0 bottom-0 z-50 bg-white border-t border-gray-200 rounded-t-2xl shadow-2xl max-h-[85vh] overflow-y-auto animate-slideUp">
+          {selectedField ? (
+            <>
+              <div className="flex justify-between items-center p-4 border-b border-gray-100">
+                <button onClick={() => setSelectedField(null)} className="p-2 rounded-full hover:bg-gray-100">
+                  <ArrowLeft className="w-5 h-5 text-gray-500" />
+                </button>
+                <h3 className="text-base font-semibold text-gray-900 flex-1 text-center">Field Settings</h3>
+                <button onClick={() => setSelectedField(null)} className="p-2 rounded-full hover:bg-gray-100">
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              <FieldConfigurationPanel
+                field={getAllFields().find(f => f.id === selectedField)}
+                onUpdate={handleFieldConfigUpdate}
+                onClose={() => setSelectedField(null)}
+                signers={
+                  documentId === 'local-new'
+                    ? (() => {
+                        try {
+                          const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+                          return config.signers || [];
+                        } catch { return []; }
+                      })()
+                    : documentData?.signers || []
+                }
+                panelClassName="w-full min-w-0 px-2"
+              />
+            </>
+          ) : (
+            <div className="p-4">
+              <h3 className="text-base font-semibold text-gray-900 mb-3 text-center">Add Field</h3>
+              <div className="flex flex-wrap justify-center gap-2">
+                {Object.entries(FIELD_CONFIGS).map(([type, config]) => {
+                  const Icon = config.icon
+                  const isActive = selectedFieldType === type
+                  return (
+                    <button
+                      key={type}
+                      onClick={() => {
+                        setSelectedFieldType(isActive ? null : type)
+                        if (!isActive && toast) {
+                          toast.info(`Tap on document to place ${config.label}`)
+                        }
+                      }}
+                      className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all min-w-[70px] min-h-[70px] ${
+                        isActive 
+                          ? 'border-blue-500 bg-blue-50' 
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      <Icon className="w-6 h-6 mb-1" style={{ color: config.color }} />
+                      <span className="text-xs font-medium text-gray-700">{config.label.split(' ')[0]}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 } 

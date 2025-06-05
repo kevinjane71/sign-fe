@@ -253,7 +253,7 @@ export default function Dashboard() {
           toast.success(`${finalFiles.length} document(s) loaded successfully!`)
           
           // Navigate directly to editor
-          router.push('/editor/new')
+          router.push('/editor/local-new')
         }
       }
 
@@ -272,7 +272,7 @@ export default function Dashboard() {
             }
             
             toast.success(`${finalFiles.length} document(s) loaded successfully!`)
-            router.push('/editor/new')
+            router.push('/editor/local-new')
           } else {
             setIsProcessing(false)
           }
