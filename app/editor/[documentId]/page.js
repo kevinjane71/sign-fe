@@ -376,43 +376,41 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Compact Header */}
-      <header className="bg-white border-b border-gray-200 fixed top-20 left-0 right-0 z-50 shadow-sm md:ml-72">
-        <div className="px-4 py-3">
+      <header className="bg-white border-b border-gray-200 z-50 shadow-sm md:ml-72 sticky top-0 md:fixed md:top-20 left-0 right-0">
+        <div className="px-3 py-2 md:px-4 md:py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 md:space-x-3">
               <button 
                 onClick={onBack}
-                className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <ArrowLeft className="w-4 h-4 text-gray-600" />
               </button>
-              
-              <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-                  <Settings className="w-3.5 h-3.5 text-white" />
+              <div className="flex items-center space-x-1 md:space-x-2">
+                <div className="w-6 h-6 md:w-7 md:h-7 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                  <Settings className="w-3 h-3 md:w-3.5 md:h-3.5 text-white" />
                 </div>
-                <div>
-                  <h1 className="text-sm font-bold text-gray-900">Configure Document</h1>
-                  <div className="flex items-center space-x-2 text-xs text-gray-500">
+                <div className="min-w-0">
+                  <h1 className="text-xs md:text-sm font-bold text-gray-900 truncate max-w-[120px] md:max-w-[200px]">Configure Document</h1>
+                  <div className="flex items-center space-x-1 md:space-x-2 text-[11px] md:text-xs text-gray-500">
                     <span>Step 1 of 2</span>
                     <span>•</span>
-                    <span>{fields.length} fields</span>
+                    <span className="truncate max-w-[60px] md:max-w-[120px]">{fields.length} fields</span>
                   </div>
                 </div>
               </div>
             </div>
-            
             <button
               onClick={handleSend}
               disabled={isLoading}
-              className="flex items-center space-x-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-xs font-semibold shadow-sm disabled:opacity-50"
+              className="flex items-center space-x-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-xs font-semibold shadow-sm disabled:opacity-50"
             >
               {isLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <ArrowRight className="w-4 h-4" />
               )}
-              <span>Next: Add Fields</span>
+              <span>Add Fields</span>
             </button>
           </div>
         </div>
@@ -728,7 +726,7 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
               ) : (
                 <ArrowRight className="w-3 h-3" />
               )}
-              <span>Next: Add Fields</span>
+              <span>Add Fields</span>
             </button>
           </div>
         </div>
