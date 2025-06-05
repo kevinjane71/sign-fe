@@ -85,9 +85,9 @@ export default function Header() {
                 <FileText className="w-7 h-7 text-white" />
               </div>
               <div className="hidden sm:block">
-                <div className="flex flex-col">
+                <div className="flex flex-col text-left">
                   <span className="text-2xl font-bold text-white">
-                    eSignTap
+                    E-SignTap
                   </span>
                   <span className="text-sm text-white/70">
                     Professional Document Signing

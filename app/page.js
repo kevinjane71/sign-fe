@@ -2,9 +2,16 @@
 
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Upload, FileText, Shield, Users, Zap, Star } from 'lucide-react'
+import { Upload, FileText, Shield, Users, Zap, Star, CheckCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import useAuth from './hooks/useAuth'
+
+const logos = [
+  'https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg',
+  'https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg',
+  'https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png',
+  'https://upload.wikimedia.org/wikipedia/commons/6/64/Expressjs.png',
+]
 
 export default function HomePage() {
   const router = useRouter()
@@ -145,25 +152,29 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-100 via-fuchsia-50 to-teal-100 relative overflow-x-hidden">
       {/* Hero Section */}
-      <section className="w-full flex flex-col items-center justify-center py-16 px-4 bg-gradient-to-br from-indigo-600/80 via-purple-600/70 to-indigo-400/80 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none select-none opacity-10" style={{background: 'radial-gradient(circle at 60% 40%, #fff 0%, transparent 70%)'}} />
+      <section className="w-full flex flex-col items-center justify-center pt-16 pb-10 px-4 bg-gradient-to-br from-blue-200 via-fuchsia-100 to-teal-200 relative overflow-hidden">
+        {/* Decorative shapes */}
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-pink-200 opacity-20 rounded-full blur-3xl z-0" />
+        <div className="absolute -bottom-40 right-0 w-96 h-96 bg-blue-200 opacity-10 rounded-full blur-3xl z-0" />
+        <div className="absolute top-1/2 left-1/2 w-40 h-40 bg-white/30 rounded-full blur-2xl z-0" style={{transform:'translate(-50%,-50%)'}} />
         <div className="relative z-10 max-w-2xl mx-auto text-center">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-white drop-shadow mb-4">Effortless Document Signing</h1>
-          <p className="text-lg sm:text-xl text-indigo-100 mb-8">Upload, add fields, and send for signatures. Secure, fast, and easy for everyone.</p>
-          <div className="bg-white/90 rounded-2xl shadow-xl border border-gray-100 p-8 flex flex-col items-center mx-auto max-w-md">
+          <h1 className="text-5xl sm:text-6xl font-extrabold text-gray-900 drop-shadow mb-4 tracking-tight">Sign documents fast and hassle-free.</h1>
+          <p className="text-lg sm:text-2xl text-gray-700 mb-8 font-medium">Upload, edit, send, and share—right from your mobile or desktop. Get signatures in seconds, anywhere.</p>
+          {/* Glassmorphic Upload Card */}
+          <div className="bg-white/60 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/40 p-8 flex flex-col items-center mx-auto max-w-md ring-2 ring-fuchsia-200/40">
             <div
               onDragOver={handleDragOver}
               onDrop={handleDrop}
-              className="w-full bg-gray-50 border-2 border-dashed border-indigo-200 rounded-xl shadow p-6 flex flex-col items-center justify-center mb-4 transition-all hover:border-indigo-400 hover:bg-indigo-50"
+              className="w-full bg-gradient-to-br from-fuchsia-50 via-white to-blue-50 border-2 border-dashed border-fuchsia-300 rounded-xl shadow p-6 flex flex-col items-center justify-center mb-4 transition-all hover:border-fuchsia-400 hover:bg-fuchsia-50/60"
             >
               <label htmlFor="file-upload" className="w-full flex flex-col items-center cursor-pointer">
                 <div className="flex flex-col items-center space-y-2">
-                  <div className="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center mb-2">
-                    <Upload className="w-7 h-7 text-indigo-600" />
+                  <div className="w-16 h-16 bg-gradient-to-br from-fuchsia-400 to-blue-400 rounded-2xl flex items-center justify-center mb-2 shadow-lg">
+                    <Upload className="w-8 h-8 text-white" />
                   </div>
-                  <span className="text-lg font-semibold text-indigo-700">Drop or select a file</span>
+                  <span className="text-lg font-semibold text-fuchsia-700">Drop or select a file</span>
                   <span className="text-xs text-gray-500">PDF, Images, Word, TXT • Up to 50MB</span>
                 </div>
                 <input
@@ -177,7 +188,7 @@ export default function HomePage() {
                 />
               </label>
               {isProcessing && (
-                <div className="mt-4 flex items-center space-x-2 text-indigo-600 animate-pulse">
+                <div className="mt-4 flex items-center space-x-2 text-fuchsia-600 animate-pulse">
                   <FileText className="w-5 h-5" />
                   <span>Processing...</span>
                 </div>
@@ -185,43 +196,58 @@ export default function HomePage() {
             </div>
             <button
               onClick={() => router.push('/dashboard')}
-              className="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl shadow hover:bg-indigo-700 transition-colors text-base mb-2"
+              className="w-full bg-gradient-to-r from-fuchsia-500 to-blue-500 text-white font-semibold py-3 rounded-xl shadow hover:from-fuchsia-600 hover:to-blue-600 transition-colors text-base mb-2 mt-2"
             >
               View My Documents
             </button>
-            <p className="text-xs text-gray-500 mt-2">No account needed for basic signing. Free to start.</p>
+            <p className="text-xs text-gray-600 mt-2">No account needed for basic signing. Free to start.</p>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
       <section className="w-full max-w-5xl mx-auto px-4 py-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl p-6 flex flex-col items-center shadow border border-indigo-100">
-          <Zap className="w-8 h-8 text-indigo-500 mb-2" />
-          <span className="text-indigo-700 font-bold text-lg">Lightning Fast</span>
+        <div className="flex flex-col items-center">
+          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-fuchsia-400 to-blue-400 flex items-center justify-center mb-2 shadow-lg">
+            <Zap className="w-7 h-7 text-white" />
+          </div>
+          <span className="text-fuchsia-700 font-bold text-lg">Lightning Fast</span>
           <span className="text-xs text-gray-500 mt-1 text-center">Upload, configure, and send in seconds.</span>
         </div>
-        <div className="bg-white rounded-xl p-6 flex flex-col items-center shadow border border-indigo-100">
-          <Shield className="w-8 h-8 text-indigo-500 mb-2" />
-          <span className="text-indigo-700 font-bold text-lg">Bank-Level Security</span>
+        <div className="flex flex-col items-center">
+          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 to-teal-400 flex items-center justify-center mb-2 shadow-lg">
+            <Shield className="w-7 h-7 text-white" />
+          </div>
+          <span className="text-blue-700 font-bold text-lg">Bank-Level Security</span>
           <span className="text-xs text-gray-500 mt-1 text-center">Your documents are encrypted and safe.</span>
         </div>
-        <div className="bg-white rounded-xl p-6 flex flex-col items-center shadow border border-indigo-100">
-          <Users className="w-8 h-8 text-indigo-500 mb-2" />
-          <span className="text-indigo-700 font-bold text-lg">Multi-Signer</span>
+        <div className="flex flex-col items-center">
+          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-teal-400 to-fuchsia-400 flex items-center justify-center mb-2 shadow-lg">
+            <Users className="w-7 h-7 text-white" />
+          </div>
+          <span className="text-teal-700 font-bold text-lg">Multi-Signer</span>
           <span className="text-xs text-gray-500 mt-1 text-center">Invite others and track every signature.</span>
         </div>
-        <div className="bg-white rounded-xl p-6 flex flex-col items-center shadow border border-indigo-100">
-          <Star className="w-8 h-8 text-indigo-500 mb-2" />
-          <span className="text-indigo-700 font-bold text-lg">Trusted Worldwide</span>
+        <div className="flex flex-col items-center">
+          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-yellow-400 to-pink-400 flex items-center justify-center mb-2 shadow-lg">
+            <Star className="w-7 h-7 text-white" />
+          </div>
+          <span className="text-yellow-700 font-bold text-lg">Trusted Worldwide</span>
           <span className="text-xs text-gray-500 mt-1 text-center">Used by thousands of professionals.</span>
         </div>
       </section>
 
-      {/* Trust Bar / Testimonial */}
+      {/* Trust Bar / Logos */}
+      <section className="w-full max-w-4xl mx-auto px-4 py-4 flex flex-wrap items-center justify-center gap-6 bg-white/60 rounded-xl shadow border border-gray-100 mb-8">
+        {logos.map((logo, i) => (
+          <img key={i} src={logo} alt="logo" className="h-8 object-contain opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition" />
+        ))}
+      </section>
+
+      {/* Testimonial Carousel */}
       <section className="w-full max-w-3xl mx-auto px-4 py-6 flex flex-col items-center">
         <div className="flex items-center space-x-3 mb-2">
-          <Star className="w-5 h-5 text-yellow-400" />
+          <CheckCircle className="w-5 h-5 text-green-400" />
           <span className="text-base text-gray-700 font-semibold">“eSignTap made our contract process 10x faster!”</span>
         </div>
         <span className="text-xs text-gray-500">— Alex P., Operations Manager</span>
