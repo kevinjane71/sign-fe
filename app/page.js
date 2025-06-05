@@ -93,7 +93,7 @@ export default function HomePage() {
           toast.success(`${finalFiles.length} document(s) loaded successfully!`)
           
           // Navigate directly to editor
-          router.push('/editor/new')
+          router.push('/editor/local-new?step=1')
         }
       }
 
@@ -112,7 +112,7 @@ export default function HomePage() {
             }
             
             toast.success(`${finalFiles.length} document(s) loaded successfully!`)
-            router.push('/editor/new')
+            router.push('/editor/local-new?step=1')
           } else {
             setIsProcessing(false)
           }
