@@ -419,18 +419,18 @@ export default function Dashboard() {
 
       <div className="w-full px-2 sm:px-6 lg:px-24 py-6 lg:py-8">
         {/* Header Section */}
-        <div className="mb-8">
-          <div className="bg-white rounded-lg p-6 lg:p-8 border border-gray-200">
+        <div className="mb-4 lg:mb-8">
+          <div className="bg-white rounded-lg p-3 lg:p-8 border border-gray-200">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div className="mb-4 lg:mb-0">
-                <h1 className="text-2xl lg:text-3xl font-bold mb-2 text-gray-900">
-                  Welcome, {user?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'User'}! 👋
+              <div className="mb-2 lg:mb-0">
+                <h1 className="text-lg lg:text-3xl font-bold mb-1 lg:mb-2 text-gray-900">
+                  {user?.name ? `Welcome, ${user.name.split(' ')[0]}! 👋` : 'Welcome! 👋'}
                 </h1>
-                <p className="text-gray-600 text-sm lg:text-base">
+                <p className="text-xs lg:text-base text-gray-600">
                   Manage your documents and track signing progress
                 </p>
               </div>
-              <div className="flex justify-end w-full lg:w-auto mt-4 lg:mt-0">
+              <div className="hidden lg:flex justify-end w-full lg:w-auto mt-4 lg:mt-0">
                 <button
                   onClick={() => document.getElementById('file-upload').click()}
                   className="inline-flex items-center px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow font-semibold text-base transition-all duration-200"
@@ -608,22 +608,22 @@ export default function Dashboard() {
           </div>
         ) : (
           /* Regular Dashboard Layout */
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
-            {/* Upload Section - Left Column */}
-            <div className="lg:col-span-1">
-              <div className="bg-gradient-to-br from-gray-50 via-white to-rose-50 rounded-2xl p-8 border border-gray-100 shadow-xl">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8">
+            {/* Upload Section - Left Column - Hidden on Mobile */}
+            <div className="hidden lg:block lg:col-span-1">
+              <div className="bg-gradient-to-br from-gray-50 via-white to-rose-50 rounded-xl p-6 border border-gray-100 shadow-sm">
                 <div className="text-center mb-4">
-                  <div className="w-14 h-14 mx-auto mb-3 bg-gray-200 rounded-full flex items-center justify-center">
-                    <Upload className="w-8 h-8 text-emerald-500" />
+                  <div className="w-12 h-12 mx-auto mb-3 bg-gray-200 rounded-full flex items-center justify-center">
+                    <Upload className="w-6 h-6 text-emerald-500" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-gray-900">Upload Documents</h3>
-                  <p className="text-sm text-gray-600">
+                  <h3 className="text-base font-semibold mb-2 text-gray-900">Upload Documents</h3>
+                  <p className="text-xs text-gray-600">
                     Add new documents to get started
                   </p>
                 </div>
 
                 <div 
-                  className={`border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 cursor-pointer ${
+                  className={`border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 cursor-pointer ${
                     isDragOver ? 'border-emerald-400 bg-emerald-50' : ''
                   }`}
                   onDrop={handleDrop}
@@ -631,12 +631,12 @@ export default function Dashboard() {
                   onDragLeave={handleDragLeave}
                   onClick={() => document.getElementById('file-upload').click()}
                 >
-                  <div className="py-4">
-                    <FolderOpen className="w-10 h-10 mx-auto mb-3 text-gray-300" />
-                    <p className="text-sm font-medium text-gray-900 mb-2">
+                  <div className="py-3">
+                    <FolderOpen className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                    <p className="text-xs font-medium text-gray-900 mb-1">
                       Drop files here or click to browse
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-[10px] text-gray-500">
                       PDF, Images, Word docs • Max 50MB
                     </p>
                   </div>
@@ -656,100 +656,98 @@ export default function Dashboard() {
             {/* Main Content - Right Column */}
             <div className="lg:col-span-3">
               {/* Header */}
-              <div className="bg-white rounded-xl p-6 mb-6 border border-gray-200 shadow-sm">
+              <div className="bg-white rounded-xl p-4 mb-4 border border-gray-200 shadow-sm">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                   <div>
-                    <h1 className="text-2xl lg:text-3xl font-bold mb-2 text-gray-900">Document Dashboard</h1>
-                    <p className="text-gray-600 text-sm lg:text-base">
+                    <h1 className="text-xl lg:text-2xl font-bold mb-1 text-gray-900">Document Dashboard</h1>
+                    <p className="text-xs lg:text-sm text-gray-600">
                       Manage and track your documents
                     </p>
+                  </div>
+                  {/* Mobile Upload Button */}
+                  <div className="lg:hidden mt-3">
+                    <button
+                      onClick={() => document.getElementById('file-upload').click()}
+                      className="w-full inline-flex items-center justify-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow text-sm font-medium transition-all duration-200"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload Document
+                    </button>
                   </div>
                 </div>
               </div>
 
               {/* Stats Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4">
+                <div className="bg-white rounded-lg p-2 sm:p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Total</p>
-                      <p className="text-2xl font-bold text-gray-900">{stats.total || 0}</p>
+                      <p className="text-[10px] sm:text-xs font-medium text-gray-600">Total</p>
+                      <p className="text-sm sm:text-base lg:text-lg font-bold text-gray-900">{stats.total || 0}</p>
                     </div>
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <FileText className="w-5 h-5 text-blue-600" />
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <FileText className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-600" />
                     </div>
-                  </div>
-                  <div className="mt-2 flex items-center text-xs text-green-600">
-                    <span>+12% from last month</span>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <div className="bg-white rounded-lg p-2 sm:p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Draft</p>
-                      <p className="text-2xl font-bold text-gray-900">{stats.draft || 0}</p>
+                      <p className="text-[10px] sm:text-xs font-medium text-gray-600">Draft</p>
+                      <p className="text-sm sm:text-base lg:text-lg font-bold text-gray-900">{stats.draft || 0}</p>
                     </div>
-                    <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                      <Edit className="w-5 h-5 text-yellow-600" />
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 bg-yellow-100 rounded-lg flex items-center justify-center">
+                      <Edit className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-600" />
                     </div>
-                  </div>
-                  <div className="mt-2 flex items-center text-xs text-green-600">
-                    <span>+8% from last month</span>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <div className="bg-white rounded-lg p-2 sm:p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Sent</p>
-                      <p className="text-2xl font-bold text-gray-900">{stats.sent || 0}</p>
+                      <p className="text-[10px] sm:text-xs font-medium text-gray-600">Sent</p>
+                      <p className="text-sm sm:text-base lg:text-lg font-bold text-gray-900">{stats.sent || 0}</p>
                     </div>
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <Send className="w-5 h-5 text-blue-600" />
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <Send className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-600" />
                     </div>
-                  </div>
-                  <div className="mt-2 flex items-center text-xs text-green-600">
-                    <span>+15% from last month</span>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <div className="bg-white rounded-lg p-2 sm:p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Completed</p>
-                      <p className="text-2xl font-bold text-gray-900">{stats.completed || 0}</p>
+                      <p className="text-[10px] sm:text-xs font-medium text-gray-600">Completed</p>
+                      <p className="text-sm sm:text-base lg:text-lg font-bold text-gray-900">{stats.completed || 0}</p>
                     </div>
-                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                      <CheckCircle className="w-5 h-5 text-green-600" />
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 bg-green-100 rounded-lg flex items-center justify-center">
+                      <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-green-600" />
                     </div>
-                  </div>
-                  <div className="mt-2 flex items-center text-xs text-green-600">
-                    <span>+22% from last month</span>
                   </div>
                 </div>
               </div>
 
-              {/* Search and Filter Controls */}
-              <div className="bg-white rounded-xl p-4 mb-6 shadow-sm border border-gray-100">
-                <div className="flex flex-col lg:flex-row gap-4">
+              {/* Search and Filter */}
+              <div className="bg-white rounded-lg p-3 mb-4 shadow-sm border border-gray-100">
+                <div className="flex flex-col lg:flex-row gap-3">
                   <div className="flex-1">
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
                       <input
                         type="text"
                         placeholder="Search documents..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full pl-8 pr-3 py-1.5 text-xs sm:text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                   </div>
-                  <div className="lg:w-48">
+                  <div className="lg:w-40">
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-2 py-1.5 text-xs sm:text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="all">All Status</option>
                       <option value="draft">Draft</option>
@@ -763,11 +761,11 @@ export default function Dashboard() {
               </div>
 
               {/* Documents Section */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-                <div className="p-6 border-b border-gray-100">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-100">
+                <div className="p-3 sm:p-4 border-b border-gray-100">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold text-gray-900">Documents</h2>
-                    <span className="text-sm text-gray-500">
+                    <h2 className="text-base sm:text-lg font-semibold text-gray-900">Documents</h2>
+                    <span className="text-[10px] sm:text-xs text-gray-500">
                       {documents.length} of {totalPages} documents
                     </span>
                   </div>
