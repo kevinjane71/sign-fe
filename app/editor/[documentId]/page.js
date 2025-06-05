@@ -33,7 +33,9 @@ import {
   Info,
   FolderOpen,
   File,
-  ChevronDown
+  ChevronDown,
+  ChevronUp,
+  Minus
 } from 'lucide-react'
 import { useToast } from '../../components/LayoutWrapper'
 import { getDocument, updateDocument, sendDocument, getDocumentFile } from '../../utils/api'
@@ -376,7 +378,7 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Compact Header */}
-      <header className="bg-white border-b border-gray-200 fixed top-20 left-0 right-0 z-30 shadow-sm">
+      <header className="bg-white border-b border-gray-200 fixed top-20 left-0 right-0 z-50 shadow-sm md:ml-72">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -1033,7 +1035,7 @@ const FieldComponent = ({
     border: `2px solid ${signerColor ? signerColor.border : isSelected ? config.color : '#e5e7eb'}`,
     borderRadius: '4px',
     cursor: isDragging ? 'grabbing' : 'grab',
-    zIndex: isSelected ? 50 : 10,
+    zIndex: 10, // Always below header (z-50) and modal (z-40)
     pointerEvents: 'auto',
     transition: isDragging ? 'none' : 'all 0.2s ease',
     transform: isDragging ? 'scale(1.03)' : isSelected ? 'scale(1.01)' : 'scale(1)',
@@ -1647,7 +1649,7 @@ function DocumentPreviewGrid({ documents, allFields, onAddDocument, onRemoveDocu
 }
 
 // Field Configuration Panel Component
-function FieldConfigurationPanel({ field, onUpdate, onClose, signers, panelClassName }) {
+function FieldConfigurationPanel({ field, onUpdate, onClose, signers, panelClassName, compact }) {
   if (!field) return null;
 
   const userColors = [
@@ -1727,31 +1729,27 @@ function FieldConfigurationPanel({ field, onUpdate, onClose, signers, panelClass
   }, [])
 
   return (
-    <div className={`w-96 min-w-[380px] bg-white border-l border-gray-200 h-full overflow-y-auto ${panelClassName}`}>
+    <div className={`${panelClassName || ''} ${compact ? 'p-2 text-sm' : 'p-4'} bg-white border-l border-gray-200 h-full overflow-y-auto`}>
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 bg-gray-50">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            {/* Large color preview for selected signer */}
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedSigner ? '' : 'bg-gray-100'}`}
-              style={{ backgroundColor: selectedSigner ? selectedSigner.color.bg : undefined, border: selectedSigner ? `2px solid ${selectedSigner.color.border}` : undefined }}>
-              <FileText className={`w-4 h-4 ${selectedSigner ? 'text-white' : 'text-gray-500'}`} />
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">Field Settings</h3>
-              <p className="text-xs text-gray-500">{FIELD_CONFIGS[field.type].label}</p>
-            </div>
+      <div className={`${compact ? 'p-2' : 'p-4'} border-b border-gray-200 bg-gray-50 flex items-center justify-between`}>
+        <div className="flex items-center space-x-2">
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedSigner ? '' : 'bg-gray-100'}`}
+            style={{ backgroundColor: selectedSigner ? selectedSigner.color.bg : undefined, border: selectedSigner ? `2px solid ${selectedSigner.color.border}` : undefined }}>
+            <FileText className={`w-4 h-4 ${selectedSigner ? 'text-white' : 'text-gray-500'}`} />
           </div>
-          <button 
-            onClick={onClose}
-            className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors"
-          >
-            <X className="w-4 h-4 text-gray-500" />
-          </button>
+          <div>
+            <h3 className={`font-semibold text-gray-900 ${compact ? 'text-sm' : 'text-base'}`}>Field Settings</h3>
+            <p className={`text-xs text-gray-500 ${compact ? 'hidden' : ''}`}>{FIELD_CONFIGS[field.type].label}</p>
+          </div>
         </div>
+        <button 
+          onClick={onClose}
+          className={`p-1.5 hover:bg-gray-200 rounded-lg transition-colors ${compact ? 'ml-2' : ''}`}
+        >
+          <X className="w-4 h-4 text-gray-500" />
+        </button>
       </div>
-
-      <div className="p-4 space-y-4">
+      <div className={`${compact ? 'p-2 space-y-2' : 'p-4 space-y-4'}`}> {/* Main content */}
         {/* Placeholder */}
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1.5">Placeholder Text</label>
@@ -1759,36 +1757,32 @@ function FieldConfigurationPanel({ field, onUpdate, onClose, signers, panelClass
             type="text"
             value={config.placeholder}
             onChange={(e) => handleChange('placeholder', e.target.value)}
-            className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className={`w-full px-2.5 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${compact ? 'text-xs' : 'text-sm'}`}
             placeholder="Enter placeholder text..."
           />
         </div>
-
         {/* Required Field */}
-        <div className="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg">
+        <div className={`flex items-center space-x-2 ${compact ? 'p-1' : 'p-2'} bg-gray-50 rounded-lg`}>
           <input
             type="checkbox"
             id="required"
             checked={config.required}
             onChange={(e) => handleChange('required', e.target.checked)}
-            className="h-3.5 w-3.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            className={`h-3.5 w-3.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 ${compact ? 'text-xs' : ''}`}
           />
-          <label htmlFor="required" className="text-sm text-gray-700">
-            Required Field
-          </label>
+          <label htmlFor="required" className={`text-gray-700 ${compact ? 'text-xs' : 'text-sm'}`}>Required Field</label>
         </div>
-
         {/* Custom Signer Assignment Dropdown */}
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1.5">Assign to Signer</label>
-          <div className="relative" ref={dropdownRef}>
+          <div className="relative">
             <button
               type="button"
-              className="w-full flex items-center justify-between px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              className={`w-full flex items-center justify-between px-2.5 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white ${compact ? 'text-xs' : 'text-sm'}`}
               style={{
                 borderColor: selectedSigner ? selectedSigner.color.border : undefined,
                 backgroundColor: selectedSigner ? selectedSigner.color.bg : undefined,
-                color: selectedSigner ? '#111827' : undefined // Always use dark text for visibility
+                color: selectedSigner ? '#111827' : undefined
               }}
               onClick={() => setDropdownOpen((open) => !open)}
             >
@@ -1807,7 +1801,7 @@ function FieldConfigurationPanel({ field, onUpdate, onClose, signers, panelClass
                     key={signer.id}
                     type="button"
                     className={`w-full flex items-center px-3 py-2 text-sm hover:bg-gray-100 ${config.assignedSigner === signer.id ? 'bg-gray-50 font-semibold' : ''}`}
-                    style={{ color: '#111827' }} // Always use dark text for visibility
+                    style={{ color: '#111827' }}
                     onClick={() => { handleChange('assignedSigner', signer.id); setDropdownOpen(false); }}
                   >
                     <span className="w-4 h-4 rounded-full mr-2 border" style={{ backgroundColor: signer.color.bg, borderColor: signer.color.border }} />
@@ -1818,22 +1812,8 @@ function FieldConfigurationPanel({ field, onUpdate, onClose, signers, panelClass
             )}
           </div>
         </div>
-
-        {/* Color indicator for selected signer */}
-        {selectedSigner && (
-          <div className="mt-2 flex items-center space-x-2 p-2 bg-gray-50 rounded-lg">
-            <div 
-              className="w-5 h-5 rounded-full border-2" 
-              style={{ backgroundColor: selectedSigner.color.bg, borderColor: selectedSigner.color.border }}
-            />
-            <span className="text-sm text-gray-600">
-              {selectedSigner.name || selectedSigner.email}
-            </span>
-          </div>
-        )}
-
         {/* Dropdown Options */}
-        {field.type === FIELD_TYPES.DROPDOWN && (
+        {field.type === FIELD_CONFIGS.DROPDOWN && (
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-xs font-medium text-gray-700">Dropdown Options</label>
@@ -1852,7 +1832,7 @@ function FieldConfigurationPanel({ field, onUpdate, onClose, signers, panelClass
                     type="text"
                     value={option}
                     onChange={(e) => handleOptionsChange(index, e.target.value)}
-                    className="flex-1 px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className={`flex-1 px-2.5 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${compact ? 'text-xs' : 'text-sm'}`}
                     placeholder={`Option ${index + 1}`}
                   />
                   <button
@@ -1906,6 +1886,8 @@ export default function EditDocumentEditor() {
   const [draggedField, setDraggedField] = useState(null)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 })
+  // In EditDocumentEditor, add state for minimizedPanel:
+  const [minimizedPanel, setMinimizedPanel] = useState(false);
 
   // Update URL when step changes
   useEffect(() => {
@@ -2507,7 +2489,7 @@ export default function EditDocumentEditor() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Compact Professional Header */}
-      <header className="bg-white border-b border-gray-200 fixed top-20 left-0 right-0 z-30 shadow-sm md:ml-72">
+      <header className="bg-white border-b border-gray-200 fixed top-20 left-0 right-0 z-50 shadow-sm md:ml-72">
         <div className="px-4 py-2 md:py-4">
           <div className="flex items-center justify-between">
           {/* Left Section */}
@@ -2831,7 +2813,7 @@ export default function EditDocumentEditor() {
                       />
                     </div>
                     {/* Mobile: bottom sheet/modal */}
-                    <div className="fixed md:hidden inset-x-0 bottom-0 z-50 bg-white border-t border-gray-200 rounded-t-2xl shadow-2xl max-h-[80vh] overflow-y-auto animate-slideUp">
+                    <div className="fixed md:hidden inset-x-0 bottom-0 z-40 bg-white border-t border-gray-200 rounded-t-2xl shadow-2xl max-h-[85vh] overflow-y-auto animate-slideUp">
                       <div className="flex justify-between items-center p-4 border-b border-gray-100">
                         <h3 className="text-base font-semibold text-gray-900">Field Settings</h3>
                         <button onClick={() => setSelectedField(null)} className="p-2 rounded-full hover:bg-gray-100">
@@ -2865,7 +2847,7 @@ export default function EditDocumentEditor() {
 
       {/* Mobile: integrated bottom sheet for palette and field config */}
       {typeof window !== 'undefined' && window.innerWidth < 768 && (
-        <div className="fixed md:hidden inset-x-0 bottom-0 z-50 bg-white border-t border-gray-200 rounded-t-2xl shadow-2xl max-h-[85vh] overflow-y-auto animate-slideUp">
+        <div className="fixed md:hidden inset-x-0 bottom-0 z-40 bg-white border-t border-gray-200 rounded-t-2xl shadow-2xl max-h-[85vh] overflow-y-auto animate-slideUp">
           {selectedField ? (
             <>
               <div className="flex justify-between items-center p-4 border-b border-gray-100">
