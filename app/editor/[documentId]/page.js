@@ -1249,76 +1249,83 @@ const FieldComponent = ({
 }
 
 // Mobile Floating Action Button
-const MobileFloatingButton = ({ onFieldTypeSelect, selectedFieldType, toast }) => {
+const BottomSheetFloatingButton = ({ onFieldTypeSelect, selectedFieldType, toast }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const [animating, setAnimating] = useState(false)
 
-  const handleFieldSelect = (type) => {
-    const isActive = selectedFieldType === type
-    onFieldTypeSelect(isActive ? null : type)
-    if (!isActive && toast) {
-      toast.info(`Tap on document to place ${FIELD_CONFIGS[type].label}`)
+  const handleToggle = () => {
+    if (isOpen) {
+      setAnimating(true)
+      setTimeout(() => {
+        setIsOpen(false)
+        setAnimating(false)
+      }, 350)
+    } else {
+      setIsOpen(true)
     }
   }
 
-  return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 md:hidden">
-      {/* Horizontal Field Options Bar */}
-      {isOpen && (
-        <div className="mb-3 bg-white rounded-xl shadow-lg border p-2">
-          <div className="flex items-center justify-between space-x-1.5 overflow-x-auto">
-            {Object.entries(FIELD_CONFIGS).map(([type, config]) => {
-              const Icon = config.icon
-              const isActive = selectedFieldType === type
-              
-              return (
-                <button
-                  key={type}
-                  onClick={() => handleFieldSelect(type)}
-                  className={`
-                    flex-shrink-0 flex flex-col items-center justify-center p-2 rounded-lg transition-all min-w-[60px]
-                    ${isActive 
-                      ? 'bg-blue-500 text-white shadow-md' 
-                      : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
-                    }
-                  `}
-                >
-                  <div 
-                    className={`
-                      w-6 h-6 rounded flex items-center justify-center mb-1
-                      ${isActive ? 'bg-white/20' : 'bg-white'}
-                    `}
-                  >
-                    <Icon className={`w-3 h-3 ${isActive ? 'text-white' : 'text-gray-600'}`} />
-                  </div>
-                  <span className={`text-xs font-medium text-center leading-tight ${isActive ? 'text-white' : 'text-gray-700'}`}>
-                    {config.label.split(' ')[0]}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-          </div>
-        )}
+  const handleFieldSelect = (type) => {
+    onFieldTypeSelect(type)
+    setAnimating(true)
+    setTimeout(() => {
+      setIsOpen(false)
+      setAnimating(false)
+    }, 350)
+    if (toast) toast.info(`Tap on document to place ${FIELD_CONFIGS[type].label}`)
+  }
 
-      {/* Compact Toggle Button */}
-      <div className="flex justify-center">
-            <button
-          onClick={() => setIsOpen(!isOpen)}
-          className={`
-            w-12 h-12 rounded-full shadow-lg flex items-center justify-center
-            transition-all duration-300 transform
-            ${isOpen 
-              ? 'bg-red-500 rotate-45' 
-              : selectedFieldType 
-                ? 'bg-blue-500' 
-                : 'bg-gray-900'
-            }
-          `}
+  return (
+    <>
+      {/* Floating + Button */}
+      {!isOpen && !animating && (
+        <button
+          onClick={handleToggle}
+          className="fixed bottom-5 right-5 z-50 w-12 h-12 rounded-full bg-blue-600 shadow-xl flex items-center justify-center transition-transform duration-300 md:hidden"
+          aria-label="Show Add Field Bar"
         >
-          <Plus className="w-5 h-5 text-white" />
-            </button>
+          <Plus className="w-6 h-6 text-white transition-transform duration-300" />
+        </button>
+      )}
+      {/* Bottom Sheet - Compact, no heading */}
+      {(isOpen || animating) && (
+        <div
+          className={`fixed inset-x-0 bottom-0 z-50 md:hidden pointer-events-auto transition-transform duration-350 ease-in-out
+            ${isOpen && !animating ? 'translate-x-0' : 'translate-x-full'}
+          `}
+          style={{ willChange: 'transform' }}
+        >
+          <div className="bg-white rounded-t-xl shadow-2xl border-t border-gray-200 px-2 pt-2 pb-4 flex flex-col">
+            <div className="flex justify-end mb-1">
+              <button
+                onClick={handleToggle}
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 transition-transform duration-300"
+                aria-label="Close Add Field Bar"
+              >
+                <Plus className="w-5 h-5 text-gray-700" />
+              </button>
             </div>
-    </div>
+            <div className="flex items-center space-x-1 overflow-x-auto pb-1">
+              {Object.entries(FIELD_CONFIGS).map(([type, config]) => {
+                const Icon = config.icon
+                return (
+                  <button
+                    key={type}
+                    onClick={() => handleFieldSelect(type)}
+                    className="flex flex-col items-center justify-center min-w-[48px] p-1 rounded-lg bg-gray-50 hover:bg-blue-100 transition-colors"
+                  >
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center mb-0.5 bg-white border border-gray-200">
+                      <Icon className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <span className="text-[11px] font-medium text-gray-700 truncate w-full text-center">{config.label.split(' ')[0]}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 
@@ -2979,37 +2986,15 @@ export default function EditDocumentEditor() {
               />
             </>
           ) : (
-            <div className="p-4">
-              <h3 className="text-base font-semibold text-gray-900 mb-3 text-center">Add Field</h3>
-              <div className="flex flex-wrap justify-center gap-2">
-                {Object.entries(FIELD_CONFIGS).map(([type, config]) => {
-                  const Icon = config.icon
-                  const isActive = selectedFieldType === type
-                  return (
-                    <button
-                      key={type}
-                      onClick={() => {
-                        setSelectedFieldType(isActive ? null : type)
-                        if (!isActive && toast) {
-                          toast.info(`Tap on document to place ${config.label}`)
-                        }
-                      }}
-                      className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all min-w-[70px] min-h-[70px] ${
-                        isActive 
-                          ? 'border-blue-500 bg-blue-50' 
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
-                    >
-                      <Icon className="w-6 h-6 mb-1" style={{ color: config.color }} />
-                      <span className="text-xs font-medium text-gray-700">{config.label.split(' ')[0]}</span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
+            <></>
           )}
         </div>
       )}
+      <BottomSheetFloatingButton
+        onFieldTypeSelect={setSelectedFieldType}
+        selectedFieldType={selectedFieldType}
+        toast={toast}
+      />
     </div>
   )
 } 
