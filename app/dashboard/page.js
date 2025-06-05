@@ -66,6 +66,8 @@ export default function Dashboard() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [isDragOver, setIsDragOver] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState(null)
+  const [isTableLoading, setIsTableLoading] = useState(false)
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
 
   // Helper functions for status handling
   const getStatusColor = (status) => {
@@ -130,6 +132,21 @@ export default function Dashboard() {
     fetchDocuments()
   }, [currentPage, statusFilter, router])
 
+  useEffect(() => {
+    // Add click outside handler for both dropdowns
+    const handleClickOutside = (event) => {
+      if (activeDropdown && !event.target.closest('.dropdown-container')) {
+        setActiveDropdown(null)
+      }
+      if (isFilterOpen && !event.target.closest('.filter-container')) {
+        setIsFilterOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [activeDropdown, isFilterOpen])
+
   const fetchStats = async () => {
     try {
       const response = await getDocumentStats()
@@ -151,7 +168,7 @@ export default function Dashboard() {
 
   const fetchDocuments = async () => {
     try {
-      setLoading(true)
+      setIsTableLoading(true)
       const params = {
         page: currentPage.toString(),
         limit: '10'
@@ -169,13 +186,11 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error('Error fetching documents:', error)
-      // If authentication failed, user will be redirected by the API utility
       if (error.message !== 'Authentication required') {
-        // Show empty state for other errors
         setDocuments([])
       }
     } finally {
-      setLoading(false)
+      setIsTableLoading(false)
     }
   }
 
@@ -530,345 +545,469 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-              <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-gray-600">Total</p>
-                    <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.total || 0}</p>
-                  </div>
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <FileText className="w-4 h-4 text-blue-600" />
-                  </div>
-                </div>
+            {/* Main Content Area: Loading, Empty State, or Data */}
+            {isTableLoading ? (
+              <div className="flex items-center justify-center min-h-[300px]">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-600 mr-2" />
+                <span className="text-gray-600 text-sm">Loading documents...</span>
               </div>
-
-              <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-gray-600">Draft</p>
-                    <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.draft || 0}</p>
+            ) : shouldShowEmptyState ? (
+              <div className="bg-white rounded-lg p-8 text-center border border-gray-200">
+                <div className="max-w-md mx-auto">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-emerald-50 rounded-full flex items-center justify-center">
+                    <Upload className="w-8 h-8 text-emerald-500" />
                   </div>
-                  <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                    <Edit className="w-4 h-4 text-yellow-600" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-gray-600">Sent</p>
-                    <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.sent || 0}</p>
-                  </div>
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Send className="w-4 h-4 text-blue-600" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-gray-600">Completed</p>
-                    <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.completed || 0}</p>
-                  </div>
-                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Search and Filter */}
-            <div className="bg-white rounded-lg p-3 mb-4 shadow-sm border border-gray-100">
-              <div className="flex flex-col lg:flex-row gap-3">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
-                    <input
-                      type="text"
-                      placeholder="Search documents..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-                <div className="lg:w-40">
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Documents Yet</h3>
+                  <p className="text-sm text-gray-600 mb-6">
+                    Get started by uploading your first document. You can upload PDFs, images, and Word documents.
+                  </p>
+                  <button
+                    onClick={() => document.getElementById('file-upload').click()}
+                    className="inline-flex items-center px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow font-medium text-sm transition-all duration-200"
                   >
-                    <option value="all">All Status</option>
-                    <option value="draft">Draft</option>
-                    <option value="sent">Sent</option>
-                    <option value="partially_signed">Partially Signed</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload Your First Document
+                  </button>
                 </div>
               </div>
-            </div>
+            ) : (
+              <>
+                {/* Stats Cards */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-gray-600">Total</p>
+                        <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.total || 0}</p>
+                      </div>
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <FileText className="w-4 h-4 text-blue-600" />
+                      </div>
+                    </div>
+                  </div>
 
-            {/* Documents Section */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-              <div className="p-4 border-b border-gray-100">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900">Documents</h2>
-                  <span className="text-xs text-gray-500">
-                    {documents.length} of {totalPages} documents
-                  </span>
+                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-gray-600">Draft</p>
+                        <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.draft || 0}</p>
+                      </div>
+                      <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <Edit className="w-4 h-4 text-yellow-600" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-gray-600">Sent</p>
+                        <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.sent || 0}</p>
+                      </div>
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <Send className="w-4 h-4 text-blue-600" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-gray-600">Completed</p>
+                        <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.completed || 0}</p>
+                      </div>
+                      <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                        <CheckCircle className="w-4 h-4 text-green-600" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Desktop Table View */}
-              <div className="hidden lg:block overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '40%'}}>
-                        Document
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '15%'}}>
-                        Status
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '20%'}}>
-                        Signers
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '10%'}}>
-                        Created
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '15%'}}>
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {documents.map((doc, index) => (
-                      <tr 
-                        key={doc.id} 
-                        className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200"
-                        style={{ animationDelay: `${index * 100}ms` }}
+                {/* Search and Filter */}
+                <div className="bg-white rounded-lg p-3 mb-4 shadow-sm border border-gray-100">
+                  <div className="flex flex-col lg:flex-row gap-3">
+                    <div className="flex-1">
+                      <div className="relative">
+                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
+                        <input
+                          type="text"
+                          placeholder="Search documents..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
+                    </div>
+                    <div className="lg:w-40 filter-container">
+                      <button
+                        onClick={() => setIsFilterOpen(!isFilterOpen)}
+                        className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent flex items-center justify-between hover:bg-gray-50 transition-colors duration-150"
                       >
-                        <td className="px-4 py-3" style={{width: '40%'}}>
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                              <FileText className="w-4 h-4 text-blue-600" />
+                        <span className="flex items-center">
+                          <Filter className="w-3.5 h-3.5 mr-2 text-gray-500" />
+                          {statusFilter === 'all' ? 'All Status' : getStatusText(statusFilter)}
+                        </span>
+                        <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isFilterOpen ? 'transform rotate-180' : ''}`} />
+                      </button>
+                      {isFilterOpen && (
+                        <div className="absolute mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 z-10 transform origin-top-right transition-all duration-200 ease-out">
+                          <div className="py-1">
+                            <div className="px-4 py-2 border-b border-gray-100">
+                              <p className="text-xs font-medium text-gray-900">Filter by Status</p>
+                              <p className="text-[10px] text-gray-500 mt-0.5">Select a status to filter documents</p>
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium text-gray-900 truncate" title={doc.title || doc.originalName || 'Untitled Document'}>
-                                {doc.title || doc.originalName || 'Untitled Document'}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {doc.totalFiles ? `${doc.totalFiles} files` : doc.files ? `${doc.files.length} files` : '1 file'} • 
-                                {(() => {
-                                  const totalFields = doc.files ? doc.files.reduce((total, file) => total + (file.fields?.length || 0), 0) : 0;
-                                  return `${totalFields} fields`;
-                                })()}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3" style={{width: '15%'}}>
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(doc.status)}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full mr-1 ${getStatusDotColor(doc.status)}`}></span>
-                            {getStatusIcon(doc.status)}
-                            <span className="ml-1">{getStatusText(doc.status)}</span>
-                          </span>
-                        </td>
-                        <td className="px-4 py-3" style={{width: '20%'}}>
-                          <div className="text-sm text-gray-900">
-                            {doc.signers && doc.signers.length > 0 ? (
-                              <div>
-                                <span className="font-medium truncate block" title={doc.signers[0].email}>
-                                  {doc.signers[0].email}
-                                </span>
-                                {doc.signers.length > 1 && (
-                                  <span className="text-xs text-gray-500">+{doc.signers.length - 1} more</span>
-                                )}
-                              </div>
-                            ) : (
-                              <span className="text-gray-400 text-xs">No signers</span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-xs text-gray-500" style={{width: '10%'}}>
-                          {formatDate(doc.createdAt)}
-                        </td>
-                        <td className="px-4 py-3" style={{width: '15%'}}>
-                          <div className="flex items-center space-x-2">
                             <button
-                              onClick={() => router.push(`/editor/${doc.id}`)}
-                              className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 hover:scale-105 transition-all duration-200"
-                              title="Edit Document"
+                              onClick={() => {
+                                setStatusFilter('all');
+                                setIsFilterOpen(false);
+                              }}
+                              className={`w-full px-4 py-2.5 text-left text-xs flex items-center transition-colors duration-150 ${
+                                statusFilter === 'all' 
+                                  ? 'bg-blue-50 text-blue-700' 
+                                  : 'text-gray-700 hover:bg-gray-50'
+                              }`}
                             >
-                              <Edit className="w-3 h-3 mr-1" />
-                              Edit
+                              <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center mr-3">
+                                <FileText className="w-4 h-4 text-gray-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium">All Documents</p>
+                                <p className="text-[10px] text-gray-500 mt-0.5">Show all documents</p>
+                              </div>
                             </button>
-                            <div className="relative">
-                              <button
-                                onClick={() => setActiveDropdown(activeDropdown === doc.id ? null : doc.id)}
-                                className="inline-flex items-center px-2 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 hover:scale-105 transition-all duration-200"
-                              >
-                                <MoreVertical className="w-3 h-3" />
-                              </button>
-                              {activeDropdown === doc.id && (
-                                <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
-                                  <div className="py-1">
-                                    <button
-                                      onClick={() => {
-                                        handleDuplicateDocument(doc.id);
-                                        setActiveDropdown(null);
-                                      }}
-                                      className="w-full px-4 py-2 text-left text-xs text-gray-700 hover:bg-gray-50 flex items-center"
-                                    >
-                                      <Copy className="w-3 h-3 mr-2" />
-                                      Duplicate
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        handleDeleteDocument(doc.id);
-                                        setActiveDropdown(null);
-                                      }}
-                                      className="w-full px-4 py-2 text-left text-xs text-red-600 hover:bg-red-50 flex items-center"
-                                    >
-                                      <Trash2 className="w-3 h-3 mr-2" />
-                                      Delete
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Mobile Card View */}
-              <div className="lg:hidden">
-                <div className="divide-y divide-gray-200">
-                  {documents.map((doc, index) => (
-                    <div 
-                      key={doc.id} 
-                      className="p-3 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200"
-                      style={{ animationDelay: `${index * 100}ms` }}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-3 flex-1 min-w-0">
-                          <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <FileText className="w-4 h-4 text-blue-600" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate" title={doc.title || doc.originalName || 'Untitled Document'}>
-                              {doc.title || doc.originalName || 'Untitled Document'}
-                            </p>
-                            <div className="mt-1 flex items-center space-x-3 text-xs text-gray-500">
-                              <span className="flex items-center">
-                                <FileText className="w-3 h-3 mr-1" />
-                                {doc.totalFiles ? `${doc.totalFiles} files` : doc.files ? `${doc.files.length} files` : '1 file'}
-                              </span>
-                              <span className="flex items-center">
-                                <Calendar className="w-3 h-3 mr-1" />
-                                {formatDate(doc.createdAt)}
-                              </span>
-                              <span className="flex items-center">
-                                <Users className="w-3 h-3 mr-1" />
-                                {doc.signers?.length || 0}
-                              </span>
-                            </div>
-                            <div className="mt-2">
-                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(doc.status)}`}>
-                                <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${getStatusDotColor(doc.status)}`}></span>
-                                {getStatusText(doc.status)}
-                              </span>
-                            </div>
+                            <button
+                              onClick={() => {
+                                setStatusFilter('draft');
+                                setIsFilterOpen(false);
+                              }}
+                              className={`w-full px-4 py-2.5 text-left text-xs flex items-center transition-colors duration-150 ${
+                                statusFilter === 'draft' 
+                                  ? 'bg-amber-50 text-amber-700' 
+                                  : 'text-gray-700 hover:bg-gray-50'
+                              }`}
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center mr-3">
+                                <Clock className="w-4 h-4 text-amber-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium">Draft</p>
+                                <p className="text-[10px] text-gray-500 mt-0.5">Documents in draft state</p>
+                              </div>
+                            </button>
+                            <button
+                              onClick={() => {
+                                setStatusFilter('sent');
+                                setIsFilterOpen(false);
+                              }}
+                              className={`w-full px-4 py-2.5 text-left text-xs flex items-center transition-colors duration-150 ${
+                                statusFilter === 'sent' 
+                                  ? 'bg-blue-50 text-blue-700' 
+                                  : 'text-gray-700 hover:bg-gray-50'
+                              }`}
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mr-3">
+                                <Send className="w-4 h-4 text-blue-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium">Sent</p>
+                                <p className="text-[10px] text-gray-500 mt-0.5">Documents sent for signing</p>
+                              </div>
+                            </button>
+                            <button
+                              onClick={() => {
+                                setStatusFilter('partially_signed');
+                                setIsFilterOpen(false);
+                              }}
+                              className={`w-full px-4 py-2.5 text-left text-xs flex items-center transition-colors duration-150 ${
+                                statusFilter === 'partially_signed' 
+                                  ? 'bg-purple-50 text-purple-700' 
+                                  : 'text-gray-700 hover:bg-gray-50'
+                              }`}
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center mr-3">
+                                <Users className="w-4 h-4 text-purple-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium">Partially Signed</p>
+                                <p className="text-[10px] text-gray-500 mt-0.5">Documents with pending signatures</p>
+                              </div>
+                            </button>
+                            <button
+                              onClick={() => {
+                                setStatusFilter('completed');
+                                setIsFilterOpen(false);
+                              }}
+                              className={`w-full px-4 py-2.5 text-left text-xs flex items-center transition-colors duration-150 ${
+                                statusFilter === 'completed' 
+                                  ? 'bg-emerald-50 text-emerald-700' 
+                                  : 'text-gray-700 hover:bg-gray-50'
+                              }`}
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center mr-3">
+                                <CheckCircle className="w-4 h-4 text-emerald-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium">Completed</p>
+                                <p className="text-[10px] text-gray-500 mt-0.5">Fully signed documents</p>
+                              </div>
+                            </button>
+                            <button
+                              onClick={() => {
+                                setStatusFilter('cancelled');
+                                setIsFilterOpen(false);
+                              }}
+                              className={`w-full px-4 py-2.5 text-left text-xs flex items-center transition-colors duration-150 ${
+                                statusFilter === 'cancelled' 
+                                  ? 'bg-red-50 text-red-700' 
+                                  : 'text-gray-700 hover:bg-gray-50'
+                              }`}
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center mr-3">
+                                <XCircle className="w-4 h-4 text-red-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium">Cancelled</p>
+                                <p className="text-[10px] text-gray-500 mt-0.5">Cancelled documents</p>
+                              </div>
+                            </button>
                           </div>
                         </div>
-                      </div>
-                      <div className="mt-3 flex space-x-2">
-                        <button
-                          onClick={() => router.push(`/editor/${doc.id}`)}
-                          className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-                        >
-                          <Edit className="w-3 h-3 mr-1" />
-                          Edit
-                        </button>
-                        <div className="relative">
-                          <button
-                            onClick={() => setActiveDropdown(activeDropdown === doc.id ? null : doc.id)}
-                            className="inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Documents Section */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100">
+                  <div className="p-4 border-b border-gray-100">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-semibold text-gray-900">Documents</h2>
+                      <span className="text-xs text-gray-500">
+                        {documents.length} of {totalPages} documents
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Desktop Table View */}
+                  <div className="hidden lg:block overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '40%'}}>
+                            Document
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '15%'}}>
+                            Status
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '20%'}}>
+                            Signers
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '10%'}}>
+                            Created
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '15%'}}>
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {isTableLoading ? (
+                          <tr>
+                            <td colSpan="5" className="px-4 py-8">
+                              <div className="flex items-center justify-center">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                                <span className="ml-3 text-sm text-gray-600">Loading documents...</span>
+                              </div>
+                            </td>
+                          </tr>
+                        ) : documents.map((doc, index) => (
+                          <tr 
+                            key={doc.id} 
+                            className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200"
+                            style={{ animationDelay: `${index * 100}ms` }}
                           >
-                            <MoreVertical className="w-3 h-3" />
-                          </button>
-                          {activeDropdown === doc.id && (
-                            <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
-                              <div className="py-1">
+                            <td className="px-4 py-3" style={{width: '40%'}}>
+                              <div className="flex items-center">
+                                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                  <FileText className="w-4 h-4 text-blue-600" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-sm font-medium text-gray-900 truncate" title={doc.title || doc.originalName || 'Untitled Document'}>
+                                    {doc.title || doc.originalName || 'Untitled Document'}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {doc.totalFiles ? `${doc.totalFiles} files` : doc.files ? `${doc.files.length} files` : '1 file'} • 
+                                    {(() => {
+                                      const totalFields = doc.files ? doc.files.reduce((total, file) => total + (file.fields?.length || 0), 0) : 0;
+                                      return `${totalFields} fields`;
+                                    })()}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3" style={{width: '15%'}}>
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(doc.status)}`}>
+                                <span className={`w-1.5 h-1.5 rounded-full mr-1 ${getStatusDotColor(doc.status)}`}></span>
+                                {getStatusIcon(doc.status)}
+                                <span className="ml-1">{getStatusText(doc.status)}</span>
+                              </span>
+                            </td>
+                            <td className="px-4 py-3" style={{width: '20%'}}>
+                              <div className="text-sm text-gray-900">
+                                {doc.signers && doc.signers.length > 0 ? (
+                                  <div>
+                                    <span className="font-medium truncate block" title={doc.signers[0].email}>
+                                      {doc.signers[0].email}
+                                    </span>
+                                    {doc.signers.length > 1 && (
+                                      <span className="text-xs text-gray-500">+{doc.signers.length - 1} more</span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-gray-400 text-xs">No signers</span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 text-xs text-gray-500" style={{width: '10%'}}>
+                              {formatDate(doc.createdAt)}
+                            </td>
+                            <td className="px-4 py-3" style={{width: '15%'}}>
+                              <div className="flex items-center space-x-2">
                                 <button
-                                  onClick={() => {
-                                    handleDuplicateDocument(doc.id);
-                                    setActiveDropdown(null);
-                                  }}
-                                  className="w-full px-4 py-2 text-left text-xs text-gray-700 hover:bg-gray-50 flex items-center"
+                                  onClick={() => router.push(`/editor/${doc.id}`)}
+                                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 hover:scale-105 transition-all duration-200"
+                                  title="Edit Document"
                                 >
-                                  <Copy className="w-3 h-3 mr-2" />
-                                  Duplicate
+                                  <Edit className="w-3 h-3 mr-1" />
+                                  Edit
                                 </button>
                                 <button
                                   onClick={() => {
-                                    handleDeleteDocument(doc.id);
-                                    setActiveDropdown(null);
+                                    if (confirm('Are you sure you want to delete this document?')) {
+                                      handleDeleteDocument(doc.id);
+                                    }
                                   }}
-                                  className="w-full px-4 py-2 text-left text-xs text-red-600 hover:bg-red-50 flex items-center"
+                                  className="inline-flex items-center px-3 py-1.5 border border-red-200 text-xs font-medium rounded text-red-600 bg-white hover:bg-red-50 hover:scale-105 transition-all duration-200"
+                                  title="Delete Document"
                                 >
-                                  <Trash2 className="w-3 h-3 mr-2" />
+                                  <Trash2 className="w-3 h-3 mr-1" />
                                   Delete
                                 </button>
                               </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mobile Card View */}
+                  <div className="lg:hidden">
+                    {isTableLoading ? (
+                      <div className="p-8">
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                          <span className="ml-3 text-sm text-gray-600">Loading documents...</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-gray-200">
+                        {documents.map((doc, index) => (
+                          <div 
+                            key={doc.id} 
+                            className="p-3 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200"
+                            style={{ animationDelay: `${index * 100}ms` }}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start space-x-3 flex-1 min-w-0">
+                                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                  <FileText className="w-4 h-4 text-blue-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-900 truncate" title={doc.title || doc.originalName || 'Untitled Document'}>
+                                    {doc.title || doc.originalName || 'Untitled Document'}
+                                  </p>
+                                  <div className="mt-1 flex items-center space-x-3 text-xs text-gray-500">
+                                    <span className="flex items-center">
+                                      <FileText className="w-3 h-3 mr-1" />
+                                      {doc.totalFiles ? `${doc.totalFiles} files` : doc.files ? `${doc.files.length} files` : '1 file'}
+                                    </span>
+                                    <span className="flex items-center">
+                                      <Calendar className="w-3 h-3 mr-1" />
+                                      {formatDate(doc.createdAt)}
+                                    </span>
+                                    <span className="flex items-center">
+                                      <Users className="w-3 h-3 mr-1" />
+                                      {doc.signers?.length || 0}
+                                    </span>
+                                  </div>
+                                  <div className="mt-2">
+                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(doc.status)}`}>
+                                      <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${getStatusDotColor(doc.status)}`}></span>
+                                      {getStatusText(doc.status)}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-                          )}
+                            <div className="mt-3 flex space-x-2">
+                              <button
+                                onClick={() => router.push(`/editor/${doc.id}`)}
+                                className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                              >
+                                <Edit className="w-3 h-3 mr-1" />
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => {
+                                  if (confirm('Are you sure you want to delete this document?')) {
+                                    handleDeleteDocument(doc.id);
+                                  }
+                                }}
+                                className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-red-200 text-xs font-medium rounded text-red-600 bg-white hover:bg-red-50 transition-colors"
+                              >
+                                <Trash2 className="w-3 h-3 mr-1" />
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Pagination - Only show when there are documents */}
+                  {documents.length > 0 && totalPages > 1 && (
+                    <div className="px-4 py-3 border-t border-gray-100">
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs text-gray-500">
+                          Showing {((currentPage - 1) * 10) + 1} to {Math.min(currentPage * 10, totalPages * 10)} of {totalPages * 10} results
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <button
+                            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                            disabled={currentPage === 1}
+                            className="px-3 py-1 text-xs border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                          >
+                            Previous
+                          </button>
+                          <span className="px-3 py-1 text-xs bg-blue-50 text-blue-600 rounded">
+                            {currentPage} of {totalPages}
+                          </span>
+                          <button
+                            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                            disabled={currentPage === totalPages}
+                            className="px-3 py-1 text-xs border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                          >
+                            Next
+                          </button>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )}
                 </div>
-              </div>
-
-              {/* Pagination - Only show when there are documents */}
-              {documents.length > 0 && totalPages > 1 && (
-                <div className="px-4 py-3 border-t border-gray-100">
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs text-gray-500">
-                      Showing {((currentPage - 1) * 10) + 1} to {Math.min(currentPage * 10, totalPages * 10)} of {totalPages * 10} results
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <button
-                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                        disabled={currentPage === 1}
-                        className="px-3 py-1 text-xs border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                      >
-                        Previous
-                      </button>
-                      <span className="px-3 py-1 text-xs bg-blue-50 text-blue-600 rounded">
-                        {currentPage} of {totalPages}
-                      </span>
-                      <button
-                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                        disabled={currentPage === totalPages}
-                        className="px-3 py-1 text-xs border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                      >
-                        Next
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+              </>
+            )}
           </div>
         </div>
       </div>
