@@ -36,7 +36,7 @@ import {
   ChevronDown
 } from 'lucide-react'
 import { useToast } from '../../components/LayoutWrapper'
-import { getDocument, updateDocument, sendDocument, getDocumentFile } from '../../utils/api'
+import { getDocument, updateDocument, sendDocument, getDocumentFile, uploadDocument } from '../../utils/api'
 import LoadingSpinner from '../../components/LoadingSpinner'
 
 // Field type configurations
@@ -2384,7 +2384,7 @@ export default function EditDocumentEditor() {
     setIsStepLoading(false)
   }
 
-  // Send handler (final step) - Modified for updating existing document
+  // Send handler (final step) - Modified for updating existing document and local-new flow
   const handleSend = useCallback(async (config) => {
     if (documents.length === 0) {
       toast.error('Please load documents first')
@@ -2394,12 +2394,104 @@ export default function EditDocumentEditor() {
     try {
       setIsSubmitting(true)
 
+      if (documentId === 'local-new') {
+        // 1. Upload the document(s) to get a real documentId
+        const formData = new FormData()
+        documents.forEach((document, index) => {
+          if (document.data) {
+            const base64Data = document.data.split(',')[1]
+            const byteCharacters = atob(base64Data)
+            const byteNumbers = new Array(byteCharacters.length)
+            for (let j = 0; j < byteCharacters.length; j++) {
+              byteNumbers[j] = byteCharacters.charCodeAt(j)
+            }
+            const byteArray = new Uint8Array(byteNumbers)
+            const blob = new Blob([byteArray], { type: document.type })
+            formData.append('documents', blob, document.name)
+            formData.append(`title_${index}`, document.name || `Untitled Document ${index + 1}`)
+            formData.append(`mimeType_${index}`, document.type)
+            formData.append(`fields_${index}`, JSON.stringify(allFields[index] || []))
+          }
+        })
+        formData.append('signers', JSON.stringify(config.signers))
+        formData.append('subject', config.subject)
+        formData.append('message', config.message)
+        formData.append('configuration', JSON.stringify({
+          requireAuthentication: config.requireAuthentication,
+          allowDelegation: config.allowDelegation,
+          allowComments: config.allowComments,
+          sendReminders: config.sendReminders,
+          reminderFrequency: config.reminderFrequency,
+          expirationEnabled: config.expirationEnabled,
+          expirationDays: config.expirationDays,
+          signingOrder: config.signingOrder,
+          requireAllSigners: config.requireAllSigners,
+          allowPrinting: config.allowPrinting,
+          allowDownload: config.allowDownload
+        }))
+        // Use authenticated upload function
+        const result = await uploadDocument(formData)
+        const newDocumentId = result.documentId
+        // Now update and send using the new documentId
+        const fileFields = result.document.files.map((file, index) => ({
+          fileId: file.fileId,
+          fields: allFields[index] || []
+        }))
+        // Update document
+        await updateDocument(newDocumentId, {
+          fileFields: fileFields,
+          signers: config.signers,
+          subject: config.subject,
+          message: config.message,
+          configuration: {
+            requireAuthentication: config.requireAuthentication,
+            allowDelegation: config.allowDelegation,
+            allowComments: config.allowComments,
+            sendReminders: config.sendReminders,
+            reminderFrequency: config.reminderFrequency,
+            expirationEnabled: config.expirationEnabled,
+            expirationDays: config.expirationDays,
+            signingOrder: config.signingOrder,
+            requireAllSigners: config.requireAllSigners,
+            allowPrinting: config.allowPrinting,
+            allowDownload: config.allowDownload
+          }
+        })
+        // Send document
+        await sendDocument(newDocumentId, {
+          fileFields: fileFields,
+          signers: config.signers,
+          subject: config.subject,
+          message: config.message,
+          configuration: {
+            requireAuthentication: config.requireAuthentication,
+            allowDelegation: config.allowDelegation,
+            allowComments: config.allowComments,
+            sendReminders: config.sendReminders,
+            reminderFrequency: config.reminderFrequency,
+            expirationEnabled: config.expirationEnabled,
+            expirationDays: config.expirationDays,
+            signingOrder: config.signingOrder,
+            requireAllSigners: config.requireAllSigners,
+            allowPrinting: config.allowPrinting,
+            allowDownload: config.allowDownload
+          }
+        })
+        toast.success('Document shared successfully!')
+        // Clear session storage
+        sessionStorage.removeItem('pendingDocument')
+        sessionStorage.removeItem('pendingDocuments')
+        // Redirect to dashboard
+        router.push('/dashboard')
+        return
+      }
+
+      // Existing document flow
       // Prepare fileFields data for the API
       const fileFields = documents.map((document, index) => ({
         fileId: document.fileId,
         fields: allFields[index] || []
       }))
-
       // Prepare update data
       const updateData = {
         fileFields: fileFields,
@@ -2420,10 +2512,8 @@ export default function EditDocumentEditor() {
           allowDownload: config.allowDownload
         }
       }
-
       // Update the existing document using authenticated function
       await updateDocument(documentId, updateData)
-
       // Send the document using authenticated function
       await sendDocument(documentId, {
         fileFields: fileFields,
@@ -2432,12 +2522,8 @@ export default function EditDocumentEditor() {
         message: config.message,
         configuration: updateData.configuration
       })
-
       toast.success('Document shared successfully!')
-      
-      // Redirect to dashboard
       router.push('/dashboard')
-      
     } catch (error) {
       console.error('Error updating document:', error)
       toast.error('Failed to share document. Please try again.')
