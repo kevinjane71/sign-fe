@@ -423,6 +423,7 @@ const SigningFieldComponent = ({
 }) => {
   const [localValue, setLocalValue] = useState(fieldValue || '')
   const [isEditing, setIsEditing] = useState(false)
+  const [showSignatureModal, setShowSignatureModal] = useState(false)
   const fieldRef = useRef(null)
 
   useEffect(() => {
@@ -460,13 +461,46 @@ const SigningFieldComponent = ({
 
   const left = (field.leftPercent || 0) * (containerWidth || 1) / 100
   const top = (field.topPercent || 0) * (containerHeight || 1) / 100
-  const width = (field.widthPercent || 10) * (containerWidth || 1) / 100
-  const height = (field.heightPercent || 5) * (containerHeight || 1) / 100
+
+  // Default sizing logic
+  let defaultWidth = 120, defaultHeight = 36
+  if (field.type === FIELD_TYPES.SIGNATURE || field.type === FIELD_TYPES.INITIAL) {
+    defaultWidth = 120; defaultHeight = 48
+  } else if (field.type === FIELD_TYPES.DATE) {
+    defaultWidth = 110; defaultHeight = 36
+  } else if (field.type === FIELD_TYPES.CHECKBOX) {
+    defaultWidth = 28; defaultHeight = 28
+  } else if (field.type === FIELD_TYPES.EMAIL || field.type === FIELD_TYPES.PHONE) {
+    defaultWidth = 140; defaultHeight = 36
+  }
+  // If field is at default size, use improved defaults
+  const isDefaultSize = !field.widthPercent || !field.heightPercent
+  const width = isDefaultSize ? defaultWidth : (field.widthPercent || 10) * (containerWidth || 1) / 100
+  const height = isDefaultSize ? defaultHeight : (field.heightPercent || 5) * (containerHeight || 1) / 100
 
   // Responsive font size and padding
   const fontSize = Math.max(12, Math.min(20, height * 0.5))
-  const paddingY = Math.max(2, Math.min(8, height * 0.15))
   const paddingX = Math.max(4, Math.min(12, width * 0.08))
+
+  // Mobile min size logic
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  let minWidth = 0, minHeight = 0
+  if (isMobile) {
+    if (field.type === FIELD_TYPES.SIGNATURE || field.type === FIELD_TYPES.INITIAL) {
+      minWidth = 80; minHeight = 40
+    } else {
+      minHeight = 32
+    }
+  }
+
+  // Signature/Initial field click handler
+  const handleFieldClick = () => {
+    if (field.type === FIELD_TYPES.SIGNATURE || field.type === FIELD_TYPES.INITIAL) {
+      setShowSignatureModal(true)
+    } else if (fieldRef.current) {
+      fieldRef.current.focus()
+    }
+  }
 
   return (
     <div 
@@ -476,41 +510,95 @@ const SigningFieldComponent = ({
         position: 'absolute',
         left: left,
         top: top,
-        width: width,
-        height: height,
+        width: Math.max(width, minWidth),
+        height: Math.max(height, minHeight),
         border: isInvalid ? '2px solid #ef4444' : `1.5px solid ${fieldConfig.borderColor}`,
         borderRadius: '4px',
         backgroundColor: fieldConfig.bgColor,
         transition: 'all 0.2s',
-        cursor: 'text',
+        cursor: (field.type === FIELD_TYPES.SIGNATURE || field.type === FIELD_TYPES.INITIAL) ? 'pointer' : 'text',
         zIndex: 20,
         pointerEvents: 'auto',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
       }}
-      onClick={() => {
-        if (fieldRef.current) {
-          fieldRef.current.focus()
-        }
-      }}
+      onClick={handleFieldClick}
     >
       {field.required && (
         <span className="absolute -top-2 -right-2 text-red-500 text-sm">*</span>
       )}
-      <input
-        ref={fieldRef}
-        type={field.type === FIELD_TYPES.EMAIL ? 'email' : field.type === FIELD_TYPES.PHONE ? 'tel' : 'text'}
-        value={localValue}
-        onChange={(e) => handleChange(e.target.value)}
-        onBlur={handleBlur}
-        onKeyPress={handleKeyPress}
-        className="w-full h-full bg-transparent border-none outline-none text-gray-700 text-center"
-        placeholder={field.placeholder || fieldConfig.label}
-        style={{ fontSize: `${fontSize}px`, padding: `0 ${paddingX}px`, background: 'transparent', height: '100%' }}
-        tabIndex={0}
-        autoFocus={false}
-      />
+      {field.type === FIELD_TYPES.SIGNATURE || field.type === FIELD_TYPES.INITIAL ? (
+        localValue ? (
+          <img src={localValue} alt={field.type} style={{ maxWidth: '100%', maxHeight: '100%' }} />
+        ) : (
+          <span className="text-gray-400 italic" style={{ fontSize: `${fontSize}px` }}>
+            {field.type === FIELD_TYPES.SIGNATURE ? 'Tap to Sign' : 'Tap to Initial'}
+          </span>
+        )
+      ) : field.type === FIELD_TYPES.DATE ? (
+        <input
+          ref={fieldRef}
+          type="date"
+          value={localValue}
+          onChange={(e) => handleChange(e.target.value)}
+          onBlur={handleBlur}
+          onKeyPress={handleKeyPress}
+          className="w-full h-full bg-transparent border-none outline-none text-gray-700 text-center"
+          placeholder={field.placeholder || 'YYYY-MM-DD'}
+          style={{ fontSize: `${fontSize}px`, padding: `0 ${paddingX}px`, background: 'transparent', height: '100%' }}
+          tabIndex={0}
+          autoFocus={false}
+        />
+      ) : field.type === 'dropdown' && field.options ? (
+        <select
+          ref={fieldRef}
+          value={localValue}
+          onChange={(e) => handleChange(e.target.value)}
+          onBlur={handleBlur}
+          className="w-full h-full bg-transparent border-none outline-none text-gray-700 text-center"
+          style={{ fontSize: `${fontSize}px`, padding: `0 ${paddingX}px`, background: 'transparent', height: '100%' }}
+        >
+          <option value="" disabled>{field.placeholder || 'Select'}</option>
+          {field.options.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+      ) : field.type === FIELD_TYPES.CHECKBOX ? (
+        <input
+          ref={fieldRef}
+          type="checkbox"
+          checked={!!localValue}
+          onChange={(e) => handleChange(e.target.checked)}
+          onBlur={handleBlur}
+          className="w-full h-full bg-transparent border-none outline-none text-gray-700"
+          style={{ width: '100%', height: '100%' }}
+        />
+      ) : (
+        <input
+          ref={fieldRef}
+          type={field.type === FIELD_TYPES.EMAIL ? 'email' : field.type === FIELD_TYPES.PHONE ? 'tel' : 'text'}
+          value={localValue}
+          onChange={(e) => handleChange(e.target.value)}
+          onBlur={handleBlur}
+          onKeyPress={handleKeyPress}
+          className="w-full h-full bg-transparent border-none outline-none text-gray-700 text-center"
+          placeholder={field.placeholder || fieldConfig.label}
+          style={{ fontSize: `${fontSize}px`, padding: `0 ${paddingX}px`, background: 'transparent', height: '100%' }}
+          tabIndex={0}
+          autoFocus={false}
+        />
+      )}
+      {showSignatureModal && (
+        <SignatureModal
+          onClose={() => setShowSignatureModal(false)}
+          onSave={(signature) => {
+            handleChange(signature)
+            setShowSignatureModal(false)
+          }}
+          maxSizeMB={20}
+        />
+      )}
     </div>
   )
 }
@@ -707,12 +795,25 @@ export default function SigningPage() {
     })
   }
 
-  // Add function to find next empty field
+  // Fix findNextEmptyField to always use latest fieldValues and correct order
   const findNextEmptyField = (currentFieldId) => {
     const allFields = getAllFields()
     const currentIndex = allFields.findIndex(f => f.id === currentFieldId)
-    const nextFields = allFields.slice(currentIndex + 1)
-    return nextFields.find(f => f.required && (!fieldValues[f.id] || fieldValues[f.id].toString().trim() === ''))
+    // Only consider fields after the current one
+    for (let i = currentIndex + 1; i < allFields.length; i++) {
+      const f = allFields[i]
+      if (f.required && (!fieldValues[f.id] || fieldValues[f.id].toString().trim() === '')) {
+        return f
+      }
+    }
+    // If none found after, try before
+    for (let i = 0; i < currentIndex; i++) {
+      const f = allFields[i]
+      if (f.required && (!fieldValues[f.id] || fieldValues[f.id].toString().trim() === '')) {
+        return f
+      }
+    }
+    return null
   }
 
   // Update handleSubmitSignature
@@ -838,11 +939,11 @@ export default function SigningPage() {
               {/* Submit Button - Mobile */}
               <button
                 onClick={handleSubmitSignature}
-                disabled={isSubmitting || !areRequiredFieldsCompleted()}
+                disabled={isSubmitting}
                 className={`px-4 py-2 rounded-md font-medium text-sm transition-colors ${
-                  areRequiredFieldsCompleted() && !isSubmitting
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  isSubmitting
+                    ? 'bg-blue-400 text-white cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
               >
                 {isSubmitting ? (
@@ -909,17 +1010,17 @@ export default function SigningPage() {
               {/* Submit Button - Desktop */}
               <button
                 onClick={handleSubmitSignature}
-                disabled={isSubmitting || !areRequiredFieldsCompleted()}
+                disabled={isSubmitting}
                 className={`px-6 py-2 rounded-md font-medium transition-colors ${
-                  areRequiredFieldsCompleted() && !isSubmitting
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  isSubmitting
+                    ? 'bg-blue-400 text-white cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
               >
                 {isSubmitting ? (
                   <div className="flex items-center space-x-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Submitting...</span>
+                    <span>Signing...</span>
                   </div>
                 ) : (
                   'Complete Signing'
