@@ -163,6 +163,38 @@ const FIELD_CONFIGS = {
   }
 }
 
+// Place this after FIELD_CONFIGS and before any component definitions:
+function DragFieldPreview({ type, x, y }) {
+  if (!type) return null
+  const config = FIELD_CONFIGS[type]
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        left: x - 40,
+        top: y - 20,
+        pointerEvents: 'none',
+        zIndex: 9999,
+        width: 80,
+        height: 40,
+        opacity: 0.8,
+        transform: 'scale(1.07)',
+        transition: 'box-shadow 0.2s, transform 0.2s',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+        border: `2px dashed ${config.color}`,
+        background: config.bgColor,
+        borderRadius: 6,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <config.icon className="w-5 h-5 mr-2" style={{ color: config.color }} />
+      <span style={{ color: config.color, fontWeight: 600, fontSize: 14 }}>{config.label.split(' ')[0]}</span>
+    </div>
+  )
+}
+
 // Document Configuration Component (Step 1) - Enhanced with pre-filling
 function DocumentConfiguration({ documentFile, documents, allFields, fields, onBack, onNext, isLoading, documentData, toast, onAddDocument, onRemoveDocument }) {
   const [signers, setSigners] = useState([])
@@ -736,7 +768,7 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
 }
 
 // Document Viewer Component - Modified to show all documents in continuous scroll
-const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentClick, signers }) => {
+const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentClick, signers, onDocumentDrop, onDocumentDragOver, onDocumentTouchEnd, draggingFieldType, isDraggingFromPalette, dragPreviewPosition }) => {
   const [allPages, setAllPages] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -892,6 +924,9 @@ const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentCli
       ref={containerRef}
       className="w-full h-full overflow-auto bg-gray-100"
       onClick={onDocumentClick}
+      onDrop={onDocumentDrop}
+      onDragOver={onDocumentDragOver}
+      onTouchEnd={onDocumentTouchEnd}
       style={{
         scrollBehavior: 'smooth',
         width: typeof window !== 'undefined' && window.innerWidth < 768 ? '100vw' : undefined,
@@ -973,6 +1008,9 @@ const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentCli
             </div>
           )
         })}
+      {draggingFieldType && isDraggingFromPalette && (
+        <DragFieldPreview type={draggingFieldType} x={dragPreviewPosition.x} y={dragPreviewPosition.y} />
+      )}
     </div>
   )
 }
@@ -1975,6 +2013,88 @@ export default function EditDocumentEditor() {
   // --- Add showConfigSheetForFieldId state ---
   const [showConfigSheetForFieldId, setShowConfigSheetForFieldId] = useState(null)
 
+  // --- DRAG STATE ---
+  // Add to main editor component
+  // ... inside EditDocumentEditor ...
+  const [draggingFieldType, setDraggingFieldType] = useState(null)
+  const [dragPreviewPosition, setDragPreviewPosition] = useState({ x: 0, y: 0 })
+  const [isDraggingFromPalette, setIsDraggingFromPalette] = useState(false)
+
+  // --- PALETTE DRAG HANDLERS (DESKTOP) ---
+  function getDesktopDragHandlers(type) {
+    return {
+      draggable: true,
+      onDragStart: (e) => {
+        setDraggingFieldType(type)
+        setIsDraggingFromPalette(true)
+        setDragPreviewPosition({ x: e.clientX, y: e.clientY })
+      },
+      onDrag: (e) => {
+        if (e.clientX && e.clientY) setDragPreviewPosition({ x: e.clientX, y: e.clientY })
+      },
+      onDragEnd: () => {
+        setDraggingFieldType(null)
+        setIsDraggingFromPalette(false)
+      },
+    }
+  }
+
+  // --- PALETTE DRAG HANDLERS (MOBILE) ---
+  function getMobileDragHandlers(type) {
+    return {
+      onTouchStart: (e) => {
+        setDraggingFieldType(type)
+        setIsDraggingFromPalette(true)
+        const touch = e.touches[0]
+        setDragPreviewPosition({ x: touch.clientX, y: touch.clientY })
+      },
+      onTouchMove: (e) => {
+        const touch = e.touches[0]
+        setDragPreviewPosition({ x: touch.clientX, y: touch.clientY })
+      },
+      onTouchEnd: () => {
+        setDraggingFieldType(null)
+        setIsDraggingFromPalette(false)
+      },
+    }
+  }
+
+  // --- DOCUMENT DROP HANDLERS ---
+  function handleDocumentDrop(e) {
+    e.preventDefault()
+    if (!draggingFieldType) return
+    const rect = e.target.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    // Find page/document index
+    const pageElement = e.target.closest('[data-page-number][data-document-index]')
+    if (!pageElement) return
+    const pageNumber = parseInt(pageElement.getAttribute('data-page-number'))
+    const documentIndex = parseInt(pageElement.getAttribute('data-document-index'))
+    addField(draggingFieldType, { x, y }, pageNumber, documentIndex)
+    setDraggingFieldType(null)
+    setIsDraggingFromPalette(false)
+  }
+  function handleDocumentDragOver(e) {
+    if (draggingFieldType) e.preventDefault()
+  }
+  // --- MOBILE DROP HANDLER ---
+  function handleDocumentTouchEnd(e) {
+    if (!draggingFieldType) return
+    const touch = e.changedTouches[0]
+    const elem = document.elementFromPoint(touch.clientX, touch.clientY)
+    const pageElement = elem?.closest('[data-page-number][data-document-index]')
+    if (!pageElement) return
+    const rect = pageElement.getBoundingClientRect()
+    const x = touch.clientX - rect.left
+    const y = touch.clientY - rect.top
+    const pageNumber = parseInt(pageElement.getAttribute('data-page-number'))
+    const documentIndex = parseInt(pageElement.getAttribute('data-document-index'))
+    addField(draggingFieldType, { x, y }, pageNumber, documentIndex)
+    setDraggingFieldType(null)
+    setIsDraggingFromPalette(false)
+  }
+
   // Update URL when step changes
   useEffect(() => {
     const newSearchParams = new URLSearchParams(searchParams)
@@ -2902,8 +3022,8 @@ export default function EditDocumentEditor() {
                         setSidebarOpen(false)
                       }
                     }}
-                    className={`
-                      w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition-all duration-200 border
+                    {...(window.innerWidth >= 768 ? getDesktopDragHandlers(type) : {})}
+                    className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition-all duration-200 border
                       ${isActive 
                         ? `${getLightBgColor(type)} border-blue-200 shadow-sm` 
                         : `${getLightBgColor(type)} hover:shadow-sm border-gray-200`
@@ -3006,7 +3126,13 @@ export default function EditDocumentEditor() {
                   zoom={zoom}
                   onZoomChange={setZoom}
                   onDocumentClick={handleDocumentClick}
-                    signers={documentData?.signers || []} // Pass signers to DocumentViewer
+                  signers={documentData?.signers || []}
+                  onDocumentDrop={handleDocumentDrop}
+                  onDocumentDragOver={handleDocumentDragOver}
+                  onDocumentTouchEnd={handleDocumentTouchEnd}
+                  draggingFieldType={draggingFieldType}
+                  isDraggingFromPalette={isDraggingFromPalette}
+                  dragPreviewPosition={dragPreviewPosition}
                 >
                   {getAllFields().map((field) => (
                     <FieldComponent
@@ -3097,6 +3223,9 @@ export default function EditDocumentEditor() {
         toast={toast}
         allFields={allFields}
       />
+      {draggingFieldType && isDraggingFromPalette && (
+        <DragFieldPreview type={draggingFieldType} x={dragPreviewPosition.x} y={dragPreviewPosition.y} />
+      )}
     </div>
   )
 } 
