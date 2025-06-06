@@ -2706,10 +2706,75 @@ export default function EditDocumentEditor() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Compact Professional Header */}
-      <header className="bg-white border-b border-gray-200 fixed top-20 left-0 right-0 z-50 shadow-sm md:ml-72">
-        <div className="px-4 py-2 md:py-4">
-          <div className="flex items-center justify-between">
-          {/* Left Section */}
+      <header className="bg-white border-b border-gray-200 z-50 shadow-sm md:ml-72 sticky top-0">
+        <div className="px-2 py-2 md:px-4 md:py-4">
+          {/* Mobile: Compact header layout */}
+          <div className="md:hidden flex items-end w-full justify-between">
+            {/* Left side: two rows */}
+            <div className="flex flex-col flex-1 min-w-0">
+              {/* Row 1: Title and step/field info */}
+              <div className="flex items-center space-x-2 min-w-0">
+                <h1 className="text-base font-bold text-gray-900 truncate max-w-[120px] flex-1" title={documentData?.title || 'Document Editor'}>
+                  {documentData?.title || 'Document Editor'}
+                </h1>
+                <span className="text-xs text-gray-500 whitespace-nowrap">Step 2 of 2 • {getAllFields().length} field{getAllFields().length !== 1 ? 's' : ''}</span>
+              </div>
+              {/* Row 2: Preview, Configure, Zoom buttons */}
+              <div className="flex items-center space-x-2 mt-1">
+                <button
+                  onClick={handlePreview}
+                  className="flex items-center px-2 py-1 bg-white hover:bg-gray-50 border border-gray-300 rounded-md transition-colors text-xs font-semibold text-gray-700 shadow-sm"
+                >
+                  <Eye className="w-4 h-4" />
+                  <span className="ml-1">Preview</span>
+                </button>
+                <button
+                  onClick={handleBackToConfiguration}
+                  disabled={isStepLoading}
+                  className="flex items-center px-2 py-1 bg-white hover:bg-gray-50 border border-gray-300 rounded-md transition-colors text-xs font-semibold text-gray-700 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isStepLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Settings className="w-4 h-4" />
+                  )}
+                  <span className="ml-1">Configure</span>
+                </button>
+                <button
+                  onClick={handleZoomOut}
+                  disabled={zoom <= 0.5}
+                  className="flex items-center px-2 py-1 bg-white hover:bg-gray-50 border border-gray-300 rounded-md transition-colors text-xs font-semibold text-gray-700 shadow-sm disabled:opacity-50"
+                >
+                  <ZoomOut className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={handleZoomIn}
+                  disabled={zoom >= 3}
+                  className="flex items-center px-2 py-1 bg-white hover:bg-gray-50 border border-gray-300 rounded-md transition-colors text-xs font-semibold text-gray-700 shadow-sm disabled:opacity-50"
+                >
+                  <ZoomIn className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            {/* Right side: Share button */}
+            <div className="flex items-center ml-2">
+              <button
+                onClick={handleNextStep}
+                disabled={isStepLoading}
+                className="flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-xs font-semibold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isStepLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+                <span className="ml-1">Share</span>
+              </button>
+            </div>
+          </div>
+          {/* Desktop: Keep existing layout */}
+          <div className="hidden md:flex items-center justify-between">
+            {/* Left Section */}
             <div className="flex items-center space-x-3">
               {/* Document Info */}
               <div className="flex items-center space-x-2">
@@ -2727,7 +2792,6 @@ export default function EditDocumentEditor() {
                   </div>
                 </div>
               </div>
-              
               {/* Progress Dots */}
               <div className="hidden sm:flex items-center space-x-1 ml-4">
                 <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
@@ -2735,7 +2799,6 @@ export default function EditDocumentEditor() {
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
               </div>
             </div>
-            
             {/* Right Section */}
             <div className="flex items-center space-x-2">
               {/* Zoom Controls */}
@@ -2758,7 +2821,6 @@ export default function EditDocumentEditor() {
                   <ZoomIn className="w-4 h-4 text-gray-700" />
                 </button>
               </div>
-              
               {/* Reset Button */}
               <button
                 onClick={() => setZoom(1)}
@@ -2766,7 +2828,6 @@ export default function EditDocumentEditor() {
               >
                 <span>Reset</span>
               </button>
-              
               <button
                 onClick={handlePreview}
                 className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 rounded-md transition-colors text-xs font-semibold text-gray-700 shadow-sm"
@@ -2774,7 +2835,6 @@ export default function EditDocumentEditor() {
                 <Eye className="w-4 h-4" />
                 <span className="hidden sm:inline">Preview</span>
               </button>
-              
               <button
                 onClick={handleBackToConfiguration}
                 disabled={isStepLoading}
@@ -2789,7 +2849,6 @@ export default function EditDocumentEditor() {
                   {isStepLoading ? 'Loading...' : 'Configure'}
                 </span>
               </button>
-              
               <button
                 onClick={handleNextStep}
                 disabled={isStepLoading}
@@ -2812,7 +2871,7 @@ export default function EditDocumentEditor() {
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden pt-16">
+      <div className="flex flex-1 overflow-hidden pt-2">
         {/* Compact Desktop Sidebar */}
         <div className={`
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
@@ -2979,7 +3038,7 @@ export default function EditDocumentEditor() {
         {/* Main Content - Adjusted for right panel */}
         <div className="flex-1 overflow-hidden md:ml-72 bg-gray-100">
           {documents.length > 0 && (
-            <div className="h-full p-4">
+            <div className="h-full p-1">
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full overflow-hidden flex">
                 <div className="flex-1">
                 <DocumentViewer
