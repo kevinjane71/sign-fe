@@ -326,31 +326,30 @@ const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentCli
       ref={containerRef}
       className="w-full h-full overflow-auto bg-gray-100"
       onClick={onDocumentClick}
-      style={{ scrollBehavior: 'smooth' }}
+      style={{ 
+        scrollBehavior: 'smooth',
+        width: typeof window !== 'undefined' && window.innerWidth < 768 ? '100vw' : undefined,
+        padding: typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : undefined
+      }}
     >
       {allPages.map((page, globalPageIndex) => {
-        // Calculate display dimensions for signing view
-        const isMobile = window.innerWidth < 768
-        
-        // Use full available width for signing
-        let availableWidth = window.innerWidth - 32 // Full width with margin
-        
-        // Calculate display width based on zoom and available space
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+        let availableWidth = isMobile ? window.innerWidth : window.innerWidth - 32
         const baseWidth = Math.min(page.originalWidth * 1.2, (availableWidth * 0.9) / zoom)
         const displayWidth = baseWidth * zoom
         const displayHeight = (page.originalHeight / page.originalWidth) * displayWidth
-
         return (
           <div key={`${page.documentIndex}-${page.pageNumber}`} className="relative">
             {/* Document Page */}
             <div
               data-page-number={page.pageNumber}
               data-document-index={page.documentIndex}
-              className="relative bg-white shadow-lg mx-auto my-4"
+              className={`relative bg-white shadow-lg my-4${isMobile ? '' : ' mx-auto'}`}
               style={{
-                width: displayWidth,
+                width: isMobile ? '100vw' : displayWidth,
                 height: displayHeight,
-                maxWidth: 'none'
+                maxWidth: isMobile ? '100vw' : 'none',
+                margin: isMobile ? '0 auto' : undefined
               }}
             >
               {/* Page Number - Top Right */}
@@ -535,12 +534,34 @@ const SigningFieldComponent = ({
                   onChange={(e) => {
                     if (e.target.value.length <= 200) handleValueChange(e.target.value)
                   }}
-                  onBlur={() => setIsEditing(false)}
-                  onKeyPress={(e) => e.key === 'Enter' && setIsEditing(false)}
+                  onBlur={() => {
+                    setIsEditing(false)
+                    // On blur, scroll back to previous position if needed (mobile)
+                    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+                      window.scrollTo({ top: 0, behavior: 'smooth' })
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      // Find next empty field and focus it
+                      const allInputs = Array.from(document.querySelectorAll('input[data-signing-field]'))
+                      const currentIdx = allInputs.findIndex(inp => inp === fieldRef.current)
+                      for (let i = currentIdx + 1; i < allInputs.length; i++) {
+                        if (!allInputs[i].value) {
+                          allInputs[i].focus()
+                          return
+                        }
+                      }
+                      setIsEditing(false)
+                    }
+                  }}
                   className="w-full h-full bg-transparent border-none outline-none text-gray-700"
                   style={{ fontSize: `${fontSize}px`, padding: '2px 4px' }}
                   maxLength={200}
                   autoFocus
+                  data-signing-field
+                  inputMode={field.type === FIELD_TYPES.PHONE ? 'tel' : 'text'}
+                  pattern={field.type === FIELD_TYPES.PHONE ? '[0-9]*' : undefined}
                 />
                 <div className="text-xs text-gray-400 text-right pr-1">{localValue.length}/200</div>
               </div>
@@ -875,7 +896,15 @@ export default function SigningPage() {
   // Submit signature
   const handleSubmitSignature = async () => {
     if (!areRequiredFieldsCompleted()) {
-      toast.error('Please complete all required fields before submitting')
+      // Focus the first empty required field
+      const allInputs = Array.from(document.querySelectorAll('input[data-signing-field]'))
+      for (let inp of allInputs) {
+        if (!inp.value) {
+          inp.focus()
+          break
+        }
+      }
+      toast.error('Please fill all required fields before submitting.')
       return
     }
 

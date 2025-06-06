@@ -11,7 +11,7 @@ const SignatureModal = ({ isOpen = true, onClose, onSave, maxSizeMB = 20 }) => {
   const [hasDrawn, setHasDrawn] = useState(false)
   const [signatureData, setSignatureData] = useState(null)
   const [penColor, setPenColor] = useState('#000000')
-  const [penWidth, setPenWidth] = useState(2)
+  const [penWidth, setPenWidth] = useState(5)
   const canvasRef = useRef(null)
   const fileInputRef = useRef(null)
   const MAX_SIZE_BYTES = maxSizeMB * 1024 * 1024;
@@ -132,7 +132,12 @@ const SignatureModal = ({ isOpen = true, onClose, onSave, maxSizeMB = 20 }) => {
 
   const modalContent = (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-2 sm:p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[95vh] overflow-y-auto mx-2 sm:mx-auto z-[9999]">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[95vh] overflow-y-auto mx-2 sm:mx-auto z-[9999]"
+        style={{
+          maxWidth: typeof window !== 'undefined' && window.innerWidth < 768 ? '95vw' : undefined,
+          width: typeof window !== 'undefined' && window.innerWidth < 768 ? '100%' : undefined
+        }}
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h3 className="text-xl font-semibold text-gray-900 flex items-center">
