@@ -1496,7 +1496,7 @@ export default function NewDocumentEditor() {
       pageNumber: pageNumber || 1,
       documentIndex: documentIndex,
       value: '',
-      required: false
+      required: true
     }
 
     // Add field to the specific document

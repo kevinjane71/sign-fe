@@ -1236,10 +1236,10 @@ const FieldComponent = ({
       {/* Field Toolbar */}
       {isSelected && (
         <div className="absolute -top-8 right-0 bg-gray-900 text-white px-2 py-1 rounded text-xs flex items-center space-x-1 z-40 shadow-lg" style={{ minWidth: '75px', maxWidth: '100%' }}>
-          <span className="truncate max-w-[80px] text-xs font-medium">{config.label}</span>
-          {field.required && (
-            <span className="text-red-400 ml-1">*</span>
-          )}
+          <span className="truncate max-w-[80px] text-xs font-medium">
+            {config.label}
+            <span className="text-red-400 ml-0.5">*</span>
+          </span>
           <button
             onClick={(e) => { e.stopPropagation(); setShowConfigSheetForFieldId(field.id); }}
             className="ml-2 p-0.5 rounded hover:bg-blue-800 focus:outline-none"
@@ -1742,7 +1742,7 @@ function FieldConfigurationPanel({ field, onUpdate, onClose, signers, panelClass
 
   const [config, setConfig] = React.useState({
     placeholder: field.placeholder || '',
-    required: field.required || false,
+    required: true, // Changed from field.required || false to true
     assignedSigner: field.assignedSigner || null,
     options: field.options || ['Option 1', 'Option 2', 'Option 3']
   })
@@ -1808,17 +1808,18 @@ function FieldConfigurationPanel({ field, onUpdate, onClose, signers, panelClass
             placeholder="Enter placeholder text..."
           />
         </div>
-        {/* Required Field */}
-        <div className="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg mb-3">
+        {/* Required Field - Mobile View */}
+        <div className="flex items-center space-x-2 p-2 bg-blue-50 rounded-lg border border-blue-100 mb-3">
           <input
             type="checkbox"
-            id="required"
+            id="required-mobile"
             checked={config.required}
             onChange={(e) => handleChange('required', e.target.checked)}
             className="h-3.5 w-3.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
-          <label htmlFor="required" className="text-sm text-gray-700">
+          <label htmlFor="required-mobile" className="text-sm text-gray-700 flex items-center">
             Required Field
+            <span className="text-red-500 ml-1">*</span>
           </label>
         </div>
         {/* Assign to Signer - Custom Dropdown */}
@@ -2361,7 +2362,7 @@ export default function EditDocumentEditor() {
       pageNumber: pageNumber || 1,
       documentIndex: documentIndex,
       value: '',
-      required: false
+      required: true // changed from false to true
     }
 
     // Add field to the specific document

@@ -58,6 +58,15 @@ if (typeof document !== 'undefined') {
         transform: translate3d(0, -1px, 0);
       }
     }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+    .animate-shake {
+      animation: shake 0.5s ease-in-out;
+    }
   `
   if (!document.head.querySelector('style[data-signing-animations]')) {
     style.setAttribute('data-signing-animations', 'true')
@@ -377,7 +386,7 @@ const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentCli
               />
               
               {/* Field Overlay Container */}
-              <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute inset-0">
                 {React.Children.map(children, (child) => {
                   if (React.isValidElement(child) && 
                       child.props.pageNumber === page.pageNumber &&
@@ -408,298 +417,101 @@ const SigningFieldComponent = ({
   fieldValue,
   onFieldUpdate,
   onFieldClick,
-  isRequired = false
+  isRequired = false,
+  hasAttemptedSubmit,
+  findNextEmptyField
 }) => {
+  const [localValue, setLocalValue] = useState(fieldValue || '')
   const [isEditing, setIsEditing] = useState(false)
-  const [localValue, setLocalValue] = useState(fieldValue || field.defaultValue || '')
-  const [showSignatureModal, setShowSignatureModal] = useState(false)
   const fieldRef = useRef(null)
-  
-  const fieldConfig = FIELD_CONFIGS[field.type] || FIELD_CONFIGS[FIELD_TYPES.TEXT]
-  const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false
-  const Icon = fieldConfig.icon || FileText // Fallback to FileText if icon is undefined
 
-  // Update local value when fieldValue prop changes
   useEffect(() => {
-    setLocalValue(fieldValue || field.defaultValue || '')
-  }, [fieldValue, field.defaultValue])
+    if (!isEditing) {
+      setLocalValue(fieldValue || '')
+    }
+  }, [fieldValue, isEditing])
 
-  // Use the exact same positioning logic as editor - no fallback conversion
-  const fieldStyle = {
-    position: 'absolute',
-    left: `${field.leftPercent || 0}%`,
-    top: `${field.topPercent || 0}%`, 
-    width: `${field.widthPercent || 10}%`,
-    height: `${field.heightPercent || 5}%`,
-    minWidth: `${fieldConfig.minWidth || 40}px`,
-    minHeight: `${fieldConfig.minHeight || 20}px`,
-    backgroundColor: fieldConfig.bgColor,
-    border: `2px solid ${isRequired && !localValue ? '#ef4444' : fieldConfig.borderColor}`,
-    borderRadius: '4px',
-    cursor: 'pointer',
-    pointerEvents: 'auto',
-    zIndex: 20,
-    transition: 'all 0.3s ease',
-    boxShadow: isRequired && !localValue 
-      ? '0 0 12px rgba(239, 68, 68, 0.4), 0 0 0 3px rgba(239, 68, 68, 0.1)' 
-      : '0 1px 3px rgba(0,0,0,0.1)',
-    animation: isRequired && !localValue ? 'pulse 2s infinite' : 'none'
+  const handleChange = (value) => {
+    setLocalValue(value)
+    setIsEditing(true)
+    onFieldUpdate(field.id, value)
   }
 
-  // Calculate responsive font size based on field size - same as editor
-  const fieldWidth = containerWidth ? (containerWidth * (field.widthPercent || 10)) / 100 : 100
-  const fieldHeight = containerHeight ? (containerHeight * (field.heightPercent || 5)) / 100 : 30
-  const baseFontSize = Math.max(10, Math.min(14, fieldHeight * 0.4))
-  const fontSize = isMobile ? Math.max(10, baseFontSize * 0.9) : baseFontSize
+  const handleBlur = () => {
+    setIsEditing(false)
+  }
 
-  // Get appropriate placeholder text
-  const getPlaceholder = () => {
-    switch (field.type) {
-      case FIELD_TYPES.TEXT: return 'Text'
-      case FIELD_TYPES.NAME: return 'Name'
-      case FIELD_TYPES.EMAIL: return 'Email'
-      case FIELD_TYPES.PHONE: return 'Phone'
-      case FIELD_TYPES.DATE: return 'Date'
-      case FIELD_TYPES.SIGNATURE: return 'Signature'
-      case FIELD_TYPES.INITIAL: return 'Initial'
-      default: return 'Field'
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' || e.key === 'Return') {
+      e.preventDefault()
+      const nextEmptyField = findNextEmptyField(field.id)
+      if (nextEmptyField) {
+        const fieldElement = document.querySelector(`[data-field-id="${nextEmptyField.id}"] input`)
+        if (fieldElement) {
+          fieldElement.focus()
+          fieldElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }
     }
   }
 
-  const handleFieldClick = (e) => {
-    e.stopPropagation()
-    if (field.type === FIELD_TYPES.SIGNATURE) {
-      setShowSignatureModal(true)
-    } else if (field.type === FIELD_TYPES.CHECKBOX) {
-      const newValue = !localValue
-      setLocalValue(newValue)
-      onFieldUpdate(field.id, newValue)
-    } else {
-      // For text, date, name, email, phone fields - just enter edit mode
-      setIsEditing(true)
-      // Focus the input after a short delay to ensure it's rendered
-      setTimeout(() => {
+  const isInvalid = hasAttemptedSubmit && field.required && (!localValue || localValue.toString().trim() === '')
+  const fieldConfig = FIELD_CONFIGS[field.type] || FIELD_CONFIGS[FIELD_TYPES.TEXT]
+
+  const left = (field.leftPercent || 0) * (containerWidth || 1) / 100
+  const top = (field.topPercent || 0) * (containerHeight || 1) / 100
+  const width = (field.widthPercent || 10) * (containerWidth || 1) / 100
+  const height = (field.heightPercent || 5) * (containerHeight || 1) / 100
+
+  // Responsive font size and padding
+  const fontSize = Math.max(12, Math.min(20, height * 0.5))
+  const paddingY = Math.max(2, Math.min(8, height * 0.15))
+  const paddingX = Math.max(4, Math.min(12, width * 0.08))
+
+  return (
+    <div 
+      data-field-id={field.id}
+      className={`relative flex items-center justify-center ${isInvalid ? 'animate-shake' : ''}`}
+      style={{
+        position: 'absolute',
+        left: left,
+        top: top,
+        width: width,
+        height: height,
+        border: isInvalid ? '2px solid #ef4444' : `1.5px solid ${fieldConfig.borderColor}`,
+        borderRadius: '4px',
+        backgroundColor: fieldConfig.bgColor,
+        transition: 'all 0.2s',
+        cursor: 'text',
+        zIndex: 20,
+        pointerEvents: 'auto',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
+      onClick={() => {
         if (fieldRef.current) {
           fieldRef.current.focus()
         }
-      }, 100)
-    }
-    onFieldClick && onFieldClick(field)
-  }
-
-  const handleValueChange = (newValue) => {
-    setLocalValue(newValue)
-    onFieldUpdate(field.id, newValue)
-    if (field.type !== FIELD_TYPES.TEXT) {
-      setIsEditing(false)
-    }
-  }
-
-  const isCompleted = Boolean(localValue)
-
-  return (
-    <>
-      <div
-        data-field-id={field.id}
-        style={fieldStyle}
-        onClick={handleFieldClick}
-        className={`flex items-center justify-center transition-all duration-300 hover:shadow-lg ${
-          isCompleted ? 'opacity-100' : 'opacity-90'
-        } ${isRequired && !isCompleted ? 'animate-pulse' : ''}`}
-        title={`${fieldConfig.label}${isRequired ? ' (Required)' : ''}`}
-      >
-        {/* Required indicator */}
-        {isRequired && !isCompleted && (
-          <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold z-10">
-            !
-          </div>
-        )}
-
-        {/* Completed indicator */}
-        {isCompleted && (
-          <div className="absolute -top-2 -right-2 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center text-white text-xs z-10">
-            ✓
-          </div>
-        )}
-
-        {/* Field Content */}
-        <div className="w-full h-full flex items-center justify-center p-1">
-          {(field.type === FIELD_TYPES.TEXT || field.type === FIELD_TYPES.NAME || field.type === FIELD_TYPES.EMAIL || field.type === FIELD_TYPES.PHONE) && (
-            isEditing ? (
-              <div className="w-full h-full flex flex-col">
-                <input
-                  ref={fieldRef}
-                  type={field.type === FIELD_TYPES.EMAIL ? 'email' : field.type === FIELD_TYPES.PHONE ? 'tel' : 'text'}
-                  value={localValue}
-                  onChange={(e) => {
-                    if (e.target.value.length <= 200) handleValueChange(e.target.value)
-                  }}
-                  onBlur={() => {
-                    setIsEditing(false)
-                    // On blur, scroll back to previous position if needed (mobile)
-                    if (typeof window !== 'undefined' && window.innerWidth < 768) {
-                      window.scrollTo({ top: 0, behavior: 'smooth' })
-                    }
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      // Find next empty field and focus it
-                      const allInputs = Array.from(document.querySelectorAll('input[data-signing-field]'))
-                      const currentIdx = allInputs.findIndex(inp => inp === fieldRef.current)
-                      for (let i = currentIdx + 1; i < allInputs.length; i++) {
-                        if (!allInputs[i].value) {
-                          allInputs[i].focus()
-                          return
-                        }
-                      }
-                      setIsEditing(false)
-                    }
-                  }}
-                  className="w-full h-full bg-transparent border-none outline-none text-gray-700"
-                  style={{ fontSize: `${fontSize}px`, padding: '2px 4px' }}
-                  maxLength={200}
-                  autoFocus
-                  data-signing-field
-                  inputMode={field.type === FIELD_TYPES.PHONE ? 'tel' : 'text'}
-                  pattern={field.type === FIELD_TYPES.PHONE ? '[0-9]*' : undefined}
-                />
-                <div className="text-xs text-gray-400 text-right pr-1">{localValue.length}/200</div>
-              </div>
-            ) : (
-              <div 
-                className="w-full h-full flex items-center justify-start px-2 text-gray-700"
-                style={{ fontSize: `${fontSize}px` }}
-              >
-                {localValue || (
-                  <span className="text-gray-400 italic">{getPlaceholder()}</span>
-                )}
-              </div>
-            )
-          )}
-
-          {field.type === FIELD_TYPES.CHECKBOX && (
-            <input
-              type="checkbox"
-              checked={localValue === 'true' || localValue === true}
-              onChange={(e) => handleValueChange(e.target.checked)}
-              onClick={(e) => e.stopPropagation()}
-              style={{ 
-                width: `${Math.min(fieldWidth * 0.8, fieldHeight * 0.8)}px`,
-                height: `${Math.min(fieldWidth * 0.8, fieldHeight * 0.8)}px`,
-                minWidth: '16px',
-                minHeight: '16px',
-                accentColor: fieldConfig.color
-              }}
-            />
-          )}
-
-          {field.type === FIELD_TYPES.DATE && (
-            isEditing ? (
-              <input
-                ref={fieldRef}
-                type="date"
-                value={localValue}
-                onChange={(e) => handleValueChange(e.target.value)}
-                onBlur={() => setIsEditing(false)}
-                className="w-full h-full bg-transparent border-none outline-none text-gray-700"
-                style={{ 
-                  fontSize: `${fontSize}px`,
-                  padding: '2px 4px'
-                }}
-                autoFocus
-              />
-            ) : (
-              <div 
-                className="w-full h-full flex items-center justify-start px-2 text-gray-700"
-                style={{ fontSize: `${fontSize}px` }}
-              >
-                {localValue || (
-                  <span className="text-gray-400 italic">Date</span>
-                )}
-              </div>
-            )
-          )}
-
-          {field.type === FIELD_TYPES.SIGNATURE && (
-            <div className="flex flex-col items-center justify-center text-gray-600 w-full h-full cursor-pointer">
-              {localValue && localValue.startsWith('data:image') ? (
-                <img
-                  src={localValue}
-                  alt="Signature"
-                  className="w-full h-full object-contain"
-                  style={{ maxHeight: '100%', maxWidth: '100%' }}
-                />
-              ) : localValue ? (
-                <span style={{ 
-                  fontSize: `${fontSize}px`,
-                  fontFamily: 'cursive',
-                  fontStyle: 'italic',
-                  fontWeight: '500',
-                  color: '#1f2937'
-                }}>
-                  {localValue}
-                </span>
-              ) : (
-                <>
-                  <Icon 
-                    style={{ 
-                      width: `${Math.min(fieldWidth * 0.3, fieldHeight * 0.5)}px`,
-                      height: `${Math.min(fieldWidth * 0.3, fieldHeight * 0.5)}px`,
-                      minWidth: '12px',
-                      minHeight: '12px'
-                    }} 
-                  />
-                  <span style={{ fontSize: `${Math.max(8, fontSize * 0.7)}px` }}>
-                    Signature
-                  </span>
-                </>
-              )}
-            </div>
-          )}
-
-          {field.type === FIELD_TYPES.INITIAL && (
-            <div className="flex flex-col items-center justify-center text-gray-600 w-full h-full cursor-pointer">
-              {localValue ? (
-                <span style={{ 
-                  fontSize: `${fontSize}px`,
-                  fontFamily: 'cursive',
-                  fontWeight: '600',
-                  color: '#1f2937'
-                }}>
-                  {localValue}
-                </span>
-              ) : (
-                <>
-                  <Icon 
-                    style={{ 
-                      width: `${Math.min(fieldWidth * 0.4, fieldHeight * 0.6)}px`,
-                      height: `${Math.min(fieldWidth * 0.4, fieldHeight * 0.6)}px`,
-                      minWidth: '12px',
-                      minHeight: '12px'
-                    }} 
-                  />
-                  <span style={{ fontSize: `${Math.max(8, fontSize * 0.7)}px` }}>
-                    Initial
-                  </span>
-                </>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Signature Modal */}
-      {showSignatureModal && (
-        <SignatureModal 
-          onClose={() => setShowSignatureModal(false)}
-          onSave={(signature) => {
-            handleValueChange(signature)
-            setShowSignatureModal(false)
-          }}
-          maxSizeMB={20}
-        />
+      }}
+    >
+      {field.required && (
+        <span className="absolute -top-2 -right-2 text-red-500 text-sm">*</span>
       )}
-    </>
+      <input
+        ref={fieldRef}
+        type={field.type === FIELD_TYPES.EMAIL ? 'email' : field.type === FIELD_TYPES.PHONE ? 'tel' : 'text'}
+        value={localValue}
+        onChange={(e) => handleChange(e.target.value)}
+        onBlur={handleBlur}
+        onKeyPress={handleKeyPress}
+        className="w-full h-full bg-transparent border-none outline-none text-gray-700 text-center"
+        placeholder={field.placeholder || fieldConfig.label}
+        style={{ fontSize: `${fontSize}px`, padding: `0 ${paddingX}px`, background: 'transparent', height: '100%' }}
+        tabIndex={0}
+        autoFocus={false}
+      />
+    </div>
   )
 }
 
@@ -719,6 +531,8 @@ export default function SigningPage() {
   const [error, setError] = useState(null)
   const [zoom, setZoom] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [highlightedFieldId, setHighlightedFieldId] = useState(null)
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false)
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'
 
@@ -893,18 +707,29 @@ export default function SigningPage() {
     })
   }
 
-  // Submit signature
+  // Add function to find next empty field
+  const findNextEmptyField = (currentFieldId) => {
+    const allFields = getAllFields()
+    const currentIndex = allFields.findIndex(f => f.id === currentFieldId)
+    const nextFields = allFields.slice(currentIndex + 1)
+    return nextFields.find(f => f.required && (!fieldValues[f.id] || fieldValues[f.id].toString().trim() === ''))
+  }
+
+  // Update handleSubmitSignature
   const handleSubmitSignature = async () => {
+    setHasAttemptedSubmit(true)
     if (!areRequiredFieldsCompleted()) {
-      // Focus the first empty required field
-      const allInputs = Array.from(document.querySelectorAll('input[data-signing-field]'))
-      for (let inp of allInputs) {
-        if (!inp.value) {
-          inp.focus()
-          break
+      // Find first empty required field
+      const allFields = getAllFields()
+      const firstEmptyField = allFields.find(f => f.required && (!fieldValues[f.id] || fieldValues[f.id].toString().trim() === ''))
+      if (firstEmptyField) {
+        const fieldElement = document.querySelector(`[data-field-id="${firstEmptyField.id}"] input`)
+        if (fieldElement) {
+          fieldElement.focus()
+          fieldElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
         }
       }
-      toast.error('Please fill all required fields before submitting.')
+      toast.error('Please complete all required fields')
       return
     }
 
@@ -1123,6 +948,8 @@ export default function SigningPage() {
                   fieldValue={fieldValues[field.id]}
                   onFieldUpdate={handleFieldUpdate}
                   isRequired={field.required}
+                  hasAttemptedSubmit={hasAttemptedSubmit}
+                  findNextEmptyField={findNextEmptyField}
                 />
               ))}
             </DocumentViewer>
