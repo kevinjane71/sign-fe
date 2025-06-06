@@ -1295,11 +1295,6 @@ const BottomSheetFloatingButton = ({ onFieldTypeSelect, selectedFieldType, toast
 
   const handleFieldSelect = (type) => {
     onFieldTypeSelect(type)
-    setAnimating(true)
-    setTimeout(() => {
-      setIsOpen(false)
-      setAnimating(false)
-    }, 350)
     if (toast) toast.info(`Tap on document to place ${FIELD_CONFIGS[type].label}`)
   }
 
@@ -1318,32 +1313,39 @@ const BottomSheetFloatingButton = ({ onFieldTypeSelect, selectedFieldType, toast
       {/* Bottom Sheet - Compact, no heading */}
       {(isOpen || animating) && (
         <div
-          className={`fixed inset-x-0 bottom-0 z-50 md:hidden pointer-events-auto transition-transform duration-350 ease-in-out
-            ${isOpen && !animating ? 'translate-x-0' : 'translate-x-full'}
+          className={`fixed inset-x-0 bottom-0 z-50 md:hidden pointer-events-auto
+            transition-all duration-400 ease-in-out
+            ${isOpen && !animating ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}
           `}
-          style={{ willChange: 'transform' }}
+          style={{ willChange: 'transform, opacity' }}
         >
-          <div className="bg-white rounded-t-xl shadow-2xl border-t border-gray-200 px-2 pt-2 pb-4 flex flex-col">
-            <div className="flex justify-end mb-1">
-              <button
-                onClick={handleToggle}
-                className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 transition-transform duration-300"
-                aria-label="Close Add Field Bar"
-              >
-                <Plus className="w-5 h-5 text-gray-700" />
-              </button>
-            </div>
-            <div className="flex items-center space-x-1 overflow-x-auto pb-1">
+          <div className="bg-white rounded-t-xl shadow-2xl border-t border-gray-200 px-2 pt-2 pb-4 flex flex-col relative">
+            {/* Small absolute close icon */}
+            <button
+              onClick={handleToggle}
+              className="absolute top-2 right-2 z-50 w-6 h-6 flex items-center justify-center bg-blue-50 border border-blue-200 rounded-full hover:bg-blue-100 transition"
+              aria-label="Close Add Field Bar"
+              style={{ padding: 0 }}
+            >
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <div className="flex items-center space-x-1 overflow-x-auto pb-1 pl-0">
               {Object.entries(FIELD_CONFIGS).map(([type, config]) => {
                 const Icon = config.icon
+                // Use a lighter pastel background for the icon circle
+                const pastelBg = config.bgColor + '33'; // add opacity for pastel
                 return (
                   <button
                     key={type}
                     onClick={() => handleFieldSelect(type)}
-                    className="flex flex-col items-center justify-center min-w-[48px] p-1 rounded-lg bg-gray-50 hover:bg-blue-100 transition-colors"
+                    className="flex flex-col items-center justify-center min-w-[44px] p-1 rounded-lg hover:scale-105 transition-transform border border-gray-100"
+                    style={{ background: config.bgColor + '22' }}
                   >
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center mb-0.5 bg-white border border-gray-200">
-                      <Icon className="w-4 h-4 text-blue-600" />
+                    <div
+                      className="w-7 h-7 rounded-lg flex items-center justify-center mb-0.5 border border-gray-200"
+                      style={{ background: pastelBg }}
+                    >
+                      <Icon className="w-4 h-4" style={{ color: config.color }} />
                     </div>
                     <span className="text-[11px] font-medium text-gray-700 truncate w-full text-center">{config.label.split(' ')[0]}</span>
                   </button>
@@ -2255,7 +2257,7 @@ export default function EditDocumentEditor() {
     }))
     
     setSelectedField(fieldId)
-    setSelectedFieldType(null)
+    // setSelectedFieldType(null) // Keep the field type selected so the bottom sheet stays open
     
     toast.success(`${config.label} added to ${documents[documentIndex]?.name}`)
     // Hide edit hint after 3 seconds
@@ -2277,6 +2279,7 @@ export default function EditDocumentEditor() {
     const y = e.clientY - rect.top
     
     addField(selectedFieldType, { x, y }, pageNumber, documentIndex)
+    setSelectedFieldType(null) // Reset selectedFieldType after adding a field
   }, [selectedFieldType, isDragging, addField])
 
   // Field deletion handler - Modified to work with document index
