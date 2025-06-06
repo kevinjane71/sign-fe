@@ -1086,189 +1086,133 @@ const FieldComponent = ({
           <div className="absolute -top-1 -right-1 text-red-500 text-xs">*</div>
         )}
         
-        {field.type === FIELD_TYPES.TEXT && (
-          <input
-            type="text"
-            value={field.value || ''}
-            onChange={(e) => onValueChange(field.id, e.target.value)}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full h-full bg-transparent border-none outline-none"
-            placeholder={field.placeholder || "Enter text..."}
-            style={{ 
-              fontSize: `${fontSize}px`,
-              padding: '2px 4px',
-              color: field.textColor || '#000000'
-              }}
-            />
-        )}
-
-        {field.type === FIELD_TYPES.NAME && (
-          <input
-            type="text"
-            value={field.value || ''}
-            onChange={(e) => onValueChange(field.id, e.target.value)}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full h-full bg-transparent border-none outline-none font-medium"
-            placeholder={field.placeholder || "Full Name"}
-            style={{ 
-              fontSize: `${fontSize}px`,
-              padding: '2px 4px',
-              color: field.textColor || '#000000'
-            }}
-          />
-        )}
-
-        {field.type === FIELD_TYPES.EMAIL && (
-          <input
-            type="email"
-            value={field.value || ''}
-            onChange={(e) => onValueChange(field.id, e.target.value)}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full h-full bg-transparent border-none outline-none"
-            placeholder={field.placeholder || "email@example.com"}
-            style={{ 
-              fontSize: `${fontSize}px`,
-              padding: '2px 4px',
-              color: field.textColor || '#000000'
-            }}
-          />
-        )}
-
-        {field.type === FIELD_TYPES.PHONE && (
-          <input
-            type="tel"
-            value={field.value || ''}
-            onChange={(e) => onValueChange(field.id, e.target.value)}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full h-full bg-transparent border-none outline-none"
-            placeholder={field.placeholder || "(555) 123-4567"}
-            style={{ 
-              fontSize: `${fontSize}px`,
-              padding: '2px 4px',
-              color: field.textColor || '#000000'
-            }}
-          />
-        )}
-        
-        {field.type === FIELD_TYPES.CHECKBOX && (
-          <input
-            type="checkbox"
-            checked={field.value || false}
-            onChange={(e) => onValueChange(field.id, e.target.checked)}
-            onClick={(e) => e.stopPropagation()}
-            style={{ 
-              width: `${Math.min(fieldWidth * 0.8, fieldHeight * 0.8)}px`,
-              height: `${Math.min(fieldWidth * 0.8, fieldHeight * 0.8)}px`,
-              minWidth: '16px',
-              minHeight: '16px',
-              borderColor: field.borderColor || config.borderColor
-            }}
-          />
-        )}
-        
-        {field.type === FIELD_TYPES.DATE && (
-          <input
-            type="date"
-            value={field.value || ''}
-            onChange={(e) => onValueChange(field.id, e.target.value)}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full h-full bg-transparent border-none outline-none"
-            style={{ 
-              fontSize: `${fontSize}px`,
-              padding: '2px 4px',
-              color: field.textColor || '#000000'
-            }}
-          />
-        )}
-        
-        {field.type === FIELD_TYPES.SIGNATURE && (
-          <div className="flex flex-col items-center justify-center" style={{ color: field.textColor || '#6B7280' }}>
-            <Icon 
-              style={{ 
-                width: `${Math.min(fieldWidth * 0.3, fieldHeight * 0.5)}px`,
-                height: `${Math.min(fieldWidth * 0.3, fieldHeight * 0.5)}px`,
-                minWidth: '12px',
-                minHeight: '12px'
-              }} 
-            />
-            <span style={{ fontSize: `${Math.max(8, fontSize * 0.7)}px` }}>
-              {field.placeholder || "Sign here"}
-            </span>
-          </div>
-        )}
-
-        {field.type === FIELD_TYPES.STAMP && (
-          <div className="flex flex-col items-center justify-center" style={{ color: field.textColor || '#6B7280' }}>
-            <Icon 
-              style={{ 
-                width: `${Math.min(fieldWidth * 0.4, fieldHeight * 0.6)}px`,
-                height: `${Math.min(fieldWidth * 0.4, fieldHeight * 0.6)}px`,
-                minWidth: '16px',
-                minHeight: '16px'
-              }} 
-            />
-            <span style={{ fontSize: `${Math.max(8, fontSize * 0.6)}px` }}>
-              {field.placeholder || "Stamp"}
-            </span>
-          </div>
-        )}
-
-        {field.type === FIELD_TYPES.DROPDOWN && (
-          <select
-            value={field.value || ''}
-            onChange={(e) => onValueChange(field.id, e.target.value)}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full h-full bg-transparent border-none outline-none"
-            style={{ 
-              fontSize: `${fontSize}px`,
-              padding: '2px 4px',
-              color: field.textColor || '#000000'
-            }}
-          >
-            <option value="" disabled>{field.placeholder || "Select an option..."}</option>
-            {field.options?.map((option, index) => (
-              <option key={index} value={option}>{option}</option>
-            ))}
-          </select>
-        )}
+        {/* Field Content (all types) */}
+        {(() => {
+          switch (field.type) {
+            case FIELD_TYPES.TEXT:
+              return (
+                <input
+                  type="text"
+                  value={field.value || ''}
+                  onChange={(e) => onValueChange(field.id, e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full h-full bg-transparent border-none outline-none"
+                  placeholder={field.placeholder || "Enter text..."}
+                  style={{ fontSize: `${fontSize}px`, padding: '2px 4px', color: field.textColor || '#000000' }}
+                />
+              )
+            case FIELD_TYPES.NAME:
+              return (
+                <input
+                  type="text"
+                  value={field.value || ''}
+                  onChange={(e) => onValueChange(field.id, e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full h-full bg-transparent border-none outline-none font-medium"
+                  placeholder={field.placeholder || "Full Name"}
+                  style={{ fontSize: `${fontSize}px`, padding: '2px 4px', color: field.textColor || '#000000' }}
+                />
+              )
+            case FIELD_TYPES.EMAIL:
+              return (
+                <input
+                  type="email"
+                  value={field.value || ''}
+                  onChange={(e) => onValueChange(field.id, e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full h-full bg-transparent border-none outline-none"
+                  placeholder={field.placeholder || "email@example.com"}
+                  style={{ fontSize: `${fontSize}px`, padding: '2px 4px', color: field.textColor || '#000000' }}
+                />
+              )
+            case FIELD_TYPES.PHONE:
+              return (
+                <input
+                  type="tel"
+                  value={field.value || ''}
+                  onChange={(e) => onValueChange(field.id, e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full h-full bg-transparent border-none outline-none"
+                  placeholder={field.placeholder || "(555) 123-4567"}
+                  style={{ fontSize: `${fontSize}px`, padding: '2px 4px', color: field.textColor || '#000000' }}
+                />
+              )
+            case FIELD_TYPES.CHECKBOX:
+              return (
+                <input
+                  type="checkbox"
+                  checked={field.value || false}
+                  onChange={(e) => onValueChange(field.id, e.target.checked)}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{ width: `${Math.min(fieldWidth * 0.8, fieldHeight * 0.8)}px`, height: `${Math.min(fieldWidth * 0.8, fieldHeight * 0.8)}px`, minWidth: '16px', minHeight: '16px', borderColor: field.borderColor || config.borderColor }}
+                />
+              )
+            case FIELD_TYPES.DATE:
+              return (
+                <input
+                  type="date"
+                  value={field.value || ''}
+                  onChange={(e) => onValueChange(field.id, e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full h-full bg-transparent border-none outline-none"
+                  style={{ fontSize: `${fontSize}px`, padding: '2px 4px', color: field.textColor || '#000000' }}
+                />
+              )
+            case FIELD_TYPES.SIGNATURE:
+              return (
+                <div className="flex flex-col items-center justify-center" style={{ color: field.textColor || '#6B7280' }}>
+                  <Icon style={{ width: `${Math.min(fieldWidth * 0.3, fieldHeight * 0.5)}px`, height: `${Math.min(fieldWidth * 0.3, fieldHeight * 0.5)}px`, minWidth: '12px', minHeight: '12px' }} />
+                  <span style={{ fontSize: `${Math.max(8, fontSize * 0.7)}px` }}>{field.placeholder || "Sign here"}</span>
+                </div>
+              )
+            case FIELD_TYPES.STAMP:
+              return (
+                <div className="flex flex-col items-center justify-center" style={{ color: field.textColor || '#6B7280' }}>
+                  <Icon style={{ width: `${Math.min(fieldWidth * 0.4, fieldHeight * 0.6)}px`, height: `${Math.min(fieldWidth * 0.4, fieldHeight * 0.6)}px`, minWidth: '16px', minHeight: '16px' }} />
+                  <span style={{ fontSize: `${Math.max(8, fontSize * 0.6)}px` }}>{field.placeholder || "Stamp"}</span>
+                </div>
+              )
+            case FIELD_TYPES.DROPDOWN:
+              return (
+                <select
+                  value={field.value || ''}
+                  onChange={(e) => onValueChange(field.id, e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full h-full bg-transparent border-none outline-none"
+                  style={{ fontSize: `${fontSize}px`, padding: '2px 4px', color: field.textColor || '#000000' }}
+                >
+                  <option value="" disabled>{field.placeholder || "Select an option..."}</option>
+                  {field.options?.map((option, index) => (
+                    <option key={index} value={option}>{option}</option>
+                  ))}
+                </select>
+              )
+            default:
+              return null
+          }
+        })()}
       </div>
 
       {/* Field Toolbar */}
       {isSelected && (
-        <div className="absolute -top-8 left-0 bg-gray-900 text-white px-2 py-1 rounded text-xs flex items-center space-x-1 z-60">
-          <Icon className="w-3 h-3" />
-          <span className="text-xs">{config.label}</span>
+        <div className="absolute -top-8 right-0 bg-gray-900 text-white px-2 py-1 rounded text-xs flex items-center space-x-1 z-40 shadow-lg" style={{ minWidth: '75px', maxWidth: '100%' }}>
+          <span className="truncate max-w-[80px] text-xs font-medium">{config.label}</span>
           {field.required && (
             <span className="text-red-400 ml-1">*</span>
           )}
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onDelete(field.id)
-          }}
-            className="text-red-400 hover:text-red-300 ml-1"
-        >
-            <Trash2 className="w-3 h-3" />
-        </button>
-        </div>
-      )}
-      {isMobile && isSelected && (
-        <div className="absolute -top-7 right-1 z-50 flex space-x-1">
           <button
-            className="bg-blue-600 text-white rounded-full p-1 shadow-lg"
-            style={{ fontSize: 16 }}
             onClick={(e) => { e.stopPropagation(); setShowConfigSheetForFieldId(field.id); }}
+            className="ml-2 p-0.5 rounded hover:bg-blue-800 focus:outline-none"
             aria-label="Edit field settings"
           >
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232a3 3 0 1 1 4.243 4.243L7.5 21H3v-4.5l12.232-12.268Z"/></svg>
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><path stroke="#38bdf8" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232a3 3 0 1 1 4.243 4.243L7.5 21H3v-4.5l12.232-12.268Z"/></svg>
           </button>
           <button
-            className="bg-red-500 text-white rounded-full p-1 shadow-lg"
-            style={{ fontSize: 16 }}
             onClick={(e) => { e.stopPropagation(); onDelete(field.id); }}
+            className="ml-1 p-0.5 rounded hover:bg-red-800 focus:outline-none"
             aria-label="Delete field"
           >
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            <Trash2 className="w-3 h-3 text-red-300" />
           </button>
         </div>
       )}
@@ -1277,7 +1221,7 @@ const FieldComponent = ({
 }
 
 // Mobile Floating Action Button
-const BottomSheetFloatingButton = ({ onFieldTypeSelect, selectedFieldType, toast }) => {
+const BottomSheetFloatingButton = ({ onFieldTypeSelect, selectedFieldType, toast, allFields }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [animating, setAnimating] = useState(false)
 
@@ -1295,7 +1239,12 @@ const BottomSheetFloatingButton = ({ onFieldTypeSelect, selectedFieldType, toast
 
   const handleFieldSelect = (type) => {
     onFieldTypeSelect(type)
-    if (toast) toast.info(`Tap on document to place ${FIELD_CONFIGS[type].label}`)
+    // Only show the hint if there are no UI fields and the hint hasn't been shown this session
+    const totalFields = Object.values(allFields || {}).reduce((total, fields) => total + fields.length, 0);
+    if (toast && totalFields === 0 && !sessionStorage.getItem('fieldPlacementHintShown')) {
+      toast.info(`Tap on document to place ${FIELD_CONFIGS[type].label}`)
+      sessionStorage.setItem('fieldPlacementHintShown', '1')
+    }
   }
 
   return (
@@ -2259,9 +2208,11 @@ export default function EditDocumentEditor() {
     setSelectedField(fieldId)
     // setSelectedFieldType(null) // Keep the field type selected so the bottom sheet stays open
     
-    toast.success(`${config.label} added to ${documents[documentIndex]?.name}`)
-    // Hide edit hint after 3 seconds
-    //setTimeout(() => setShowEditHint(false), 3000)
+    // Only show toast if this is the first field being added
+    const totalFieldsBefore = Object.values(allFields).reduce((total, fields) => total + fields.length, 0);
+    if (totalFieldsBefore === 0) {
+      toast.success(`${config.label} added to ${documents[documentIndex]?.name}`)
+    }
   }, [zoom, documents])
 
   // Handle document click to add field - Modified to detect document index
@@ -3111,7 +3062,7 @@ export default function EditDocumentEditor() {
       {/* Mobile: integrated bottom sheet for palette and field config */}
       {typeof window !== 'undefined' && window.innerWidth < 768 && (
         <>
-          <div className={`fixed md:hidden inset-x-0 bottom-0 z-50 bg-white border-t border-gray-200 rounded-t-2xl shadow-2xl transition-all duration-300 max-h-[50vh] ${showConfigSheetForFieldId ? 'translate-y-0' : 'translate-y-full'}`} style={{ minHeight: '180px', height: showConfigSheetForFieldId ? '50vh' : 0, pointerEvents: showConfigSheetForFieldId ? 'auto' : 'none' }}>
+          <div className={`fixed md:hidden inset-x-0 bottom-0 z-[1000] bg-white border-t border-gray-200 rounded-t-2xl shadow-2xl transition-all duration-300 max-h-[50vh] ${showConfigSheetForFieldId ? 'translate-y-0' : 'translate-y-full'}`} style={{ minHeight: '180px', height: showConfigSheetForFieldId ? '50vh' : 0, pointerEvents: showConfigSheetForFieldId ? 'auto' : 'none' }}>
             {showConfigSheetForFieldId && (
               <>
                 <div className="flex justify-between items-center p-2 border-b border-gray-100">
@@ -3144,6 +3095,7 @@ export default function EditDocumentEditor() {
         onFieldTypeSelect={setSelectedFieldType}
         selectedFieldType={selectedFieldType}
         toast={toast}
+        allFields={allFields}
       />
     </div>
   )
