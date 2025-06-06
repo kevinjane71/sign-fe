@@ -982,7 +982,9 @@ const FieldComponent = ({
   onValueChange,
   containerWidth,
   containerHeight,
-  signers // Add signers prop
+  signers, // Add signers prop
+  lastAddedFieldId,
+  setShowConfigSheetForFieldId
 }) => {
   const config = FIELD_CONFIGS[field.type]
   const Icon = config.icon
@@ -1242,6 +1244,26 @@ const FieldComponent = ({
         >
             <Trash2 className="w-3 h-3" />
         </button>
+        </div>
+      )}
+      {isMobile && isSelected && (
+        <div className="absolute -top-7 right-1 z-50 flex space-x-1">
+          <button
+            className="bg-blue-600 text-white rounded-full p-1 shadow-lg"
+            style={{ fontSize: 16 }}
+            onClick={(e) => { e.stopPropagation(); setShowConfigSheetForFieldId(field.id); }}
+            aria-label="Edit field settings"
+          >
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232a3 3 0 1 1 4.243 4.243L7.5 21H3v-4.5l12.232-12.268Z"/></svg>
+          </button>
+          <button
+            className="bg-red-500 text-white rounded-full p-1 shadow-lg"
+            style={{ fontSize: 16 }}
+            onClick={(e) => { e.stopPropagation(); onDelete(field.id); }}
+            aria-label="Delete field"
+          >
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
         </div>
       )}
     </div>
@@ -1652,7 +1674,7 @@ function DocumentPreviewGrid({ documents, allFields, onAddDocument, onRemoveDocu
 }
 
 // Field Configuration Panel Component
-function FieldConfigurationPanel({ field, onUpdate, onClose, signers, panelClassName }) {
+function FieldConfigurationPanel({ field, onUpdate, onClose, signers, panelClassName, compactMobile }) {
   if (!field) return null;
 
   const userColors = [
@@ -1730,6 +1752,87 @@ function FieldConfigurationPanel({ field, onUpdate, onClose, signers, panelClass
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  // --- Only show essentials if compactMobile is true ---
+  if (compactMobile) {
+    return (
+      <div className={`w-full bg-white h-full overflow-y-auto px-2 pt-2`}>
+        {/* Placeholder */}
+        <div className="mb-3">
+          <label className="block text-xs font-medium text-gray-700 mb-1.5">Placeholder</label>
+          <input
+            type="text"
+            value={config.placeholder}
+            onChange={(e) => handleChange('placeholder', e.target.value)}
+            className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Enter placeholder text..."
+          />
+        </div>
+        {/* Required Field */}
+        <div className="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg mb-3">
+          <input
+            type="checkbox"
+            id="required"
+            checked={config.required}
+            onChange={(e) => handleChange('required', e.target.checked)}
+            className="h-3.5 w-3.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+          />
+          <label htmlFor="required" className="text-sm text-gray-700">
+            Required Field
+          </label>
+        </div>
+        {/* Assign to Signer - Custom Dropdown */}
+        <div className="mb-3">
+          <label className="block text-xs font-medium text-gray-700 mb-1.5">Assign to Signer</label>
+          <div className="relative" ref={dropdownRef}>
+            <button
+              type="button"
+              className="w-full flex items-center justify-between px-2.5 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              style={{
+                borderColor: selectedSigner ? selectedSigner.color.border : undefined,
+                backgroundColor: selectedSigner ? selectedSigner.color.bg : undefined,
+                color: selectedSigner ? '#111827' : undefined
+              }}
+              onClick={() => setDropdownOpen((open) => !open)}
+            >
+              <span className="flex items-center">
+                {selectedSigner && (
+                  <span className="w-4 h-4 rounded-full mr-2 border" style={{ backgroundColor: selectedSigner.color.bg, borderColor: selectedSigner.color.border }} />
+                )}
+                <span className="font-semibold text-gray-900">{selectedSigner ? (selectedSigner.name || selectedSigner.email) : 'Select a signer...'}</span>
+              </span>
+              <svg className="w-4 h-4 text-gray-500 ml-2" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            {dropdownOpen && (
+              <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                {signersWithColors.map((signer) => (
+                  <button
+                    key={signer.id}
+                    type="button"
+                    className={`w-full flex items-center px-3 py-2 text-sm hover:bg-gray-100 ${config.assignedSigner === signer.id ? 'bg-gray-50 font-semibold' : ''}`}
+                    style={{ color: '#111827' }}
+                    onClick={() => { handleChange('assignedSigner', signer.id); setDropdownOpen(false); }}
+                  >
+                    <span className="w-4 h-4 rounded-full mr-2 border" style={{ backgroundColor: signer.color.bg, borderColor: signer.color.border }} />
+                    <span className="font-semibold text-gray-900">{signer.name || signer.email}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        {/* Save/Done Button */}
+        <div className="flex justify-end pt-2">
+          <button
+            onClick={onClose}
+            className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-semibold shadow-sm"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={`w-60 min-w-[240px] bg-white border-l border-gray-200 h-full overflow-y-auto `}>
@@ -1912,6 +2015,9 @@ export default function EditDocumentEditor() {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 })
 
+  // --- Add showConfigSheetForFieldId state ---
+  const [showConfigSheetForFieldId, setShowConfigSheetForFieldId] = useState(null)
+
   // Update URL when step changes
   useEffect(() => {
     const newSearchParams = new URLSearchParams(searchParams)
@@ -2089,7 +2195,7 @@ export default function EditDocumentEditor() {
     toast.success('Document removed')
   }
 
-  // Add field to specific document based on click position
+  // --- 2. Update addField to NOT auto-select field, but track last added ---
   const addField = useCallback((type, position, pageNumber, documentIndex) => {
     const config = FIELD_CONFIGS[type]
     const fieldId = `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -2146,6 +2252,8 @@ export default function EditDocumentEditor() {
     setSelectedFieldType(null)
     
     toast.success(`${config.label} added to ${documents[documentIndex]?.name}`)
+    // Hide edit hint after 3 seconds
+    setTimeout(() => setShowEditHint(false), 3000)
   }, [zoom, documents])
 
   // Handle document click to add field - Modified to detect document index
@@ -2893,7 +3001,8 @@ export default function EditDocumentEditor() {
                       onDragStart={handleDragStart}
                       onDelete={handleFieldDelete}
                       onValueChange={handleFieldValueChange}
-                        signers={documentData?.signers || []} // Pass signers to FieldComponent
+                      signers={documentData?.signers || []}
+                      setShowConfigSheetForFieldId={setShowConfigSheetForFieldId}
                     />
                   ))}
                 </DocumentViewer>
@@ -2922,30 +3031,7 @@ export default function EditDocumentEditor() {
                       />
                     </div>
                     {/* Mobile: bottom sheet/modal */}
-                    <div className="fixed md:hidden inset-x-0 bottom-0 z-40 bg-white border-t border-gray-200 rounded-t-2xl shadow-2xl max-h-[85vh] overflow-y-auto animate-slideUp">
-                      <div className="flex justify-between items-center p-4 border-b border-gray-100">
-                        <h3 className="text-base font-semibold text-gray-900">Field Settings</h3>
-                        <button onClick={() => setSelectedField(null)} className="p-2 rounded-full hover:bg-gray-100">
-                          <X className="w-5 h-5 text-gray-500" />
-                        </button>
-                      </div>
-                      <FieldConfigurationPanel
-                        field={getAllFields().find(f => f.id === selectedField)}
-                        onUpdate={handleFieldConfigUpdate}
-                        onClose={() => setSelectedField(null)}
-                        signers={
-                          documentId === 'local-new'
-                            ? (() => {
-                                try {
-                                  const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
-                                  return config.signers || [];
-                                } catch { return []; }
-                              })()
-                            : documentData?.signers || []
-                        }
-                        panelClassName="w-full min-w-0 px-2"
-                      />
-                    </div>
+                    
                   </>
                 )}
               </div>
@@ -2956,39 +3042,35 @@ export default function EditDocumentEditor() {
 
       {/* Mobile: integrated bottom sheet for palette and field config */}
       {typeof window !== 'undefined' && window.innerWidth < 768 && (
-        <div className="fixed md:hidden inset-x-0 bottom-0 z-40 bg-white border-t border-gray-200 rounded-t-2xl shadow-2xl max-h-[85vh] overflow-y-auto animate-slideUp">
-          {selectedField ? (
-            <>
-              <div className="flex justify-between items-center p-4 border-b border-gray-100">
-                <button onClick={() => setSelectedField(null)} className="p-2 rounded-full hover:bg-gray-100">
-                  <ArrowLeft className="w-5 h-5 text-gray-500" />
-                </button>
-                <h3 className="text-base font-semibold text-gray-900 flex-1 text-center">Field Settings</h3>
-                <button onClick={() => setSelectedField(null)} className="p-2 rounded-full hover:bg-gray-100">
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
-              </div>
-              <FieldConfigurationPanel
-                field={getAllFields().find(f => f.id === selectedField)}
-                onUpdate={handleFieldConfigUpdate}
-                onClose={() => setSelectedField(null)}
-                signers={
-                  documentId === 'local-new'
-                    ? (() => {
-                        try {
-                          const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
-                          return config.signers || [];
-                        } catch { return []; }
-                      })()
-                    : documentData?.signers || []
-                }
-                panelClassName="w-full min-w-0 px-2"
-              />
-            </>
-          ) : (
-            <></>
+        <>
+          <div className={`fixed md:hidden inset-x-0 bottom-0 z-50 bg-white border-t border-gray-200 rounded-t-2xl shadow-2xl transition-all duration-300 max-h-[50vh] ${showConfigSheetForFieldId ? 'translate-y-0' : 'translate-y-full'}`} style={{ minHeight: '180px', height: showConfigSheetForFieldId ? '50vh' : 0, pointerEvents: showConfigSheetForFieldId ? 'auto' : 'none' }}>
+            {showConfigSheetForFieldId && (
+              <>
+                <div className="flex justify-between items-center p-2 border-b border-gray-100">
+                  <button onClick={() => setShowConfigSheetForFieldId(null)} className="p-2 rounded-full hover:bg-gray-100">
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                  </button>
+                  <h3 className="text-base font-semibold text-gray-900 flex-1 text-center">Field Settings</h3>
+                  <div className="w-8" />
+                </div>
+                <div className="px-3 py-2">
+                  <FieldConfigurationPanel
+                    field={getAllFields().find(f => f.id === showConfigSheetForFieldId)}
+                    onUpdate={handleFieldConfigUpdate}
+                    onClose={() => setShowConfigSheetForFieldId(null)}
+                    signers={documentId === 'local-new' ? (() => { try { const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}'); return config.signers || []; } catch { return []; } })() : documentData?.signers || []}
+                    panelClassName="w-full min-w-0 px-2"
+                    compactMobile
+                  />
+                </div>
+              </>
+            )}
+          </div>
+          {/* Tap-outside to dismiss */}
+          {showConfigSheetForFieldId && (
+            <div onClick={() => setShowConfigSheetForFieldId(null)} className="fixed inset-0 bg-black bg-opacity-10 z-40" style={{ pointerEvents: 'auto' }} />
           )}
-        </div>
+        </>
       )}
       <BottomSheetFloatingButton
         onFieldTypeSelect={setSelectedFieldType}
