@@ -1028,7 +1028,9 @@ const FieldComponent = ({
   containerHeight,
   signers, // Add signers prop
   lastAddedFieldId,
-  setShowConfigSheetForFieldId
+  setShowConfigSheetForFieldId,
+  resizingFieldId,
+  handleResizeStart
 }) => {
   const config = FIELD_CONFIGS[field.type]
   const Icon = config.icon
@@ -1253,6 +1255,49 @@ const FieldComponent = ({
             <Trash2 className="w-3 h-3 text-red-300" />
           </button>
         </div>
+      )}
+      {isSelected && (
+        <>
+          {/* 8 handles: corners and sides */}
+          {['tl','tr','br','bl'].map(handle => {
+            const pos = {
+              tl: { top: -6, left: -6, cursor: 'nwse-resize' },
+              tr: { top: -6, right: -6, cursor: 'nesw-resize' },
+              br: { bottom: -6, right: -6, cursor: 'nwse-resize' },
+              bl: { bottom: -6, left: -6, cursor: 'nesw-resize' },
+            }[handle]
+            return (
+              <div
+                key={handle}
+                style={{
+                  position: 'absolute',
+                  width: 14, height: 14,
+                  background: resizingFieldId === field.id ? '#38bdf8' : '#fff',
+                  border: '2px solid #38bdf8',
+                  borderRadius: 8,
+                  boxShadow: '0 2px 8px rgba(56,189,248,0.15)',
+                  zIndex: 100,
+                  ...pos
+                }}
+                onMouseDown={e => handleResizeStart(field.id, handle, e)}
+                onTouchStart={e => handleResizeStart(field.id, handle, e)}
+              />
+            )
+          })}
+          {/* Highlight border during resize */}
+          {resizingFieldId === field.id && (
+            <div style={{
+              position: 'absolute',
+              inset: -4,
+              border: '2px dashed #38bdf8',
+              borderRadius: 6,
+              pointerEvents: 'none',
+              zIndex: 99,
+              boxShadow: '0 0 0 2px #38bdf833',
+              transition: 'box-shadow 0.2s',
+            }} />
+          )}
+        </>
       )}
     </div>
   )
@@ -2749,6 +2794,116 @@ export default function EditDocumentEditor() {
     setSelectedField(fieldId)
   }
 
+  // --- RESIZE STATE ---
+  // Add to main editor component
+  const [resizingFieldId, setResizingFieldId] = useState(null)
+  const [resizeHandle, setResizeHandle] = useState(null) // e.g. 'br', 'tr', 'bl', 'tl', 'r', 'b', etc.
+  const [resizeStart, setResizeStart] = useState(null) // { x, y, width, height, leftPercent, topPercent, widthPercent, heightPercent }
+
+  // --- RESIZE HANDLERS ---
+  function handleResizeStart(fieldId, handle, e) {
+    e.stopPropagation()
+    let clientX, clientY
+    if (e.type.startsWith('touch')) {
+      const touch = e.touches[0]
+      clientX = touch.clientX
+      clientY = touch.clientY
+    } else {
+      clientX = e.clientX
+      clientY = e.clientY
+    }
+    // Find field
+    const field = getAllFields().find(f => f.id === fieldId)
+    setResizingFieldId(fieldId)
+    setResizeHandle(handle)
+    setResizeStart({
+      x: clientX,
+      y: clientY,
+      widthPercent: field.widthPercent,
+      heightPercent: field.heightPercent,
+      leftPercent: field.leftPercent,
+      topPercent: field.topPercent
+    })
+  }
+  function handleResizeMove(e) {
+    if (!resizingFieldId || !resizeHandle || !resizeStart) return
+    let clientX, clientY
+    if (e.type.startsWith('touch')) {
+      const touch = e.touches[0]
+      clientX = touch.clientX
+      clientY = touch.clientY
+    } else {
+      clientX = e.clientX
+      clientY = e.clientY
+    }
+    // Find field and its container
+    const field = getAllFields().find(f => f.id === resizingFieldId)
+    if (!field) return
+    const pageElement = document.querySelector(`[data-page-number="${field.pageNumber}"][data-document-index="${field.documentIndex}"]`)
+    if (!pageElement) return
+    const containerWidth = pageElement.offsetWidth
+    const containerHeight = pageElement.offsetHeight
+    // Calculate delta
+    const dx = clientX - resizeStart.x
+    const dy = clientY - resizeStart.y
+    let newWidth = resizeStart.widthPercent
+    let newHeight = resizeStart.heightPercent
+    let newLeft = resizeStart.leftPercent
+    let newTop = resizeStart.topPercent
+    // Handle logic (bottom-right, right, bottom, etc.)
+    if (resizeHandle.includes('r')) {
+      newWidth = Math.max(4, Math.min(80, resizeStart.widthPercent + (dx / containerWidth) * 100))
+    }
+    if (resizeHandle.includes('b')) {
+      newHeight = Math.max(2, Math.min(60, resizeStart.heightPercent + (dy / containerHeight) * 100))
+    }
+    if (resizeHandle.includes('l')) {
+      newWidth = Math.max(4, Math.min(80, resizeStart.widthPercent - (dx / containerWidth) * 100))
+      newLeft = Math.max(0, Math.min(96, resizeStart.leftPercent + (dx / containerWidth) * 100))
+    }
+    if (resizeHandle.includes('t')) {
+      newHeight = Math.max(2, Math.min(60, resizeStart.heightPercent - (dy / containerHeight) * 100))
+      newTop = Math.max(0, Math.min(96, resizeStart.topPercent + (dy / containerHeight) * 100))
+    }
+    // Update field in allFields
+    for (const [docIndex, fields] of Object.entries(allFields)) {
+      const idx = fields.findIndex(f => f.id === resizingFieldId)
+      if (idx !== -1) {
+        setAllFields(prev => ({
+          ...prev,
+          [docIndex]: prev[docIndex].map(f =>
+            f.id === resizingFieldId
+              ? { ...f, widthPercent: newWidth, heightPercent: newHeight, leftPercent: newLeft, topPercent: newTop }
+              : f
+          )
+        }))
+        break
+      }
+    }
+  }
+  function handleResizeEnd() {
+    setResizingFieldId(null)
+    setResizeHandle(null)
+    setResizeStart(null)
+  }
+  // --- GLOBAL EVENT LISTENERS FOR RESIZE ---
+  useEffect(() => {
+    if (resizingFieldId) {
+      const move = e => handleResizeMove(e)
+      const up = () => handleResizeEnd()
+      window.addEventListener('mousemove', move)
+      window.addEventListener('mouseup', up)
+      window.addEventListener('touchmove', move, { passive: false })
+      window.addEventListener('touchend', up)
+      return () => {
+        window.removeEventListener('mousemove', move)
+        window.removeEventListener('mouseup', up)
+        window.removeEventListener('touchmove', move)
+        window.removeEventListener('touchend', up)
+      }
+    }
+  }, [resizingFieldId, resizeHandle, resizeStart])
+
   if (loading) {
     return <LoadingSpinner message="Loading document..." />
   }
@@ -3148,6 +3303,8 @@ export default function EditDocumentEditor() {
                       onValueChange={handleFieldValueChange}
                       signers={documentData?.signers || []}
                       setShowConfigSheetForFieldId={setShowConfigSheetForFieldId}
+                      resizingFieldId={resizingFieldId}
+                      handleResizeStart={handleResizeStart}
                     />
                   ))}
                 </DocumentViewer>
