@@ -2540,24 +2540,13 @@ export default function EditDocumentEditor() {
       return
     }
 
-    // Store preview data for all documents
+    // Store preview data for the first document (as expected by /live/preview)
     const previewData = {
-      documents: documents.map((doc, index) => ({
-        title: doc.name,
-        document: {
-          name: doc.name,
-          type: doc.type,
-          size: doc.size,
-          data: doc.data,
-          url: doc.url
-        },
-        fields: allFields[index] || []
-      }))
+      title: documentData?.title || documents[0]?.name || 'Document',
+      document: documents[0],
+      fields: getAllFields()
     }
-
-    sessionStorage.setItem('previewDocuments', JSON.stringify(previewData))
-    
-    // Open preview in new tab
+    sessionStorage.setItem('previewDocument', JSON.stringify(previewData))
     window.open('/live/preview', '_blank')
   }
 
