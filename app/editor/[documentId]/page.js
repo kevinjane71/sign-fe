@@ -892,22 +892,27 @@ const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentCli
       ref={containerRef}
       className="w-full h-full overflow-auto bg-gray-100"
       onClick={onDocumentClick}
-      style={{ scrollBehavior: 'smooth' }}
+      style={{
+        scrollBehavior: 'smooth',
+        width: typeof window !== 'undefined' && window.innerWidth < 768 ? '100vw' : undefined,
+        padding: typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : undefined
+      }}
     >
       {allPages.map((page, globalPageIndex) => {
           // Calculate display dimensions to use full available width when zoomed
-          const isMobile = window.innerWidth < 768
+          const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
           
           // Use full available width, accounting for sidebar
           let availableWidth
           if (isMobile) {
-            availableWidth = window.innerWidth - 16 // Small margin
+            availableWidth = window.innerWidth
           } else {
             availableWidth = window.innerWidth - 320 - 16 // Sidebar + small margin
           }
           
           // Calculate display width based on zoom and available space
-          const baseWidth = Math.min(page.originalWidth * 1.2, (availableWidth * 0.9) / zoom) // Increased base size
+          const useFullWidth = isMobile && zoom === 1
+          const baseWidth = useFullWidth ? window.innerWidth : Math.min(page.originalWidth * 1.2, (availableWidth * 0.9) / zoom) // Increased base size
           const displayWidth = baseWidth * zoom
           const displayHeight = (page.originalHeight / page.originalWidth) * displayWidth
 
@@ -919,9 +924,10 @@ const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentCli
               data-document-index={page.documentIndex}
               className="relative bg-white shadow-lg mx-auto my-4"
               style={{
-                width: displayWidth,
+                width: useFullWidth ? '100vw' : displayWidth,
                 height: displayHeight,
-                maxWidth: 'none'
+                maxWidth: useFullWidth ? '100vw' : 'none',
+                margin: useFullWidth ? '0 auto' : undefined
               }}
             >
               {/* Page Number - Top Right */}
@@ -2253,7 +2259,7 @@ export default function EditDocumentEditor() {
     
     toast.success(`${config.label} added to ${documents[documentIndex]?.name}`)
     // Hide edit hint after 3 seconds
-    setTimeout(() => setShowEditHint(false), 3000)
+    //setTimeout(() => setShowEditHint(false), 3000)
   }, [zoom, documents])
 
   // Handle document click to add field - Modified to detect document index
