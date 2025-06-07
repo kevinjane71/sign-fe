@@ -555,7 +555,7 @@ const SigningFieldComponent = ({
           onKeyPress={handleKeyPress}
           className="w-full h-full bg-transparent border-none outline-none text-gray-700"
           placeholder={field.placeholder || 'dd/mm/yyyy'}
-          style={{ fontSize: `${fontSize}px`, padding: `${paddingY}px ${paddingX}px`, color: '#374151', '::placeholder': { color: '#9ca3af' } }}
+          style={{ fontSize: Math.max(16, fontSize), padding: `${paddingY}px ${paddingX}px`, color: '#374151', '::placeholder': { color: '#9ca3af' } }}
           tabIndex={0}
           autoFocus={false}
         />
@@ -566,7 +566,7 @@ const SigningFieldComponent = ({
           onChange={(e) => handleChange(e.target.value)}
           onBlur={handleBlur}
           className="w-full h-full bg-transparent border-none outline-none text-gray-700"
-          style={{ fontSize: `${fontSize}px`, padding: `${paddingY}px ${paddingX}px`, color: '#374151' }}
+          style={{ fontSize: Math.max(16, fontSize), padding: `${paddingY}px ${paddingX}px`, color: '#374151' }}
         >
           <option value="" disabled>{field.placeholder || 'Select an option...'}</option>
           {field.options.map(opt => (
@@ -581,7 +581,7 @@ const SigningFieldComponent = ({
           onChange={(e) => handleChange(e.target.checked)}
           onBlur={handleBlur}
           className="bg-transparent border-none outline-none text-gray-700"
-          style={{ width: '100%', height: '100%' }}
+          style={{ width: '100%', height: '100%', fontSize: Math.max(16, fontSize) }}
         />
       ) : (
         <input
@@ -593,7 +593,7 @@ const SigningFieldComponent = ({
           onKeyPress={handleKeyPress}
           className="w-full h-full bg-transparent border-none outline-none text-gray-700"
           placeholder={field.placeholder || fieldConfig.label}
-          style={{ fontSize: `${fontSize}px`, padding: `${paddingY}px ${paddingX}px`, color: '#374151', '::placeholder': { color: '#9ca3af' } }}
+          style={{ fontSize: Math.max(16, fontSize), padding: `${paddingY}px ${paddingX}px`, color: '#374151', '::placeholder': { color: '#9ca3af' } }}
           tabIndex={0}
           autoFocus={false}
         />

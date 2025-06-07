@@ -39,6 +39,17 @@ const SignatureModal = ({ isOpen = true, onClose, onSave, maxSizeMB = 20 }) => {
     }
   }, [isOpen, activeTab, penColor, penWidth])
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'auto'
+    }
+    return () => {
+      document.body.style.overflow = 'auto'
+    }
+  }, [isOpen])
+
   const initializeCanvas = () => {
     const canvas = canvasRef.current
     if (!canvas) return
