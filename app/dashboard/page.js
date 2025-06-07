@@ -46,6 +46,7 @@ import {
 import { useToast } from '../components/LayoutWrapper'
 import { getUserDocuments, deleteDocument, duplicateDocument, isAuthenticated, getStoredUser, getDocuments, getDocumentStats } from '../utils/api'
 import LoadingSpinner from '../components/LoadingSpinner'
+import Modal from '../components/Modal'
 
 export default function Dashboard() {
   const router = useRouter()
@@ -78,6 +79,8 @@ export default function Dashboard() {
   const [toastType, setToastType] = useState('success')
   const [isDeleting, setIsDeleting] = useState(false)
   const [isDuplicating, setIsDuplicating] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [pendingDeleteDoc, setPendingDeleteDoc] = useState(null)
   const dropdownRef = useRef(null)
   const fileInputRef = useRef(null)
 
@@ -380,10 +383,6 @@ export default function Dashboard() {
   }
 
   const handleDeleteDocument = async (documentId) => {
-    if (!confirm('Are you sure you want to delete this document?')) {
-      return
-    }
-
     try {
       const response = await deleteDocument(documentId)
 
@@ -470,6 +469,24 @@ export default function Dashboard() {
   
   // Check if we should show "no results" message (when filters are applied but no results)
   const shouldShowNoResults = documents.length === 0 && ((statusFilter && statusFilter !== 'all') || searchTerm);
+
+  const handleDeleteClick = (doc) => {
+    setPendingDeleteDoc(doc)
+    setShowDeleteModal(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (pendingDeleteDoc) {
+      await handleDeleteDocument(pendingDeleteDoc.id)
+      setShowDeleteModal(false)
+      setPendingDeleteDoc(null)
+    }
+  }
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false)
+    setPendingDeleteDoc(null)
+  }
 
   // Show loading state while checking authentication
   if (!user) {
@@ -958,16 +975,12 @@ export default function Dashboard() {
                                     Edit
                                   </button>
                                   <button
-                                  onClick={() => {
-                                    if (confirm('Are you sure you want to delete this document?')) {
-                                      handleDeleteDocument(doc.id);
-                                    }
-                                  }}
-                                  className="inline-flex items-center px-3 py-1.5 border border-red-200 text-xs font-medium rounded text-red-600 bg-white hover:bg-red-50 hover:scale-105 transition-all duration-200"
+                                    onClick={() => handleDeleteClick(doc)}
+                                    className="inline-flex items-center px-3 py-1.5 border border-red-200 text-xs font-medium rounded text-red-600 bg-white hover:bg-red-50 hover:scale-105 transition-all duration-200"
                                     title="Delete Document"
                                   >
-                                  <Trash2 className="w-3 h-3 mr-1" />
-                                  Delete
+                                    <Trash2 className="w-3 h-3 mr-1" />
+                                    Delete
                                   </button>
                                 </div>
                               </td>
@@ -1035,11 +1048,7 @@ export default function Dashboard() {
                                 Edit
                               </button>
                               <button
-                                onClick={() => {
-                                  if (confirm('Are you sure you want to delete this document?')) {
-                                    handleDeleteDocument(doc.id);
-                                  }
-                                }}
+                                onClick={() => handleDeleteClick(doc)}
                                 className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-red-200 text-xs font-medium rounded text-red-600 bg-white hover:bg-red-50 transition-colors"
                               >
                                 <Trash2 className="w-3 h-3 mr-1" />
@@ -1087,6 +1096,20 @@ export default function Dashboard() {
             </div>
           </div>
       </div>
+
+      {/* Custom Delete Modal */}
+      {showDeleteModal && (
+        <Modal isOpen={showDeleteModal} onClose={handleCancelDelete}>
+          <div className="p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">Delete Document</h2>
+            <p className="text-gray-700 mb-4">Are you sure you want to delete <span className="font-bold">{pendingDeleteDoc?.title || pendingDeleteDoc?.originalName || 'this document'}</span>? This action cannot be undone.</p>
+            <div className="flex justify-end space-x-2">
+              <button onClick={handleCancelDelete} className="px-4 py-2 rounded bg-gray-100 text-gray-700 hover:bg-gray-200">Cancel</button>
+              <button onClick={handleConfirmDelete} className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">Delete</button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   )
 } 

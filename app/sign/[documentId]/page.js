@@ -602,6 +602,13 @@ const SigningFieldComponent = ({
   )
 }
 
+// Add helper to get current signer role
+function getCurrentSignerRole(documentData, signerEmail) {
+  if (!documentData || !documentData.signers) return 'Signer'
+  const signer = documentData.signers.find(s => s.email === signerEmail)
+  return signer?.role?.toLowerCase() || 'signer'
+}
+
 // Main Signing Page Component
 export default function SigningPage() {
   const router = useRouter()
@@ -612,6 +619,7 @@ export default function SigningPage() {
   const token = searchParams.get('token')
 
   const [documentData, setDocumentData] = useState(null)
+  const [signerInfo, setSignerInfo] = useState(null)
   const [documents, setDocuments] = useState([])
   const [fieldValues, setFieldValues] = useState({})
   const [loading, setLoading] = useState(true)
@@ -688,6 +696,7 @@ export default function SigningPage() {
         }
 
         setDocumentData(result.document)
+        setSignerInfo(result.signer)
         // --- FIX: Also set documents and fieldValues ---
         const loadedDocuments = []
         const initialFieldValues = {}
@@ -902,6 +911,7 @@ export default function SigningPage() {
           throw new Error(result.error || 'Failed to load document')
         }
         setDocumentData(result.document)
+        setSignerInfo(result.signer)
         // --- FIX: Also set documents and fieldValues ---
         const loadedDocuments = []
         const initialFieldValues = {}
@@ -951,6 +961,13 @@ export default function SigningPage() {
     }
     fetchWithCode()
   }
+
+  // Use role from signerInfo (API response)
+  const currentSignerRole = signerInfo?.role || 'signer'
+  const isViewer = currentSignerRole.toLowerCase() === 'viewer'
+  console.log('Debug - Document Data:', documentData)
+  console.log('Debug - Current Signer Role:', currentSignerRole)
+  console.log('Debug - Is Viewer:', isViewer)
 
   if (accessCodeRequired) {
     return (
@@ -1048,24 +1065,26 @@ export default function SigningPage() {
               </div>
               
               {/* Submit Button - Mobile */}
-              <button
-                onClick={handleSubmitSignature}
-                disabled={isSubmitting}
-                className={`px-4 py-2 rounded-md font-medium text-sm transition-colors ${
-                  isSubmitting
-                    ? 'bg-blue-400 text-white cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center space-x-1">
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                    <span>Signing...</span>
-                  </div>
-                ) : (
-                  'Complete Signing'
-                )}
-              </button>
+              {!isViewer && (
+                <button
+                  onClick={handleSubmitSignature}
+                  disabled={isSubmitting}
+                  className={`px-4 py-2 rounded-md font-medium text-sm transition-colors ${
+                    isSubmitting
+                      ? 'bg-blue-400 text-white cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center space-x-1">
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      <span>Signing...</span>
+                    </div>
+                  ) : (
+                    'Complete Signing'
+                  )}
+                </button>
+              )}
             </div>
 
             {/* Progress indicator for mobile */}
@@ -1119,24 +1138,26 @@ export default function SigningPage() {
               </div>
 
               {/* Submit Button - Desktop */}
-              <button
-                onClick={handleSubmitSignature}
-                disabled={isSubmitting}
-                className={`px-6 py-2 rounded-md font-medium transition-colors ${
-                  isSubmitting
-                    ? 'bg-blue-400 text-white cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center space-x-2">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Signing...</span>
-                  </div>
-                ) : (
-                  'Complete Signing'
-                )}
-              </button>
+              {!isViewer && (
+                <button
+                  onClick={handleSubmitSignature}
+                  disabled={isSubmitting}
+                  className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                    isSubmitting
+                      ? 'bg-blue-400 text-white cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center space-x-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Signing...</span>
+                    </div>
+                  ) : (
+                    'Complete Signing'
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>
