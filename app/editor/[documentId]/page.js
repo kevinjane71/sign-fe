@@ -842,11 +842,39 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
 }
 
 // Document Viewer Component - Modified to show all documents in continuous scroll
-const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentClick, signers, onDocumentDrop, onDocumentDragOver, onDocumentTouchEnd, draggingFieldType, isDraggingFromPalette, dragPreviewPosition }) => {
+const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentClick, signers, onDocumentDrop, onDocumentDragOver, onDocumentTouchEnd, draggingFieldType, isDraggingFromPalette, dragPreviewPosition, fitToWidth, setFitToWidth }) => {
   const [allPages, setAllPages] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const containerRef = useRef(null)
+  const [fitZoom, setFitZoom] = useState(1)
+
+  // Calculate fit-to-width zoom on mount and when window resizes
+  useEffect(() => {
+    function updateFitZoom() {
+      if (!allPages.length) return
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+      if (isMobile) return // Don't fit-to-width on mobile
+      // Use the first page as reference
+      const page = allPages[0]
+      // Calculate available width (sidebar + right panel + margin)
+      const sidebarWidth = 288 // 72 * 4 px (w-72)
+      const rightPanelWidth = 200 // min-w-[200px]
+      const margin = 32 // 16px left/right
+      const availableWidth = window.innerWidth - sidebarWidth - rightPanelWidth - margin
+      const fit = availableWidth / page.originalWidth
+      setFitZoom(fit)
+      if (fitToWidth && zoom !== fit) {
+        onZoomChange && onZoomChange(fit)
+      }
+    }
+    updateFitZoom()
+    window.addEventListener('resize', updateFitZoom)
+    return () => window.removeEventListener('resize', updateFitZoom)
+  }, [allPages, fitToWidth, zoom, onZoomChange])
+
+  // If fitToWidth is true, always use fitZoom
+  const effectiveZoom = fitToWidth ? fitZoom : zoom
 
   // Load all documents and create a continuous page list
   const loadAllDocuments = useCallback(async () => {
@@ -1004,25 +1032,24 @@ const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentCli
       style={{
         scrollBehavior: 'smooth',
         width: typeof window !== 'undefined' && window.innerWidth < 768 ? '100vw' : undefined,
-        padding: typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : undefined
+        padding: typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : undefined,
+        transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
+        overflowX: effectiveZoom > fitZoom ? 'auto' : 'hidden',
       }}
     >
       {allPages.map((page, globalPageIndex) => {
           // Calculate display dimensions to use full available width when zoomed
           const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
-          
-          // Use full available width, accounting for sidebar
           let availableWidth
           if (isMobile) {
             availableWidth = window.innerWidth
           } else {
             availableWidth = window.innerWidth - 320 - 16 // Sidebar + small margin
           }
-          
           // Calculate display width based on zoom and available space
-          const useFullWidth = isMobile && zoom === 1
-          const baseWidth = useFullWidth ? window.innerWidth : Math.min(page.originalWidth * 1.2, (availableWidth * 0.9) / zoom) // Increased base size
-          const displayWidth = baseWidth * zoom
+          const useFullWidth = isMobile && effectiveZoom === 1
+          const baseWidth = useFullWidth ? window.innerWidth : page.originalWidth
+          const displayWidth = baseWidth * effectiveZoom
           const displayHeight = (page.originalHeight / page.originalWidth) * displayWidth
 
           return (
@@ -1036,7 +1063,8 @@ const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentCli
                 width: useFullWidth ? '100vw' : displayWidth,
                 height: displayHeight,
                 maxWidth: useFullWidth ? '100vw' : 'none',
-                margin: useFullWidth ? '0 auto' : undefined
+                margin: useFullWidth ? '0 auto' : undefined,
+                transition: 'width 0.3s cubic-bezier(0.4,0,0.2,1), height 0.3s cubic-bezier(0.4,0,0.2,1)',
               }}
             >
               {/* Page Number - Top Right */}
@@ -1052,7 +1080,8 @@ const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentCli
                 style={{
                   width: '100%',
                   height: '100%',
-                  imageRendering: 'crisp-edges'
+                  imageRendering: 'crisp-edges',
+                  transition: 'width 0.3s cubic-bezier(0.4,0,0.2,1), height 0.3s cubic-bezier(0.4,0,0.2,1)',
                 }}
                 ref={(canvas) => {
                   if (canvas && page.canvas) {
@@ -2113,6 +2142,7 @@ export default function EditDocumentEditor() {
   const [selectedField, setSelectedField] = useState(null)
   const [selectedFieldType, setSelectedFieldType] = useState(null)
   const [zoom, setZoom] = useState(1)
+  const [fitToWidth, setFitToWidth] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   
@@ -2593,14 +2623,7 @@ export default function EditDocumentEditor() {
     }
   }, [isDragging, handleDragMove, handleDragEnd])
 
-  // Zoom handlers
-  const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev + 0.25, 3))
-  }
-
-  const handleZoomOut = () => {
-    setZoom(prev => Math.max(prev - 0.25, 0.5))
-  }
+ 
 
   // Preview handler - Updated for continuous view
   const handlePreview = () => {
@@ -2968,6 +2991,40 @@ export default function EditDocumentEditor() {
     }
   }, [resizingFieldId, resizeHandle, resizeStart])
 
+  // --- Fit to Width Handler ---
+  const handleFitToWidth = useCallback(() => {
+    // Find the first document page element
+    setTimeout(() => {
+      const pageElement = document.querySelector('[data-page-number][data-document-index]')
+      if (!pageElement) return
+      // Calculate available width (window - sidebar - right panel)
+      const sidebarWidth = 288 // 72 * 4 px (w-72)
+      const rightPanelWidth = 200 // min-w-[200px]
+      const margin = 32 // 16px left/right
+      const availableWidth = window.innerWidth - sidebarWidth - rightPanelWidth - margin
+      // Get the original width of the page (PDF/image)
+      const originalWidth = pageElement.offsetWidth / zoom // current width / zoom = original
+      // Calculate the zoom needed to fit
+      const fitZoom = availableWidth / originalWidth
+      setZoom(fitZoom)
+      setFitToWidth(true)
+    }, 100)
+  }, [zoom])
+
+  // If user zooms in/out manually, disable fitToWidth
+  const handleZoomIn = () => {
+    setZoom(prev => {
+      setFitToWidth(false)
+      return Math.min(prev + 0.25, 3)
+    })
+  }
+  const handleZoomOut = () => {
+    setZoom(prev => {
+      setFitToWidth(false)
+      return Math.max(prev - 0.25, 0.5)
+    })
+  }
+
   if (loading) {
     return <LoadingSpinner message="Loading document..." />
   }
@@ -3101,6 +3158,14 @@ export default function EditDocumentEditor() {
             {/* Right Section */}
             <div className="flex items-center space-x-2">
               {/* Zoom Controls */}
+              <button
+    onClick={handleFitToWidth}
+    className="flex items-center space-x-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md transition-colors text-xs font-semibold text-gray-700"
+    style={{ minWidth: 110 }}
+  >
+    <ZoomIn className="w-4 h-4 mr-1" />
+    <span>Zoom to Fit Width</span>
+  </button>
               <div className="hidden md:flex items-center bg-gray-50 rounded-md border border-gray-300 overflow-hidden">
                 <button
                   onClick={handleZoomOut}
@@ -3122,7 +3187,7 @@ export default function EditDocumentEditor() {
               </div>
               {/* Reset Button */}
               <button
-                onClick={() => setZoom(1)}
+                onClick={() => { setZoom(1); setFitToWidth(false); }}
                 className="hidden md:flex items-center space-x-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md transition-colors text-xs font-semibold text-gray-700"
               >
                 <span>Reset</span>
@@ -3344,6 +3409,8 @@ export default function EditDocumentEditor() {
                   documents={documents}
                   zoom={zoom}
                   onZoomChange={setZoom}
+                  fitToWidth={fitToWidth}
+                  setFitToWidth={setFitToWidth}
                   onDocumentClick={handleDocumentClick}
                   signers={documentData?.signers || []}
                   onDocumentDrop={handleDocumentDrop}
