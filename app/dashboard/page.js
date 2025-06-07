@@ -497,58 +497,58 @@ export default function Dashboard() {
           {/* Upload Section - Left Column - Hidden on Mobile */}
           <div className="hidden lg:block lg:col-span-1">
             <div className="bg-gradient-to-br from-gray-50 via-white to-rose-50 rounded-xl p-6 border border-gray-100 shadow-sm">
-              <div className="text-center mb-4">
+                <div className="text-center mb-4">
                 <div className="w-12 h-12 mx-auto mb-3 bg-gray-200 rounded-full flex items-center justify-center">
                   <Upload className="w-6 h-6 text-emerald-500" />
                 </div>
                 <h3 className="text-base font-semibold mb-2 text-gray-900">Upload Documents</h3>
                 <p className="text-xs text-gray-600">
-                  Add new documents to get started
-                </p>
-              </div>
+                    Add new documents to get started
+                  </p>
+                </div>
 
-              <div 
+                <div 
                 className={`border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 cursor-pointer ${
-                  isDragOver ? 'border-emerald-400 bg-emerald-50' : ''
-                }`}
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onClick={() => document.getElementById('file-upload').click()}
-              >
+                    isDragOver ? 'border-emerald-400 bg-emerald-50' : ''
+                  }`}
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onClick={() => document.getElementById('file-upload').click()}
+                >
                 <div className="py-3">
                   <FolderOpen className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                   <p className="text-xs font-medium text-gray-900 mb-1">
-                    Drop files here or click to browse
-                  </p>
+                      Drop files here or click to browse
+                    </p>
                   <p className="text-[10px] text-gray-500">
-                    PDF, Images, Word docs • Max 50MB
-                  </p>
-                </div>
+                      PDF, Images, Word docs • Max 50MB
+                    </p>
+                  </div>
 
-                <input
-                  id="file-upload"
-                  type="file"
-                  multiple
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
+                  <input
+                    id="file-upload"
+                    type="file"
+                    multiple
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Main Content - Right Column */}
-          <div className="lg:col-span-3">
-            {/* Header */}
+            {/* Main Content - Right Column */}
+            <div className="lg:col-span-3">
+              {/* Header */}
             <div className="bg-white rounded-xl p-4 mb-4 border border-gray-200 shadow-sm">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                <div>
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                  <div>
                   <h1 className="text-xl lg:text-2xl font-bold mb-1 text-gray-900">Document Dashboard</h1>
                   <p className="text-xs lg:text-sm text-gray-600">
-                    Manage and track your documents
-                  </p>
-                </div>
+                      Manage and track your documents
+                    </p>
+                  </div>
                 {/* Mobile Upload Button */}
                 <div className="lg:hidden mt-3">
                   <button
@@ -558,9 +558,9 @@ export default function Dashboard() {
                     <Upload className="w-4 h-4 mr-2" />
                     Upload Document
                   </button>
+                  </div>
                 </div>
               </div>
-            </div>
 
             {/* Main Content Area: Loading, Empty State, or Data */}
             {isTableLoading ? (
@@ -589,77 +589,77 @@ export default function Dashboard() {
               </div>
             ) : (
               <>
-                {/* Stats Cards */}
+              {/* Stats Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
                   <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between">
-                      <div>
+                  <div className="flex items-center justify-between">
+                    <div>
                         <p className="text-xs font-medium text-gray-600">Total</p>
                         <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.total || 0}</p>
-                      </div>
+                    </div>
                       <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                         <FileText className="w-4 h-4 text-blue-600" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-gray-600">Draft</p>
-                        <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.draft || 0}</p>
-                      </div>
-                      <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                        <Edit className="w-4 h-4 text-yellow-600" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-gray-600">Sent</p>
-                        <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.sent || 0}</p>
-                      </div>
-                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <Send className="w-4 h-4 text-blue-600" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-gray-600">Completed</p>
-                        <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.completed || 0}</p>
-                      </div>
-                      <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                        <CheckCircle className="w-4 h-4 text-green-600" />
-                      </div>
                     </div>
                   </div>
                 </div>
 
+                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-medium text-gray-600">Draft</p>
+                        <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.draft || 0}</p>
+                    </div>
+                      <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <Edit className="w-4 h-4 text-yellow-600" />
+                    </div>
+                  </div>
+                </div>
+
+                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-medium text-gray-600">Sent</p>
+                        <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.sent || 0}</p>
+                    </div>
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <Send className="w-4 h-4 text-blue-600" />
+                    </div>
+                  </div>
+                </div>
+
+                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-medium text-gray-600">Completed</p>
+                        <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.completed || 0}</p>
+                    </div>
+                      <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                        <CheckCircle className="w-4 h-4 text-green-600" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
                 {/* Search and Filter */}
                 <div className="bg-white rounded-lg p-3 mb-4 shadow-sm border border-gray-100">
                   <div className="flex flex-col lg:flex-row gap-3">
-                    <div className="flex-1">
-                      <div className="relative">
+                  <div className="flex-1">
+                    <div className="relative">
                         <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
-                        <input
-                          type="text"
-                          placeholder="Search documents..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
+                      <input
+                        type="text"
+                        placeholder="Search documents..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
                           className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                      </div>
+                      />
                     </div>
+                  </div>
                     <div className="lg:w-40 filter-container">
                       <button
                         onClick={() => setIsFilterOpen(!isFilterOpen)}
                         className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent flex items-center justify-between hover:bg-gray-50 transition-colors duration-150"
-                      >
+                    >
                         <span className="flex items-center">
                           <Filter className="w-3.5 h-3.5 mr-2 text-gray-500" />
                           {statusFilter === 'all' ? 'All Status' : getStatusText(statusFilter)}
@@ -672,7 +672,7 @@ export default function Dashboard() {
                             <div className="px-4 py-2 border-b border-gray-100">
                               <p className="text-xs font-medium text-gray-900">Filter by Status</p>
                               <p className="text-[10px] text-gray-500 mt-0.5">Select a status to filter documents</p>
-                            </div>
+                  </div>
                             <button
                               onClick={() => {
                                 setStatusFilter('all');
@@ -686,11 +686,11 @@ export default function Dashboard() {
                             >
                               <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center mr-3">
                                 <FileText className="w-4 h-4 text-gray-600" />
-                              </div>
+                </div>
                               <div>
                                 <p className="font-medium">All Documents</p>
                                 <p className="text-[10px] text-gray-500 mt-0.5">Show all documents</p>
-                              </div>
+              </div>
                             </button>
                             <button
                               onClick={() => {
@@ -705,11 +705,11 @@ export default function Dashboard() {
                             >
                               <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center mr-3">
                                 <Clock className="w-4 h-4 text-amber-600" />
-                              </div>
+                  </div>
                               <div>
                                 <p className="font-medium">Draft</p>
                                 <p className="text-[10px] text-gray-500 mt-0.5">Documents in draft state</p>
-                              </div>
+                </div>
                             </button>
                             <button
                               onClick={() => {
@@ -724,13 +724,13 @@ export default function Dashboard() {
                             >
                               <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mr-3">
                                 <Send className="w-4 h-4 text-blue-600" />
-                              </div>
+                    </div>
                               <div>
                                 <p className="font-medium">Sent</p>
                                 <p className="text-[10px] text-gray-500 mt-0.5">Documents sent for signing</p>
                               </div>
                             </button>
-                            <button
+                      <button
                               onClick={() => {
                                 setStatusFilter('partially_signed');
                                 setIsFilterOpen(false);
@@ -748,7 +748,7 @@ export default function Dashboard() {
                                 <p className="font-medium">Partially Signed</p>
                                 <p className="text-[10px] text-gray-500 mt-0.5">Documents with pending signatures</p>
                               </div>
-                            </button>
+                      </button>
                             <button
                               onClick={() => {
                                 setStatusFilter('completed');
@@ -762,11 +762,11 @@ export default function Dashboard() {
                             >
                               <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center mr-3">
                                 <CheckCircle className="w-4 h-4 text-emerald-600" />
-                              </div>
+                    </div>
                               <div>
                                 <p className="font-medium">Completed</p>
                                 <p className="text-[10px] text-gray-500 mt-0.5">Fully signed documents</p>
-                              </div>
+                  </div>
                             </button>
                             <button
                               onClick={() => {
@@ -805,29 +805,29 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  {/* Desktop Table View */}
-                  <div className="hidden lg:block overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '40%'}}>
-                            Document
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '15%'}}>
-                            Status
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '20%'}}>
-                            Signers
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '10%'}}>
-                            Created
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '15%'}}>
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+                    {/* Desktop Table View */}
+                    <div className="hidden lg:block overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '40%'}}>
+                              Document
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '15%'}}>
+                              Status
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '20%'}}>
+                              Signers
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '10%'}}>
+                              Created
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '15%'}}>
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
                         {isTableLoading ? (
                           <tr>
                             <td colSpan="5" className="px-4 py-8">
@@ -838,88 +838,88 @@ export default function Dashboard() {
                             </td>
                           </tr>
                         ) : documents.map((doc, index) => (
-                          <tr 
-                            key={doc.id} 
-                            className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200"
-                            style={{ animationDelay: `${index * 100}ms` }}
-                          >
-                            <td className="px-4 py-3" style={{width: '40%'}}>
-                              <div className="flex items-center">
-                                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                                  <FileText className="w-4 h-4 text-blue-600" />
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <p className="text-sm font-medium text-gray-900 truncate" title={doc.title || doc.originalName || 'Untitled Document'}>
-                                    {doc.title || doc.originalName || 'Untitled Document'}
-                                  </p>
-                                  <p className="text-xs text-gray-500">
-                                    {doc.totalFiles ? `${doc.totalFiles} files` : doc.files ? `${doc.files.length} files` : '1 file'} • 
-                                    {(() => {
-                                      const totalFields = doc.files ? doc.files.reduce((total, file) => total + (file.fields?.length || 0), 0) : 0;
-                                      return `${totalFields} fields`;
-                                    })()}
-                                  </p>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-4 py-3" style={{width: '15%'}}>
-                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(doc.status)}`}>
-                                <span className={`w-1.5 h-1.5 rounded-full mr-1 ${getStatusDotColor(doc.status)}`}></span>
-                                {getStatusIcon(doc.status)}
-                                <span className="ml-1">{getStatusText(doc.status)}</span>
-                              </span>
-                            </td>
-                            <td className="px-4 py-3" style={{width: '20%'}}>
-                              <div className="text-sm text-gray-900">
-                                {doc.signers && doc.signers.length > 0 ? (
-                                  <div>
-                                    <span className="font-medium truncate block" title={doc.signers[0].email}>
-                                      {doc.signers[0].email}
-                                    </span>
-                                    {doc.signers.length > 1 && (
-                                      <span className="text-xs text-gray-500">+{doc.signers.length - 1} more</span>
-                                    )}
+                            <tr 
+                              key={doc.id} 
+                              className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200"
+                              style={{ animationDelay: `${index * 100}ms` }}
+                            >
+                              <td className="px-4 py-3" style={{width: '40%'}}>
+                                <div className="flex items-center">
+                                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                    <FileText className="w-4 h-4 text-blue-600" />
                                   </div>
-                                ) : (
-                                  <span className="text-gray-400 text-xs">No signers</span>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-4 py-3 text-xs text-gray-500" style={{width: '10%'}}>
-                              {formatDate(doc.createdAt)}
-                            </td>
-                            <td className="px-4 py-3" style={{width: '15%'}}>
-                              <div className="flex items-center space-x-2">
-                                <button
-                                  onClick={() => router.push(`/editor/${doc.id}`)}
-                                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 hover:scale-105 transition-all duration-200"
-                                  title="Edit Document"
-                                >
-                                  <Edit className="w-3 h-3 mr-1" />
-                                  Edit
-                                </button>
-                                <button
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-medium text-gray-900 truncate" title={doc.title || doc.originalName || 'Untitled Document'}>
+                                      {doc.title || doc.originalName || 'Untitled Document'}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                      {doc.totalFiles ? `${doc.totalFiles} files` : doc.files ? `${doc.files.length} files` : '1 file'} • 
+                                      {(() => {
+                                        const totalFields = doc.files ? doc.files.reduce((total, file) => total + (file.fields?.length || 0), 0) : 0;
+                                        return `${totalFields} fields`;
+                                      })()}
+                                    </p>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-4 py-3" style={{width: '15%'}}>
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(doc.status)}`}>
+                                  <span className={`w-1.5 h-1.5 rounded-full mr-1 ${getStatusDotColor(doc.status)}`}></span>
+                                  {getStatusIcon(doc.status)}
+                                  <span className="ml-1">{getStatusText(doc.status)}</span>
+                                </span>
+                              </td>
+                              <td className="px-4 py-3" style={{width: '20%'}}>
+                                <div className="text-sm text-gray-900">
+                                  {doc.signers && doc.signers.length > 0 ? (
+                                    <div>
+                                      <span className="font-medium truncate block" title={doc.signers[0].email}>
+                                        {doc.signers[0].email}
+                                      </span>
+                                      {doc.signers.length > 1 && (
+                                        <span className="text-xs text-gray-500">+{doc.signers.length - 1} more</span>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <span className="text-gray-400 text-xs">No signers</span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 text-xs text-gray-500" style={{width: '10%'}}>
+                                {formatDate(doc.createdAt)}
+                              </td>
+                              <td className="px-4 py-3" style={{width: '15%'}}>
+                                <div className="flex items-center space-x-2">
+                                  <button
+                                    onClick={() => router.push(`/editor/${doc.id}`)}
+                                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 hover:scale-105 transition-all duration-200"
+                                    title="Edit Document"
+                                  >
+                                    <Edit className="w-3 h-3 mr-1" />
+                                    Edit
+                                  </button>
+                                  <button
                                   onClick={() => {
                                     if (confirm('Are you sure you want to delete this document?')) {
                                       handleDeleteDocument(doc.id);
                                     }
                                   }}
                                   className="inline-flex items-center px-3 py-1.5 border border-red-200 text-xs font-medium rounded text-red-600 bg-white hover:bg-red-50 hover:scale-105 transition-all duration-200"
-                                  title="Delete Document"
-                                >
+                                    title="Delete Document"
+                                  >
                                   <Trash2 className="w-3 h-3 mr-1" />
                                   Delete
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
 
-                  {/* Mobile Card View */}
-                  <div className="lg:hidden">
+                    {/* Mobile Card View */}
+                    <div className="lg:hidden">
                     {isTableLoading ? (
                       <div className="p-8">
                         <div className="flex items-center justify-center">
@@ -991,42 +991,42 @@ export default function Dashboard() {
                         ))}
                       </div>
                     )}
-                  </div>
+                    </div>
 
-                  {/* Pagination - Only show when there are documents */}
-                  {documents.length > 0 && totalPages > 1 && (
-                    <div className="px-4 py-3 border-t border-gray-100">
-                      <div className="flex items-center justify-between">
-                        <div className="text-xs text-gray-500">
-                          Showing {((currentPage - 1) * 10) + 1} to {Math.min(currentPage * 10, totalPages * 10)} of {totalPages * 10} results
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <button
-                            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                            disabled={currentPage === 1}
-                            className="px-3 py-1 text-xs border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                          >
-                            Previous
-                          </button>
-                          <span className="px-3 py-1 text-xs bg-blue-50 text-blue-600 rounded">
-                            {currentPage} of {totalPages}
-                          </span>
-                          <button
-                            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                            disabled={currentPage === totalPages}
-                            className="px-3 py-1 text-xs border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                          >
-                            Next
-                          </button>
-                        </div>
+                {/* Pagination - Only show when there are documents */}
+                {documents.length > 0 && totalPages > 1 && (
+                  <div className="px-4 py-3 border-t border-gray-100">
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs text-gray-500">
+                        Showing {((currentPage - 1) * 10) + 1} to {Math.min(currentPage * 10, totalPages * 10)} of {totalPages * 10} results
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <button
+                          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                          disabled={currentPage === 1}
+                          className="px-3 py-1 text-xs border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                        >
+                          Previous
+                        </button>
+                        <span className="px-3 py-1 text-xs bg-blue-50 text-blue-600 rounded">
+                          {currentPage} of {totalPages}
+                        </span>
+                        <button
+                          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                          disabled={currentPage === totalPages}
+                          className="px-3 py-1 text-xs border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                        >
+                          Next
+                        </button>
                       </div>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
+              </div>
               </>
             )}
+            </div>
           </div>
-        </div>
       </div>
     </div>
   )
