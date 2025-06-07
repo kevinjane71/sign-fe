@@ -29,6 +29,14 @@ const SignatureModal = ({ isOpen = true, onClose, onSave, maxSizeMB = 20 }) => {
       setSignatureData(null)
       setErrorMsg("")
     }
+    // Fix passive event listener for touchmove
+    const canvas = canvasRef.current
+    if (canvas) {
+      canvas.addEventListener('touchmove', draw, { passive: false })
+      return () => {
+        canvas.removeEventListener('touchmove', draw)
+      }
+    }
   }, [isOpen, activeTab, penColor, penWidth])
 
   const initializeCanvas = () => {
@@ -132,10 +140,12 @@ const SignatureModal = ({ isOpen = true, onClose, onSave, maxSizeMB = 20 }) => {
 
   const modalContent = (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-2 sm:p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[95vh] overflow-y-auto mx-2 sm:mx-auto z-[9999]"
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[95vh] mx-2 sm:mx-auto z-[9999] flex flex-col"
         style={{
           maxWidth: typeof window !== 'undefined' && window.innerWidth < 768 ? '95vw' : undefined,
-          width: typeof window !== 'undefined' && window.innerWidth < 768 ? '100%' : undefined
+          width: typeof window !== 'undefined' && window.innerWidth < 768 ? '100%' : undefined,
+          maxHeight: '95vh',
+          overflow: 'hidden'
         }}
       >
         {/* Header */}
@@ -145,7 +155,7 @@ const SignatureModal = ({ isOpen = true, onClose, onSave, maxSizeMB = 20 }) => {
             Add Signature
           </h3>
           <button
-            onClick={onClose}
+            onClick={() => { console.log('SignatureModal: Close (X) clicked'); onClose(); }}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
@@ -177,7 +187,7 @@ const SignatureModal = ({ isOpen = true, onClose, onSave, maxSizeMB = 20 }) => {
           </button>
         </div>
         {/* Content */}
-        <div className="p-4 sm:p-6">
+        <div className="p-4 sm:p-6 flex-1 overflow-y-auto" style={{ minHeight: 0 }}>
           {activeTab === 'draw' && (
             <div className="space-y-4">
               {/* Drawing Controls */}
@@ -233,7 +243,6 @@ const SignatureModal = ({ isOpen = true, onClose, onSave, maxSizeMB = 20 }) => {
                   onMouseUp={stopDrawing}
                   onMouseLeave={stopDrawing}
                   onTouchStart={startDrawing}
-                  onTouchMove={draw}
                   onTouchEnd={stopDrawing}
                 />
                 <p className="text-sm text-gray-500 mt-2 text-center">
@@ -279,10 +288,11 @@ const SignatureModal = ({ isOpen = true, onClose, onSave, maxSizeMB = 20 }) => {
           )}
         </div>
         {/* Footer */}
-        <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50" style={{ pointerEvents: 'auto' }}>
           <button
-            onClick={onClose}
+            onClick={() => { console.log('SignatureModal: Cancel clicked'); onClose(); }}
             className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+            style={{ pointerEvents: 'auto' }}
           >
             Cancel
           </button>
@@ -293,6 +303,7 @@ const SignatureModal = ({ isOpen = true, onClose, onSave, maxSizeMB = 20 }) => {
               (activeTab === 'upload' && !signatureData)
             }
             className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            style={{ pointerEvents: 'auto' }}
           >
             <Check className="w-4 h-4" />
             <span>Save Signature</span>

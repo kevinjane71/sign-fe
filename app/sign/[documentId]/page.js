@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import SignatureModal from '../../components/SignatureModal'
+import { createPortal } from 'react-dom'
 
 // Load PDF.js
 import * as pdfjsLib from 'pdfjs-dist'
@@ -419,11 +420,12 @@ const SigningFieldComponent = ({
   onFieldClick,
   isRequired = false,
   hasAttemptedSubmit,
-  findNextEmptyField
+  findNextEmptyField,
+  onOpenSignatureModal,
+  onSignatureValueChange
 }) => {
   const [localValue, setLocalValue] = useState(fieldValue || '')
   const [isEditing, setIsEditing] = useState(false)
-  const [showSignatureModal, setShowSignatureModal] = useState(false)
   const fieldRef = useRef(null)
 
   useEffect(() => {
@@ -463,24 +465,27 @@ const SigningFieldComponent = ({
   const top = (field.topPercent || 0) * (containerHeight || 1) / 100
 
   // Default sizing logic
-  let defaultWidth = 120, defaultHeight = 36
+  let defaultWidth = 160, defaultHeight = 28
   if (field.type === FIELD_TYPES.SIGNATURE || field.type === FIELD_TYPES.INITIAL) {
-    defaultWidth = 120; defaultHeight = 48
-  } else if (field.type === FIELD_TYPES.DATE) {
-    defaultWidth = 110; defaultHeight = 36
+    defaultWidth = 160; defaultHeight = 36
+  } else if (field.type === FIELD_TYPES.DATE || field.type === FIELD_TYPES.EMAIL || field.type === FIELD_TYPES.PHONE || field.type === FIELD_TYPES.TEXT || field.type === FIELD_TYPES.NAME) {
+    defaultWidth = 160; defaultHeight = 28
   } else if (field.type === FIELD_TYPES.CHECKBOX) {
-    defaultWidth = 28; defaultHeight = 28
-  } else if (field.type === FIELD_TYPES.EMAIL || field.type === FIELD_TYPES.PHONE) {
-    defaultWidth = 140; defaultHeight = 36
+    defaultWidth = 32; defaultHeight = 32
+  } else if (field.type === 'dropdown') {
+    defaultWidth = 160; defaultHeight = 28
   }
   // If field is at default size, use improved defaults
   const isDefaultSize = !field.widthPercent || !field.heightPercent
   const width = isDefaultSize ? defaultWidth : (field.widthPercent || 10) * (containerWidth || 1) / 100
   const height = isDefaultSize ? defaultHeight : (field.heightPercent || 5) * (containerHeight || 1) / 100
 
+  // Use minWidth/minHeight from FIELD_CONFIGS
+  const minWidthPx = fieldConfig.minWidth || 60
+  const minHeightPx = fieldConfig.minHeight || 28
   // Responsive font size and padding
-  const fontSize = Math.max(12, Math.min(20, height * 0.5))
-  const paddingX = Math.max(4, Math.min(12, width * 0.08))
+  const fontSize = Math.max(10, Math.min(14, height * 0.4))
+  const paddingX = 4, paddingY = 2
 
   // Mobile min size logic
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
@@ -496,7 +501,7 @@ const SigningFieldComponent = ({
   // Signature/Initial field click handler
   const handleFieldClick = () => {
     if (field.type === FIELD_TYPES.SIGNATURE || field.type === FIELD_TYPES.INITIAL) {
-      setShowSignatureModal(true)
+      onOpenSignatureModal(field.id, localValue)
     } else if (fieldRef.current) {
       fieldRef.current.focus()
     }
@@ -510,9 +515,9 @@ const SigningFieldComponent = ({
         position: 'absolute',
         left: left,
         top: top,
-        width: Math.max(width, minWidth),
-        height: Math.max(height, minHeight),
-        border: isInvalid ? '2px solid #ef4444' : `1.5px solid ${fieldConfig.borderColor}`,
+        width: Math.max(width, minWidthPx),
+        height: Math.max(height, minHeightPx),
+        border: `2px solid ${fieldConfig.color}`,
         borderRadius: '4px',
         backgroundColor: fieldConfig.bgColor,
         transition: 'all 0.2s',
@@ -521,20 +526,24 @@ const SigningFieldComponent = ({
         pointerEvents: 'auto',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        boxSizing: 'border-box'
       }}
       onClick={handleFieldClick}
     >
       {field.required && (
-        <span className="absolute -top-2 -right-2 text-red-500 text-sm">*</span>
+        <span className="absolute -top-2 -right-2 text-red-500 text-xs">*</span>
       )}
       {field.type === FIELD_TYPES.SIGNATURE || field.type === FIELD_TYPES.INITIAL ? (
         localValue ? (
           <img src={localValue} alt={field.type} style={{ maxWidth: '100%', maxHeight: '100%' }} />
         ) : (
-          <span className="text-gray-400 italic" style={{ fontSize: `${fontSize}px` }}>
-            {field.type === FIELD_TYPES.SIGNATURE ? 'Tap to Sign' : 'Tap to Initial'}
-          </span>
+          <div className="flex flex-col items-center justify-center text-gray-600 w-full h-full">
+            {(fieldConfig.icon || FileText) && React.createElement(fieldConfig.icon || FileText, { style: { width: '22px', height: '22px', color: fieldConfig.color, marginBottom: 2 } })}
+            <span style={{ fontSize: `${Math.max(8, fontSize * 0.7)}px`, color: '#6B7280' }}>
+              {field.type === FIELD_TYPES.SIGNATURE ? 'Sign here' : 'Initial'}
+            </span>
+          </div>
         )
       ) : field.type === FIELD_TYPES.DATE ? (
         <input
@@ -544,9 +553,9 @@ const SigningFieldComponent = ({
           onChange={(e) => handleChange(e.target.value)}
           onBlur={handleBlur}
           onKeyPress={handleKeyPress}
-          className="w-full h-full bg-transparent border-none outline-none text-gray-700 text-center"
-          placeholder={field.placeholder || 'YYYY-MM-DD'}
-          style={{ fontSize: `${fontSize}px`, padding: `0 ${paddingX}px`, background: 'transparent', height: '100%' }}
+          className="w-full h-full bg-transparent border-none outline-none text-gray-700"
+          placeholder={field.placeholder || 'dd/mm/yyyy'}
+          style={{ fontSize: `${fontSize}px`, padding: `${paddingY}px ${paddingX}px`, color: '#374151', '::placeholder': { color: '#9ca3af' } }}
           tabIndex={0}
           autoFocus={false}
         />
@@ -556,10 +565,10 @@ const SigningFieldComponent = ({
           value={localValue}
           onChange={(e) => handleChange(e.target.value)}
           onBlur={handleBlur}
-          className="w-full h-full bg-transparent border-none outline-none text-gray-700 text-center"
-          style={{ fontSize: `${fontSize}px`, padding: `0 ${paddingX}px`, background: 'transparent', height: '100%' }}
+          className="w-full h-full bg-transparent border-none outline-none text-gray-700"
+          style={{ fontSize: `${fontSize}px`, padding: `${paddingY}px ${paddingX}px`, color: '#374151' }}
         >
-          <option value="" disabled>{field.placeholder || 'Select'}</option>
+          <option value="" disabled>{field.placeholder || 'Select an option...'}</option>
           {field.options.map(opt => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
@@ -571,7 +580,7 @@ const SigningFieldComponent = ({
           checked={!!localValue}
           onChange={(e) => handleChange(e.target.checked)}
           onBlur={handleBlur}
-          className="w-full h-full bg-transparent border-none outline-none text-gray-700"
+          className="bg-transparent border-none outline-none text-gray-700"
           style={{ width: '100%', height: '100%' }}
         />
       ) : (
@@ -582,21 +591,11 @@ const SigningFieldComponent = ({
           onChange={(e) => handleChange(e.target.value)}
           onBlur={handleBlur}
           onKeyPress={handleKeyPress}
-          className="w-full h-full bg-transparent border-none outline-none text-gray-700 text-center"
+          className="w-full h-full bg-transparent border-none outline-none text-gray-700"
           placeholder={field.placeholder || fieldConfig.label}
-          style={{ fontSize: `${fontSize}px`, padding: `0 ${paddingX}px`, background: 'transparent', height: '100%' }}
+          style={{ fontSize: `${fontSize}px`, padding: `${paddingY}px ${paddingX}px`, color: '#374151', '::placeholder': { color: '#9ca3af' } }}
           tabIndex={0}
           autoFocus={false}
-        />
-      )}
-      {showSignatureModal && (
-        <SignatureModal
-          onClose={() => setShowSignatureModal(false)}
-          onSave={(signature) => {
-            handleChange(signature)
-            setShowSignatureModal(false)
-          }}
-          maxSizeMB={20}
         />
       )}
     </div>
@@ -621,6 +620,8 @@ export default function SigningPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [highlightedFieldId, setHighlightedFieldId] = useState(null)
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false)
+  const [activeSignatureFieldId, setActiveSignatureFieldId] = useState(null)
+  const [signatureModalValue, setSignatureModalValue] = useState(null)
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'
 
@@ -868,6 +869,16 @@ export default function SigningPage() {
     }
   }
 
+  const handleOpenSignatureModal = (fieldId, value) => {
+    setActiveSignatureFieldId(fieldId)
+    setSignatureModalValue(value || null)
+  }
+  const handleSignatureValueChange = (fieldId, value) => {
+    handleFieldUpdate(fieldId, value)
+    setActiveSignatureFieldId(null)
+    setSignatureModalValue(null)
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -1051,6 +1062,8 @@ export default function SigningPage() {
                   isRequired={field.required}
                   hasAttemptedSubmit={hasAttemptedSubmit}
                   findNextEmptyField={findNextEmptyField}
+                  onOpenSignatureModal={handleOpenSignatureModal}
+                  onSignatureValueChange={handleSignatureValueChange}
                 />
               ))}
             </DocumentViewer>
@@ -1145,6 +1158,15 @@ export default function SigningPage() {
           )}
         </div>
       </div>
+
+      {activeSignatureFieldId && (
+        <SignatureModal
+          isOpen={!!activeSignatureFieldId}
+          onClose={() => setActiveSignatureFieldId(null)}
+          onSave={(signature) => handleSignatureValueChange(activeSignatureFieldId, signature)}
+          maxSizeMB={20}
+        />
+      )}
     </div>
   )
 } 
