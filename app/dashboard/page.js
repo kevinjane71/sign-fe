@@ -131,6 +131,36 @@ export default function Dashboard() {
     return statusTexts[status] || 'Draft'
   }
 
+  // Add these helper functions after the existing status helpers
+  const getSignerStatusColor = (hasSigned) => {
+    return hasSigned 
+      ? 'bg-emerald-100 text-emerald-800 border-emerald-200' 
+      : 'bg-rose-50 text-rose-700 border-rose-200'
+  }
+
+  // Helper to infer hasSigned if missing
+  const inferSignerHasSigned = (signer, docStatus) => {
+    if (typeof signer.hasSigned === 'boolean') return signer.hasSigned
+    if (docStatus === 'completed') return true
+    return false // sent, partially_signed, draft, etc.
+  }
+
+  const getSigningProgress = (signers, docStatus) => {
+    if (!signers || signers.length === 0) return { signed: 0, total: 0, percentage: 0 }
+    const signed = signers.filter(s => inferSignerHasSigned(s, docStatus)).length
+    return {
+      signed,
+      total: signers.length,
+      percentage: signers.length === 0 ? 0 : Math.round((signed / signers.length) * 100)
+    }
+  }
+
+  const getProgressColor = (percentage) => {
+    if (percentage === 100) return 'bg-emerald-500'
+    if (percentage >= 50) return 'bg-blue-500'
+    return 'bg-rose-400'
+  }
+
   useEffect(() => {
     // Check authentication
     if (!isAuthenticated()) {
@@ -198,7 +228,13 @@ export default function Dashboard() {
       const response = await getDocuments(params)
       
       if (response.success) {
-        setDocuments(response.documents)
+        // Sort by updatedAt desc, fallback to createdAt
+        const sortedDocs = [...response.documents].sort((a, b) => {
+          const aDate = new Date(a.updatedAt || a.createdAt)
+          const bDate = new Date(b.updatedAt || b.createdAt)
+          return bDate - aDate
+        })
+        setDocuments(sortedDocs)
         setTotalPages(response.pagination.totalPages)
       }
     } catch (error) {
@@ -401,36 +437,27 @@ export default function Dashboard() {
 
   const formatDate = (dateString) => {
     let date;
-    
     // Handle Firebase timestamp format
     if (dateString && typeof dateString === 'object' && dateString._seconds) {
-      // Convert Firebase timestamp to JavaScript Date
       date = new Date(dateString._seconds * 1000 + (dateString._nanoseconds || 0) / 1000000);
     } else if (dateString) {
-      // Handle regular date string
       date = new Date(dateString);
     } else {
       return 'Unknown';
     }
-    
-    // Check if date is valid
     if (isNaN(date.getTime())) {
       return 'Invalid Date';
     }
-    
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 1) return 'Today';
-    if (diffDays === 2) return 'Yesterday';
-    if (diffDays <= 7) return `${diffDays - 1} days ago`;
-    
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
+    // Format: Sat, 6 Jul 2024, 12:30pm
+    return date.toLocaleString('en-US', {
+      weekday: 'short',
+      day: 'numeric',
       month: 'short',
-      day: 'numeric'
-    });
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    }).replace(/, ([0-9]{1,2}):([0-9]{2}) ([AP]M)$/, (match, h, m, ampm) => `, ${h}:${m.toLowerCase()}${ampm.toLowerCase()}`)
   }
 
   const filteredDocuments = documents.filter(doc =>
@@ -848,8 +875,8 @@ export default function Dashboard() {
                                   <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
                                     <FileText className="w-4 h-4 text-blue-600" />
                                   </div>
-                                  <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-medium text-gray-900 truncate" title={doc.title || doc.originalName || 'Untitled Document'}>
+                                  <div className="min-w-0 flex-1" style={{wordBreak: 'break-word', whiteSpace: 'normal'}}>
+                                    <p className="text-sm font-medium text-gray-900" title={doc.title || doc.originalName || 'Untitled Document'}>
                                       {doc.title || doc.originalName || 'Untitled Document'}
                                     </p>
                                     <p className="text-xs text-gray-500">
@@ -863,27 +890,59 @@ export default function Dashboard() {
                                 </div>
                               </td>
                               <td className="px-4 py-3" style={{width: '15%'}}>
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(doc.status)}`}>
-                                  <span className={`w-1.5 h-1.5 rounded-full mr-1 ${getStatusDotColor(doc.status)}`}></span>
-                                  {getStatusIcon(doc.status)}
-                                  <span className="ml-1">{getStatusText(doc.status)}</span>
-                                </span>
+                                <div className="flex flex-col space-y-1">
+                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(doc.status)}`}>
+                                    <span className={`w-1.5 h-1.5 rounded-full mr-1 ${getStatusDotColor(doc.status)}`}></span>
+                                    {getStatusIcon(doc.status)}
+                                    <span className="ml-1">{getStatusText(doc.status)}</span>
+                                  </span>
+                                  <div className="w-full mt-1">
+                                    <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+                                      <div
+                                        className={`h-full transition-all duration-300 ${getProgressColor(getSigningProgress(doc.signers, doc.status).percentage)}`}
+                                        style={{ width: `${getSigningProgress(doc.signers, doc.status).percentage}%` }}
+                                      />
+                                    </div>
+                                    <span className="text-[10px] text-gray-500 ml-1">{getSigningProgress(doc.signers, doc.status).signed}/{getSigningProgress(doc.signers, doc.status).total}</span>
+                                  </div>
+                                </div>
                               </td>
                               <td className="px-4 py-3" style={{width: '20%'}}>
-                                <div className="text-sm text-gray-900">
-                                  {doc.signers && doc.signers.length > 0 ? (
-                                    <div>
-                                      <span className="font-medium truncate block" title={doc.signers[0].email}>
-                                        {doc.signers[0].email}
+                                {doc.signers && doc.signers.length > 0 ? (
+                                  <div className="flex flex-wrap gap-1.5 items-center">
+                                    {doc.signers.slice(0, 3).map((signer) => (
+                                      <span
+                                        key={signer.email}
+                                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border shadow-sm ${getSignerStatusColor(inferSignerHasSigned(signer, doc.status))}`}
+                                      >
+                                        {signer.email}
                                       </span>
-                                      {doc.signers.length > 1 && (
-                                        <span className="text-xs text-gray-500">+{doc.signers.length - 1} more</span>
-                                      )}
-                                    </div>
-                                  ) : (
-                                    <span className="text-gray-400 text-xs">No signers</span>
-                                  )}
-                                </div>
+                                    ))}
+                                    {doc.signers.length > 3 && (
+                                      <span className="text-[10px] text-gray-500">
+                                        +{doc.signers.length - 3} more
+                                      </span>
+                                    )}
+                                    {doc.signers.length > 3 && (
+                                      <div className="absolute z-10 left-0 mt-1 w-max min-w-[200px] bg-white border border-gray-200 rounded-lg shadow-lg p-2 text-xs text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
+                                        <div className="space-y-1.5">
+                                          {doc.signers.map((signer) => (
+                                            <div key={signer.email} className="flex items-center justify-between">
+                                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border shadow-sm ${getSignerStatusColor(inferSignerHasSigned(signer, doc.status))}`}>
+                                                {signer.email}
+                                              </span>
+                                              <span className={`text-[10px] font-medium ml-2 ${inferSignerHasSigned(signer, doc.status) ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                                {inferSignerHasSigned(signer, doc.status) ? 'Signed' : 'Pending'}
+                                              </span>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-gray-400 text-xs">No signers</span>
+                                )}
                               </td>
                               <td className="px-4 py-3 text-xs text-gray-500" style={{width: '10%'}}>
                                 {formatDate(doc.createdAt)}
