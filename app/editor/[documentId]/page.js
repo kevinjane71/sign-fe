@@ -198,35 +198,42 @@ function DragFieldPreview({ type, x, y }) {
 
 // Document Configuration Component (Step 1) - Enhanced with pre-filling
 function DocumentConfiguration({ documentFile, documents, allFields, fields, onBack, onNext, isLoading, documentData, toast, onAddDocument, onRemoveDocument }) {
-  // Initialize state from sessionStorage if available
+  // Initialize state from sessionStorage if available, otherwise from documentData, otherwise default
   const [signers, setSigners] = useState(() => {
     try {
       const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
-      return config.signers || [];
-    } catch {
+      if (config.signers) return config.signers;
+      if (documentData?.signers) return documentData.signers;
       return [];
+    } catch {
+      return documentData?.signers || [];
     }
   });
   const [subject, setSubject] = useState(() => {
     try {
       const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
-      return config.subject || 'Please sign this document';
-    } catch {
+      if (config.subject) return config.subject;
+      if (documentData?.subject) return documentData.subject;
       return 'Please sign this document';
+    } catch {
+      return documentData?.subject || 'Please sign this document';
     }
   });
   const [message, setMessage] = useState(() => {
     try {
       const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
-      return config.message || 'Hi, please review and sign the attached document.';
-    } catch {
+      if (config.message) return config.message;
+      if (documentData?.message) return documentData.message;
       return 'Hi, please review and sign the attached document.';
+    } catch {
+      return documentData?.message || 'Hi, please review and sign the attached document.';
     }
   });
   const [showAdvanced, setShowAdvanced] = useState(() => {
     try {
       const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
-      return config.showAdvanced || false;
+      if (typeof config.showAdvanced !== 'undefined') return config.showAdvanced;
+      return false;
     } catch {
       return false;
     }
@@ -234,89 +241,111 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
   const [requireAuthentication, setRequireAuthentication] = useState(() => {
     try {
       const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
-      return config.requireAuthentication || false;
-    } catch {
+      if (typeof config.requireAuthentication !== 'undefined') return config.requireAuthentication;
+      if (typeof documentData?.configuration?.requireAuthentication !== 'undefined') return documentData.configuration.requireAuthentication;
       return false;
+    } catch {
+      return documentData?.configuration?.requireAuthentication || false;
     }
   });
   const [allowDelegation, setAllowDelegation] = useState(() => {
     try {
       const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
-      return config.allowDelegation || false;
-    } catch {
+      if (typeof config.allowDelegation !== 'undefined') return config.allowDelegation;
+      if (typeof documentData?.configuration?.allowDelegation !== 'undefined') return documentData.configuration.allowDelegation;
       return false;
+    } catch {
+      return documentData?.configuration?.allowDelegation || false;
     }
   });
   const [allowComments, setAllowComments] = useState(() => {
     try {
       const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
-      return config.allowComments || false;
-    } catch {
+      if (typeof config.allowComments !== 'undefined') return config.allowComments;
+      if (typeof documentData?.configuration?.allowComments !== 'undefined') return documentData.configuration.allowComments;
       return false;
+    } catch {
+      return documentData?.configuration?.allowComments || false;
     }
   });
   const [sendReminders, setSendReminders] = useState(() => {
     try {
       const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
-      return config.sendReminders || false;
-    } catch {
+      if (typeof config.sendReminders !== 'undefined') return config.sendReminders;
+      if (typeof documentData?.configuration?.sendReminders !== 'undefined') return documentData.configuration.sendReminders;
       return false;
+    } catch {
+      return documentData?.configuration?.sendReminders || false;
     }
   });
   const [reminderFrequency, setReminderFrequency] = useState(() => {
     try {
       const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
-      return config.reminderFrequency || 'daily';
-    } catch {
+      if (config.reminderFrequency) return config.reminderFrequency;
+      if (documentData?.configuration?.reminderFrequency) return documentData.configuration.reminderFrequency;
       return 'daily';
+    } catch {
+      return documentData?.configuration?.reminderFrequency || 'daily';
     }
   });
   const [expirationEnabled, setExpirationEnabled] = useState(() => {
     try {
       const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
-      return config.expirationEnabled || false;
-    } catch {
+      if (typeof config.expirationEnabled !== 'undefined') return config.expirationEnabled;
+      if (typeof documentData?.configuration?.expirationEnabled !== 'undefined') return documentData.configuration.expirationEnabled;
       return false;
+    } catch {
+      return documentData?.configuration?.expirationEnabled || false;
     }
   });
   const [expirationDays, setExpirationDays] = useState(() => {
     try {
       const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
-      return config.expirationDays || 7;
-    } catch {
+      if (config.expirationDays) return config.expirationDays;
+      if (documentData?.configuration?.expirationDays) return documentData.configuration.expirationDays;
       return 7;
+    } catch {
+      return documentData?.configuration?.expirationDays || 7;
     }
   });
   const [signingOrder, setSigningOrder] = useState(() => {
     try {
       const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
-      return config.signingOrder || 'any';
-    } catch {
+      if (config.signingOrder) return config.signingOrder;
+      if (documentData?.configuration?.signingOrder) return documentData.configuration.signingOrder;
       return 'any';
+    } catch {
+      return documentData?.configuration?.signingOrder || 'any';
     }
   });
   const [requireAllSigners, setRequireAllSigners] = useState(() => {
     try {
       const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
-      return config.requireAllSigners || false;
-    } catch {
+      if (typeof config.requireAllSigners !== 'undefined') return config.requireAllSigners;
+      if (typeof documentData?.configuration?.requireAllSigners !== 'undefined') return documentData.configuration.requireAllSigners;
       return false;
+    } catch {
+      return documentData?.configuration?.requireAllSigners || false;
     }
   });
   const [allowPrinting, setAllowPrinting] = useState(() => {
     try {
       const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
-      return config.allowPrinting || true;
-    } catch {
+      if (typeof config.allowPrinting !== 'undefined') return config.allowPrinting;
+      if (typeof documentData?.configuration?.allowPrinting !== 'undefined') return documentData.configuration.allowPrinting;
       return true;
+    } catch {
+      return documentData?.configuration?.allowPrinting || true;
     }
   });
   const [allowDownload, setAllowDownload] = useState(() => {
     try {
       const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
-      return config.allowDownload || true;
-    } catch {
+      if (typeof config.allowDownload !== 'undefined') return config.allowDownload;
+      if (typeof documentData?.configuration?.allowDownload !== 'undefined') return documentData.configuration.allowDownload;
       return true;
+    } catch {
+      return documentData?.configuration?.allowDownload || true;
     }
   });
 
