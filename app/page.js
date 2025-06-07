@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, FileText, Shield, Users, Zap, Star, CheckCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -17,6 +17,11 @@ export default function HomePage() {
   const router = useRouter()
   const [isProcessing, setIsProcessing] = useState(false)
   const { user } = useAuth()
+
+  // Clear document configuration when visiting home page
+  useEffect(() => {
+    sessionStorage.removeItem('documentConfiguration');
+  }, []);
 
   // Handle file drop - support multiple files
   const onDrop = useCallback((acceptedFiles) => {

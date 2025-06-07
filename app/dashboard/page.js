@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
   Plus, 
@@ -68,6 +68,23 @@ export default function Dashboard() {
   const [activeDropdown, setActiveDropdown] = useState(null)
   const [isTableLoading, setIsTableLoading] = useState(false)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [selectedDocument, setSelectedDocument] = useState(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const [showToast, setShowToast] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
+  const [toastType, setToastType] = useState('success')
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isDuplicating, setIsDuplicating] = useState(false)
+  const dropdownRef = useRef(null)
+  const fileInputRef = useRef(null)
+
+  // Clear document configuration when visiting dashboard
+  useEffect(() => {
+    sessionStorage.removeItem('documentConfiguration');
+  }, []);
 
   // Helper functions for status handling
   const getStatusColor = (status) => {

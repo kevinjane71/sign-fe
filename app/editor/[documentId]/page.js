@@ -33,7 +33,8 @@ import {
   Info,
   FolderOpen,
   File,
-  ChevronDown
+  ChevronDown,
+  Grip
 } from 'lucide-react'
 import { useToast } from '../../components/LayoutWrapper'
 import { getDocument, updateDocument, sendDocument, getDocumentFile, uploadDocument } from '../../utils/api'
@@ -197,114 +198,137 @@ function DragFieldPreview({ type, x, y }) {
 
 // Document Configuration Component (Step 1) - Enhanced with pre-filling
 function DocumentConfiguration({ documentFile, documents, allFields, fields, onBack, onNext, isLoading, documentData, toast, onAddDocument, onRemoveDocument }) {
-  const [signers, setSigners] = useState([])
-  const [subject, setSubject] = useState('')
-  const [message, setMessage] = useState('')
-  const [showAdvanced, setShowAdvanced] = useState(false)
-  
-  // Advanced settings
-  const [requireAuthentication, setRequireAuthentication] = useState(false)
-  const [allowDelegation, setAllowDelegation] = useState(true)
-  const [allowComments, setAllowComments] = useState(true)
-  const [sendReminders, setSendReminders] = useState(true)
-  const [reminderFrequency, setReminderFrequency] = useState(3) // days
-  const [expirationEnabled, setExpirationEnabled] = useState(false)
-  const [expirationDays, setExpirationDays] = useState(30)
-  const [signingOrder, setSigningOrder] = useState('any') // 'any' or 'sequential'
-  const [requireAllSigners, setRequireAllSigners] = useState(true)
-  const [allowPrinting, setAllowPrinting] = useState(true)
-  const [allowDownload, setAllowDownload] = useState(true)
-
-  // Enhanced initialization with pre-filling from documentData
-  useEffect(() => {
-    // Pre-fill from existing document data if available
-    if (documentData) {
-      // Pre-fill signers if they exist
-      if (documentData.signers && documentData.signers.length > 0) {
-        const existingSigners = documentData.signers.map((signer, index) => ({
-          id: signer.id || Date.now() + index,
-          name: signer.name || '',
-          email: signer.email || '',
-          role: signer.role || 'Signer'
-        }))
-        setSigners(existingSigners)
-      } else if (signers.length === 0) {
-        // Add default signer if none exist
-        setSigners([{
-          id: Date.now(),
-          name: '',
-          email: '',
-          role: 'Signer'
-        }])
-      }
-
-      // Pre-fill subject and message
-      if (documentData.subject) {
-        setSubject(documentData.subject)
-      } else {
-        const documentName = documentData.title || documents?.[0]?.name || 'Document'
-    setSubject(`Please sign: ${documentName}`)
-      }
-
-      if (documentData.message) {
-        setMessage(documentData.message)
-      } else {
-    setMessage('Please review and sign this document at your earliest convenience.')
-      }
-
-      // Pre-fill advanced configuration if it exists
-      if (documentData.configuration) {
-        const config = documentData.configuration
-        setRequireAuthentication(config.requireAuthentication || false)
-        setAllowDelegation(config.allowDelegation !== false)
-        setAllowComments(config.allowComments !== false)
-        setSendReminders(config.sendReminders !== false)
-        setReminderFrequency(config.reminderFrequency || 3)
-        setExpirationEnabled(config.expirationEnabled || false)
-        setExpirationDays(config.expirationDays || 30)
-        setSigningOrder(config.signingOrder || 'any')
-        setRequireAllSigners(config.requireAllSigners !== false)
-        setAllowPrinting(config.allowPrinting !== false)
-        setAllowDownload(config.allowDownload !== false)
-      }
-    } else {
-      // Fallback to defaults for new documents
-      const documentName = documents?.[0]?.name || 'Document'
-      setSubject(`Please sign: ${documentName}`)
-      setMessage('Please review and sign this document at your earliest convenience.')
-      
-    if (signers.length === 0) {
-      setSigners([{
-        id: Date.now(),
-        name: '',
-        email: '',
-        role: 'Signer'
-      }])
+  // Initialize state from sessionStorage if available
+  const [signers, setSigners] = useState(() => {
+    try {
+      const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+      return config.signers || [];
+    } catch {
+      return [];
     }
+  });
+  const [subject, setSubject] = useState(() => {
+    try {
+      const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+      return config.subject || 'Please sign this document';
+    } catch {
+      return 'Please sign this document';
     }
-  }, [documentData, documents, signers.length])
+  });
+  const [message, setMessage] = useState(() => {
+    try {
+      const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+      return config.message || 'Hi, please review and sign the attached document.';
+    } catch {
+      return 'Hi, please review and sign the attached document.';
+    }
+  });
+  const [showAdvanced, setShowAdvanced] = useState(() => {
+    try {
+      const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+      return config.showAdvanced || false;
+    } catch {
+      return false;
+    }
+  });
+  const [requireAuthentication, setRequireAuthentication] = useState(() => {
+    try {
+      const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+      return config.requireAuthentication || false;
+    } catch {
+      return false;
+    }
+  });
+  const [allowDelegation, setAllowDelegation] = useState(() => {
+    try {
+      const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+      return config.allowDelegation || false;
+    } catch {
+      return false;
+    }
+  });
+  const [allowComments, setAllowComments] = useState(() => {
+    try {
+      const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+      return config.allowComments || false;
+    } catch {
+      return false;
+    }
+  });
+  const [sendReminders, setSendReminders] = useState(() => {
+    try {
+      const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+      return config.sendReminders || false;
+    } catch {
+      return false;
+    }
+  });
+  const [reminderFrequency, setReminderFrequency] = useState(() => {
+    try {
+      const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+      return config.reminderFrequency || 'daily';
+    } catch {
+      return 'daily';
+    }
+  });
+  const [expirationEnabled, setExpirationEnabled] = useState(() => {
+    try {
+      const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+      return config.expirationEnabled || false;
+    } catch {
+      return false;
+    }
+  });
+  const [expirationDays, setExpirationDays] = useState(() => {
+    try {
+      const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+      return config.expirationDays || 7;
+    } catch {
+      return 7;
+    }
+  });
+  const [signingOrder, setSigningOrder] = useState(() => {
+    try {
+      const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+      return config.signingOrder || 'any';
+    } catch {
+      return 'any';
+    }
+  });
+  const [requireAllSigners, setRequireAllSigners] = useState(() => {
+    try {
+      const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+      return config.requireAllSigners || false;
+    } catch {
+      return false;
+    }
+  });
+  const [allowPrinting, setAllowPrinting] = useState(() => {
+    try {
+      const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+      return config.allowPrinting || true;
+    } catch {
+      return true;
+    }
+  });
+  const [allowDownload, setAllowDownload] = useState(() => {
+    try {
+      const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+      return config.allowDownload || true;
+    } catch {
+      return true;
+    }
+  });
 
-  // On mount, restore from sessionStorage if available
+  // Add drag state for signer drag-and-drop
+  const [draggingSignerIndex, setDraggingSignerIndex] = useState(null);
+  const [dragOverSignerIndex, setDragOverSignerIndex] = useState(null);
+
+  // Add a default signer if none exists (only once, and only if signers is empty and sessionStorage is also empty)
   useEffect(() => {
-    const stored = sessionStorage.getItem('documentConfiguration');
-    if (stored) {
-      try {
-        const config = JSON.parse(stored);
-        if (config.signers) setSigners(config.signers);
-        if (config.subject) setSubject(config.subject);
-        if (config.message) setMessage(config.message);
-        if (config.requireAuthentication !== undefined) setRequireAuthentication(config.requireAuthentication);
-        if (config.allowDelegation !== undefined) setAllowDelegation(config.allowDelegation);
-        if (config.allowComments !== undefined) setAllowComments(config.allowComments);
-        if (config.sendReminders !== undefined) setSendReminders(config.sendReminders);
-        if (config.reminderFrequency !== undefined) setReminderFrequency(config.reminderFrequency);
-        if (config.expirationEnabled !== undefined) setExpirationEnabled(config.expirationEnabled);
-        if (config.expirationDays !== undefined) setExpirationDays(config.expirationDays);
-        if (config.signingOrder) setSigningOrder(config.signingOrder);
-        if (config.requireAllSigners !== undefined) setRequireAllSigners(config.requireAllSigners);
-        if (config.allowPrinting !== undefined) setAllowPrinting(config.allowPrinting);
-        if (config.allowDownload !== undefined) setAllowDownload(config.allowDownload);
-      } catch {}
+    const config = JSON.parse(sessionStorage.getItem('documentConfiguration') || '{}');
+    if ((signers.length === 0) && (!config.signers || config.signers.length === 0)) {
+      setSigners([{ id: Date.now(), name: '', email: '', role: 'Signer' }]);
     }
   }, []);
 
@@ -324,10 +348,11 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
       signingOrder,
       requireAllSigners,
       allowPrinting,
-      allowDownload
+      allowDownload,
+      showAdvanced
     };
     sessionStorage.setItem('documentConfiguration', JSON.stringify(config));
-  }, [signers, subject, message, requireAuthentication, allowDelegation, allowComments, sendReminders, reminderFrequency, expirationEnabled, expirationDays, signingOrder, requireAllSigners, allowPrinting, allowDownload]);
+  }, [signers, subject, message, requireAuthentication, allowDelegation, allowComments, sendReminders, reminderFrequency, expirationEnabled, expirationDays, signingOrder, requireAllSigners, allowPrinting, allowDownload, showAdvanced]);
 
   const addSigner = () => {
     const newSigner = {
@@ -361,10 +386,6 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
     }
 
     for (const signer of signers) {
-      if (!signer.name.trim()) {
-        toast.error('All signers must have a name')
-        return
-      }
       if (!signer.email.trim()) {
         toast.error('All signers must have an email')
         return
@@ -480,7 +501,7 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
             toast={toast}
           />
 
-          {/* Signers - Compact */}
+          {/* Signers - Modern Card UI */}
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-gray-900">Signers</h2>
@@ -492,39 +513,53 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
                 <span>Add</span>
               </button>
             </div>
-
             <div className="space-y-3">
               {signers.map((signer, index) => (
-                <div key={signer.id} className="border border-gray-200 rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-medium text-gray-700">Signer {index + 1}</span>
-                    {signers.length > 1 && (
-                      <button
-                        onClick={() => removeSigner(signer.id)}
-                        className="text-red-500 hover:text-red-600 p-0.5"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    )}
+                <div
+                  key={signer.id}
+                  className="relative bg-gray-50 border border-gray-200 rounded-xl p-3 shadow-sm flex flex-col md:flex-row md:items-center md:space-x-4 signer-draggable"
+                  draggable
+                  onDragStart={e => {
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', index);
+                    setDraggingSignerIndex(index);
+                  }}
+                  onDragOver={e => {
+                    e.preventDefault();
+                    setDragOverSignerIndex(index);
+                  }}
+                  onDrop={e => {
+                    e.preventDefault();
+                    const fromIndex = draggingSignerIndex;
+                    const toIndex = index;
+                    if (fromIndex !== toIndex) {
+                      const updated = [...signers];
+                      const [moved] = updated.splice(fromIndex, 1);
+                      updated.splice(toIndex, 0, moved);
+                      setSigners(updated);
+                    }
+                    setDraggingSignerIndex(null);
+                    setDragOverSignerIndex(null);
+                  }}
+                  onDragEnd={() => {
+                    setDraggingSignerIndex(null);
+                    setDragOverSignerIndex(null);
+                  }}
+                  style={{
+                    opacity: draggingSignerIndex === index ? 0.5 : 1,
+                    border: dragOverSignerIndex === index && draggingSignerIndex !== null ? '2px solid #3b82f6' : undefined,
+                    cursor: 'grab',
+                    transition: 'border 0.2s',
+                  }}
+                >
+                  {/* Drag handle */}
+                  <div className="flex items-center md:items-start md:mr-2 mb-2 md:mb-0 cursor-grab select-none" style={{ touchAction: 'none' }}>
+                    <Grip className="w-5 h-5 text-gray-400 hover:text-blue-500" />
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1">
-                        Full Name *
-                      </label>
-                      <input
-                        type="text"
-                        value={signer.name}
-                        onChange={(e) => updateSigner(signer.id, 'name', e.target.value)}
-                        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Enter full name"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">
-                        Email Address *
+                        Email Address <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="email"
@@ -532,9 +567,48 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
                         onChange={(e) => updateSigner(signer.id, 'email', e.target.value)}
                         className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                         placeholder="Enter email address"
+                        required
                       />
                     </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Full Name
+                      </label>
+                      <input
+                        type="text"
+                        value={signer.name}
+                        onChange={(e) => updateSigner(signer.id, 'name', e.target.value)}
+                        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter full name (optional)"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Role
+                      </label>
+                      <div className="relative">
+                        <select
+                          value={signer.role}
+                          onChange={e => updateSigner(signer.id, 'role', e.target.value)}
+                          className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 appearance-none pr-8"
+                        >
+                          <option value="Signer">Signer</option>
+                          <option value="Viewer">Viewer</option>
+                        </select>
+                        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      </div>
+                    </div>
                   </div>
+                  {/* Remove button */}
+                  {signers.length > 1 && (
+                    <button
+                      onClick={() => removeSigner(signer.id)}
+                      className="absolute top-2 right-2 text-red-500 hover:text-red-600 p-1"
+                      title="Remove signer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
