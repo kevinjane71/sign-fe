@@ -243,11 +243,11 @@ export default function HomePage() {
       </section>
 
       {/* Trust Bar / Logos */}
-      <section className="w-full max-w-4xl mx-auto px-4 py-4 flex flex-wrap items-center justify-center gap-6 bg-white/60 rounded-xl shadow border border-gray-100 mb-8">
+      {/* <section className="w-full max-w-4xl mx-auto px-4 py-4 flex flex-wrap items-center justify-center gap-6 bg-white/60 rounded-xl shadow border border-gray-100 mb-8">
         {logos.map((logo, i) => (
           <img key={i} src={logo} alt="logo" className="h-8 object-contain opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition" />
         ))}
-      </section>
+      </section> */}
 
       {/* Testimonial Carousel */}
       <section className="w-full max-w-3xl mx-auto px-4 py-6 flex flex-col items-center">

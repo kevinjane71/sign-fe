@@ -388,7 +388,8 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
       id: Date.now(),
       name: '',
       email: '',
-      role: 'Signer'
+      role: 'Signer',
+      accessCode: ''
     }
     setSigners(prev => [...prev, newSigner])
   }
@@ -454,6 +455,9 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
     // Just navigate to step 2, don't call API yet
     onNext()
   }
+
+  // In DocumentConfiguration, add local state to track which signer's access code input is open
+  const [accessCodeOpenFor, setAccessCodeOpenFor] = useState(null)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -546,7 +550,7 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
               {signers.map((signer, index) => (
                 <div
                   key={signer.id}
-                  className="relative bg-gray-50 border border-gray-200 rounded-xl p-3 shadow-sm flex flex-col md:flex-row md:items-center md:space-x-4 signer-draggable"
+                  className="relative bg-gray-50 border border-gray-200 rounded-xl p-3 shadow-sm signer-draggable"
                   draggable
                   onDragStart={e => {
                     e.dataTransfer.effectAllowed = 'move';
@@ -627,6 +631,25 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
                         <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                       </div>
                     </div>
+                  </div>
+                  {/* Access Code Link and Input: new row, right-aligned, below the grid */}
+                  <div className="w-full flex flex-col items-end mt-2">
+                    <a
+                      href="#"
+                      onClick={e => { e.preventDefault(); setAccessCodeOpenFor(accessCodeOpenFor === signer.id ? null : signer.id); }}
+                      className="text-xs text-blue-600 hover:underline font-medium"
+                    >
+                      {signer.accessCode ? 'Edit Access Code' : '+ Access Code'}
+                    </a>
+                    {accessCodeOpenFor === signer.id && (
+                      <input
+                        type="text"
+                        value={signer.accessCode || ''}
+                        onChange={e => updateSigner(signer.id, 'accessCode', e.target.value)}
+                        className="w-28 px-2 py-1 text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 mt-1"
+                        placeholder="Set access code"
+                      />
+                    )}
                   </div>
                   {/* Remove button */}
                   {signers.length > 1 && (

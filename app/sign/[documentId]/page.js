@@ -622,6 +622,9 @@ export default function SigningPage() {
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false)
   const [activeSignatureFieldId, setActiveSignatureFieldId] = useState(null)
   const [signatureModalValue, setSignatureModalValue] = useState(null)
+  const [accessCode, setAccessCode] = useState('')
+  const [accessCodeRequired, setAccessCodeRequired] = useState(false)
+  const [accessCodeError, setAccessCodeError] = useState('')
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'
 
@@ -654,16 +657,26 @@ export default function SigningPage() {
       return
     }
 
-    const loadSigningDocument = async () => {
+    const loadSigningDocument = async (code) => {
       try {
         setLoading(true)
         setError(null)
+        setAccessCodeError('')
+        setAccessCodeRequired(false)
 
         // Fetch document data from backend
-        const response = await fetch(`${API_BASE_URL}/api/sign/${documentId}?signer=${encodeURIComponent(signerEmail)}&token=${token}`)
+        let url = `${API_BASE_URL}/api/sign/${documentId}?signer=${encodeURIComponent(signerEmail)}&token=${token}`
+        if (code) url += `&accessCode=${encodeURIComponent(code)}`
+        const response = await fetch(url)
         const result = await response.json()
 
         if (!response.ok) {
+          if (result.accessCodeRequired) {
+            setAccessCodeRequired(true)
+            setAccessCodeError(result.error)
+            setLoading(false)
+            return
+          }
           throw new Error(result.error || 'Failed to load document')
         }
 
@@ -675,19 +688,13 @@ export default function SigningPage() {
         }
 
         setDocumentData(result.document)
-
-        // Convert document data to format expected by DocumentViewer
+        // --- FIX: Also set documents and fieldValues ---
         const loadedDocuments = []
         const initialFieldValues = {}
-
         if (result.document.files && result.document.files.length > 0) {
-          // Multi-file document
           for (let i = 0; i < result.document.files.length; i++) {
             const file = result.document.files[i]
-            
-            // Fetch file content with token
             const fileUrl = `${API_BASE_URL}/api/sign/${documentId}/file/${file.fileId}?signer=${encodeURIComponent(signerEmail)}&token=${token}`
-            
             const documentObj = {
               name: file.originalName,
               type: file.mimeType,
@@ -696,10 +703,7 @@ export default function SigningPage() {
               fileId: file.fileId,
               title: file.title
             }
-            
             loadedDocuments.push(documentObj)
-
-            // Initialize field values
             if (file.fields) {
               file.fields.forEach(field => {
                 initialFieldValues[field.id] = field.defaultValue || ''
@@ -707,28 +711,24 @@ export default function SigningPage() {
             }
           }
         } else {
-          // Legacy single file document
           const fileUrl = `${API_BASE_URL}/api/sign/${documentId}/file/main?signer=${encodeURIComponent(signerEmail)}&token=${token}`
-          
           const documentObj = {
             name: result.document.originalName,
             type: result.document.mimeType,
             url: fileUrl
           }
-          
           loadedDocuments.push(documentObj)
-
-          // Initialize field values for legacy fields
           if (result.document.fields) {
             result.document.fields.forEach(field => {
               initialFieldValues[field.id] = field.defaultValue || ''
             })
           }
         }
-
         setDocuments(loadedDocuments)
         setFieldValues(initialFieldValues)
-
+        // --- END FIX ---
+        setAccessCodeRequired(false)
+        setAccessCodeError('')
       } catch (err) {
         console.error('Error loading document:', err)
         setError(err.message || 'Failed to load document')
@@ -737,7 +737,7 @@ export default function SigningPage() {
       }
     }
 
-    loadSigningDocument()
+    loadSigningDocument(accessCode)
   }, [documentId, signerEmail, token, router])
 
   // Get all fields from all files
@@ -877,6 +877,106 @@ export default function SigningPage() {
     handleFieldUpdate(fieldId, value)
     setActiveSignatureFieldId(null)
     setSignatureModalValue(null)
+  }
+
+  // Handler for submitting access code
+  const handleAccessCodeSubmit = (e) => {
+    e.preventDefault()
+    setError('')
+    setAccessCodeError('')
+    setLoading(true)
+    // Refetch with access code
+    const fetchWithCode = async () => {
+      try {
+        let url = `${API_BASE_URL}/api/sign/${documentId}?signer=${encodeURIComponent(signerEmail)}&token=${token}`
+        if (accessCode) url += `&accessCode=${encodeURIComponent(accessCode)}`
+        const response = await fetch(url)
+        const result = await response.json()
+        if (!response.ok) {
+          if (result.accessCodeRequired) {
+            setAccessCodeRequired(true)
+            setAccessCodeError(result.error)
+            setLoading(false)
+            return
+          }
+          throw new Error(result.error || 'Failed to load document')
+        }
+        setDocumentData(result.document)
+        // --- FIX: Also set documents and fieldValues ---
+        const loadedDocuments = []
+        const initialFieldValues = {}
+        if (result.document.files && result.document.files.length > 0) {
+          for (let i = 0; i < result.document.files.length; i++) {
+            const file = result.document.files[i]
+            const fileUrl = `${API_BASE_URL}/api/sign/${documentId}/file/${file.fileId}?signer=${encodeURIComponent(signerEmail)}&token=${token}`
+            const documentObj = {
+              name: file.originalName,
+              type: file.mimeType,
+              size: file.size,
+              url: fileUrl,
+              fileId: file.fileId,
+              title: file.title
+            }
+            loadedDocuments.push(documentObj)
+            if (file.fields) {
+              file.fields.forEach(field => {
+                initialFieldValues[field.id] = field.defaultValue || ''
+              })
+            }
+          }
+        } else {
+          const fileUrl = `${API_BASE_URL}/api/sign/${documentId}/file/main?signer=${encodeURIComponent(signerEmail)}&token=${token}`
+          const documentObj = {
+            name: result.document.originalName,
+            type: result.document.mimeType,
+            url: fileUrl
+          }
+          loadedDocuments.push(documentObj)
+          if (result.document.fields) {
+            result.document.fields.forEach(field => {
+              initialFieldValues[field.id] = field.defaultValue || ''
+            })
+          }
+        }
+        setDocuments(loadedDocuments)
+        setFieldValues(initialFieldValues)
+        // --- END FIX ---
+        setAccessCodeRequired(false)
+        setAccessCodeError('')
+      } catch (err) {
+        setAccessCodeError(err.message || 'Failed to load document')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchWithCode()
+  }
+
+  if (accessCodeRequired) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <form onSubmit={handleAccessCodeSubmit} className="bg-white p-6 rounded-lg shadow-md max-w-sm w-full">
+          <h2 className="text-lg font-semibold mb-2 text-gray-900">Access Code Required</h2>
+          <p className="text-gray-600 mb-4">This document is protected. Please enter the access code provided by the sender to continue.</p>
+          <input
+            type="text"
+            value={accessCode}
+            onChange={e => setAccessCode(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded mb-2 focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter access code"
+            autoFocus
+          />
+          {accessCodeError && <div className="text-red-600 text-sm mb-2">{accessCodeError}</div>}
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 transition"
+            disabled={loading || !accessCode}
+          >
+            {loading ? 'Checking...' : 'Continue'}
+          </button>
+        </form>
+      </div>
+    )
   }
 
   if (loading) {
