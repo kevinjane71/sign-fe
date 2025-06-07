@@ -642,13 +642,26 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
                       {signer.accessCode ? 'Edit Access Code' : '+ Access Code'}
                     </a>
                     {accessCodeOpenFor === signer.id && (
-                      <input
-                        type="text"
-                        value={signer.accessCode || ''}
-                        onChange={e => updateSigner(signer.id, 'accessCode', e.target.value)}
-                        className="w-28 px-2 py-1 text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 mt-1"
-                        placeholder="Set access code"
-                      />
+                      <div className="flex items-center justify-end mt-1 space-x-2">
+                        <input
+                          type="text"
+                          value={signer.accessCode || ''}
+                          onChange={e => updateSigner(signer.id, 'accessCode', e.target.value)}
+                          className="w-28 px-2 py-1 text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Set access code"
+                        />
+                        {signer.accessCode && (
+                          <button
+                            type="button"
+                            onClick={() => updateSigner(signer.id, 'accessCode', '')}
+                            className="ml-1 text-gray-400 hover:text-red-500 text-xs p-1 rounded"
+                            title="Remove access code"
+                          >
+                            <span className="sr-only">Remove</span>
+                            &#10005;
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
                   {/* Remove button */}
