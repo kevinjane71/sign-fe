@@ -1195,31 +1195,7 @@ export default function SigningPage() {
       {/* Progress Sidebar - Mobile-friendly */}
       <div className="fixed bottom-4 right-4 bg-white rounded-lg shadow-lg border max-w-xs z-30">
         {/* Mobile - Collapsed view */}
-        <div className="block md:hidden">
-          <div className="p-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-900">
-                Progress: {Object.keys(fieldValues).filter(key => fieldValues[key]).length}/{getAllFields().length}
-              </span>
-              <div className="w-16 bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                  style={{ 
-                    width: `${getAllFields().length > 0 ? (Object.keys(fieldValues).filter(key => fieldValues[key]).length / getAllFields().length) * 100 : 0}%` 
-                  }}
-                ></div>
-              </div>
-            </div>
-            
-            {/* Show validation message if there are incomplete required fields */}
-            {!areRequiredFieldsCompleted() && getAllFields().some(field => field.required) && (
-              <div className="mt-2 text-xs text-red-600 flex items-center">
-                <AlertCircle className="w-3 h-3 mr-1" />
-                Complete required fields to submit
-              </div>
-            )}
-          </div>
-        </div>
+        
 
         {/* Desktop - Full view */}
         <div className="hidden md:block p-4">
