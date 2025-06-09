@@ -44,11 +44,9 @@ import {
   Loader2
 } from 'lucide-react'
 import { useToast } from '../components/LayoutWrapper'
-import { getUserDocuments, deleteDocument, duplicateDocument, isAuthenticated, getStoredUser, getDocuments, getDocumentStats, getDocumentFile } from '../utils/api'
+import { getUserDocuments, deleteDocument, duplicateDocument, isAuthenticated, getStoredUser, getDocuments, getDocumentStats } from '../utils/api'
 import LoadingSpinner from '../components/LoadingSpinner'
 import Modal from '../components/Modal'
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
 
 export default function Dashboard() {
   const router = useRouter()
@@ -83,7 +81,6 @@ export default function Dashboard() {
   const [isDuplicating, setIsDuplicating] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [pendingDeleteDoc, setPendingDeleteDoc] = useState(null)
-  const [deletingDocId, setDeletingDocId] = useState(null)
   const dropdownRef = useRef(null)
   const fileInputRef = useRef(null)
 
@@ -480,11 +477,9 @@ export default function Dashboard() {
 
   const handleConfirmDelete = async () => {
     if (pendingDeleteDoc) {
-      setShowDeleteModal(false); // Hide modal immediately
-      setDeletingDocId(pendingDeleteDoc.id);
       await handleDeleteDocument(pendingDeleteDoc.id)
+      setShowDeleteModal(false)
       setPendingDeleteDoc(null)
-      setDeletingDocId(null);
     }
   }
 
@@ -641,50 +636,53 @@ export default function Dashboard() {
               {/* Stats Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
                   <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-gray-600">Completed</p>
-                        <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.completed || 0}</p>
-                      </div>
-                      <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                        <CheckCircle className="w-4 h-4 text-green-600" />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-gray-600">Draft</p>
-                        <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.draft || 0}</p>
-                      </div>
-                      <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                        <Edit className="w-4 h-4 text-yellow-600" />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-gray-600">Sent</p>
-                        <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.sent || 0}</p>
-                      </div>
-                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <Send className="w-4 h-4 text-blue-600" />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between">
-                      <div>
+                  <div className="flex items-center justify-between">
+                    <div>
                         <p className="text-xs font-medium text-gray-600">Total</p>
                         <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.total || 0}</p>
-                      </div>
+                    </div>
                       <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                         <FileText className="w-4 h-4 text-blue-600" />
-                      </div>
                     </div>
                   </div>
                 </div>
+
+                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-medium text-gray-600">Draft</p>
+                        <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.draft || 0}</p>
+                    </div>
+                      <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <Edit className="w-4 h-4 text-yellow-600" />
+                    </div>
+                  </div>
+                </div>
+
+                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-medium text-gray-600">Sent</p>
+                        <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.sent || 0}</p>
+                    </div>
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <Send className="w-4 h-4 text-blue-600" />
+                    </div>
+                  </div>
+                </div>
+
+                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-medium text-gray-600">Completed</p>
+                        <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.completed || 0}</p>
+                    </div>
+                      <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                        <CheckCircle className="w-4 h-4 text-green-600" />
+                    </div>
+                  </div>
+                </div>
+              </div>
 
                 {/* Search and Filter */}
                 <div className="bg-white rounded-lg p-3 mb-4 shadow-sm border border-gray-100">
@@ -978,51 +976,12 @@ export default function Dashboard() {
                                   </button>
                                   <button
                                     onClick={() => handleDeleteClick(doc)}
-                                    className={`inline-flex items-center px-3 py-1.5 border border-red-200 text-xs font-medium rounded text-red-600 bg-white hover:bg-red-50 hover:scale-105 transition-all duration-200 ${deletingDocId === doc.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className="inline-flex items-center px-3 py-1.5 border border-red-200 text-xs font-medium rounded text-red-600 bg-white hover:bg-red-50 hover:scale-105 transition-all duration-200"
                                     title="Delete Document"
-                                    disabled={deletingDocId === doc.id}
-                                    style={{ display: deletingDocId === doc.id ? 'none' : 'inline-flex' }}
                                   >
                                     <Trash2 className="w-3 h-3 mr-1" />
                                     Delete
                                   </button>
-                                  {deletingDocId === doc.id && (
-                                    <span className="inline-flex items-center px-3 py-1.5 border border-gray-200 text-xs font-medium rounded text-gray-500 bg-gray-50">
-                                      <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                                      Deleting...
-                                    </span>
-                                  )}
-                                  {doc.status === 'completed' && (
-                                    <button
-                                      onClick={async () => {
-                                        try {
-                                          const response = await fetch(`${API_BASE_URL}/api/documents/${doc.id}/download`, {
-                                            credentials: 'include'
-                                          })
-                                          if (response.ok) {
-                                            const blob = await response.blob()
-                                            const url = window.URL.createObjectURL(blob)
-                                            const a = document.createElement('a')
-                                            a.href = url
-                                            a.download = `${doc.title || doc.originalName || 'signed-document'}.pdf`
-                                            document.body.appendChild(a)
-                                            a.click()
-                                            window.URL.revokeObjectURL(url)
-                                            document.body.removeChild(a)
-                                          } else {
-                                            throw new Error('Failed to download document')
-                                          }
-                                        } catch (err) {
-                                          toast.error('Failed to download file')
-                                        }
-                                      }}
-                                      className="inline-flex items-center px-3 py-1.5 border border-emerald-300 text-xs font-medium rounded text-emerald-700 bg-white hover:bg-emerald-50 hover:scale-105 transition-all duration-200"
-                                      title="Download Final File"
-                                    >
-                                      <Download className="w-3 h-3 mr-1" />
-                                      Download
-                                    </button>
-                                  )}
                                 </div>
                               </td>
                             </tr>
@@ -1090,49 +1049,11 @@ export default function Dashboard() {
                               </button>
                               <button
                                 onClick={() => handleDeleteClick(doc)}
-                                className={`flex-1 inline-flex items-center justify-center px-3 py-2 border border-red-200 text-xs font-medium rounded text-red-600 bg-white hover:bg-red-50 transition-colors ${deletingDocId === doc.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                disabled={deletingDocId === doc.id}
-                                style={{ display: deletingDocId === doc.id ? 'none' : 'inline-flex' }}
+                                className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-red-200 text-xs font-medium rounded text-red-600 bg-white hover:bg-red-50 transition-colors"
                               >
                                 <Trash2 className="w-3 h-3 mr-1" />
                                 Delete
                               </button>
-                              {deletingDocId === doc.id && (
-                                <span className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-200 text-xs font-medium rounded text-gray-500 bg-gray-50">
-                                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                                  Deleting...
-                                </span>
-                              )}
-                              {doc.status === 'completed' && (
-                                <button
-                                  onClick={async () => {
-                                    try {
-                                      const response = await fetch(`${API_BASE_URL}/api/documents/${doc.id}/download`, {
-                                        credentials: 'include'
-                                      })
-                                      if (response.ok) {
-                                        const blob = await response.blob()
-                                        const url = window.URL.createObjectURL(blob)
-                                        const a = document.createElement('a')
-                                        a.href = url
-                                        a.download = `${doc.title || doc.originalName || 'signed-document'}.pdf`
-                                        document.body.appendChild(a)
-                                        a.click()
-                                        window.URL.revokeObjectURL(url)
-                                        document.body.removeChild(a)
-                                      } else {
-                                        throw new Error('Failed to download document')
-                                      }
-                                    } catch (err) {
-                                      toast.error('Failed to download file')
-                                    }
-                                  }}
-                                  className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-emerald-300 text-xs font-medium rounded text-emerald-700 bg-white hover:bg-emerald-50 transition-colors"
-                                >
-                                  <Download className="w-3 h-3 mr-1" />
-                                  Download
-                                </button>
-                              )}
                             </div>
                           </div>
                         ))}
