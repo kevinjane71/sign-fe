@@ -56,7 +56,7 @@ export default function Header() {
                 </div>
                 <div className="hidden sm:block">
                   <div className="flex flex-col">
-                    <span className="text-xl md:text-2xl font-bold text-white">SignFlow</span>
+                    <span className="text-xl md:text-2xl font-bold text-white">eSignTap</span>
                     <span className="text-xs md:text-sm text-white/70">Professional Document Signing</span>
                   </div>
                 </div>

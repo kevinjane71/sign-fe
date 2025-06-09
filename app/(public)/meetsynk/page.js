@@ -5,7 +5,7 @@ import Script from 'next/script';
 export async function generateMetadata() {
   return {
     title: "eSigntap: Professional Document Signing & E-Signature Platform",
-    description: "Streamline your document signing process with SignFlow's intelligent platform. Upload documents, add signature fields, manage signers, and track signing progress all in one place.",
+    description: "Streamline your document signing process with eSignTap's intelligent platform. Upload documents, add signature fields, manage signers, and track signing progress all in one place.",
     
     // Basic meta tags
     metadataBase: new URL('https://esigntap.com'),
@@ -99,10 +99,10 @@ export async function generateMetadata() {
     robots: 'index, follow',
     
     // Application information
-    applicationName: 'SignFlow',
+    applicationName: 'eSignTap',
     referrer: 'origin-when-cross-origin',
-    authors: [{ name: 'SignFlow Team' }],
-    publisher: 'SignFlow',
+    authors: [{ name: 'eSignTap Team' }],
+    publisher: 'eSignTap',
     category: 'Business Software',
     
     // Verification tags (add your actual verification codes)
@@ -117,7 +117,7 @@ export async function generateMetadata() {
       'mobile-web-app-capable': 'yes',
       'apple-mobile-web-app-capable': 'yes',
       'apple-mobile-web-app-status-bar-style': 'black-translucent',
-      'apple-mobile-web-app-title': 'SignFlow',
+      'apple-mobile-web-app-title': 'eSignTap',
       'msapplication-TileColor': '#2b5797',
       'theme-color': '#ffffff'
     }
@@ -132,7 +132,7 @@ export default function Home() {
           {
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
-            "name": "SignFlow",
+            "name": "eSignTap",
             "applicationCategory": "BusinessApplication",
             "operatingSystem": "Web",
             "offers": {

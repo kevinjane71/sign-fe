@@ -11,7 +11,7 @@ export default function PricingPage() {
   const plans = [
     {
       name: "Free",
-      description: "Perfect for trying out SignFlow",
+      description: "Perfect for trying out eSignTap",
       price: { monthly: 0, annual: 0 },
       features: [
         "🎁 ALL PRO FEATURES until July 30th!",
@@ -208,7 +208,7 @@ export default function PricingPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Why Choose SignFlow?
+              Why Choose eSignTap?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               We offer the same powerful features as industry leaders at a fraction of the cost
@@ -305,7 +305,7 @@ export default function PricingPage() {
             Ready to streamline your workflow?
           </h2>
           <p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of professionals who trust SignFlow for their document signing needs
+            Join thousands of professionals who trust eSignTap for their document signing needs
           </p>
           <button
             onClick={() => router.push('/login')}
