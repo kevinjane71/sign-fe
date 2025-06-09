@@ -644,7 +644,7 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
             <button
               onClick={handleNext}
               disabled={isLoading}
-              className="flex items-center space-x-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-xs font-semibold shadow-sm disabled:opacity-50"
+              className="flex items-center space-x-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-xs font-semibold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -1355,6 +1355,17 @@ export default function NewDocumentEditor() {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 })
 
+  // Upload status: { uploaded, documentId, fileMap }
+  const [uploadStatus, setUploadStatus] = useState(() => {
+    const saved = sessionStorage.getItem('editorUploadStatus')
+    return saved ? JSON.parse(saved) : { uploaded: false, documentId: null, fileMap: {} }
+  })
+
+  // Detect mode from route
+  const isEditMode = typeof window !== 'undefined' && window.location.pathname.startsWith('/editor/') && !window.location.pathname.includes('local-new')
+  // If edit mode, extract documentId from URL
+  const documentIdFromUrl = isEditMode ? window.location.pathname.split('/')[2] : null
+
   // Get all fields from all documents
   const getAllFields = () => {
     return Object.values(allFields).flat()
@@ -1693,22 +1704,79 @@ export default function NewDocumentEditor() {
 
   // Step navigation
   const handleNextStep = async () => {
+    console.log('DEBUG: handleNextStep called')
     if (currentStep === 1) {
-      // Moving from configuration to editor
       if (documents.length === 0) {
         toast.error('Please upload at least one document first')
         return
       }
-      
       setIsStepLoading(true)
-      
-      // Smooth transition delay for better UX
+      try {
+        console.log('DEBUG: documents array:', documents)
+        let filesToUpload = []
+        let uploadDocId = uploadStatus.documentId
+        if (isEditMode) {
+          filesToUpload = documents.filter(doc => !uploadStatus.fileMap[doc.name])
+          uploadDocId = documentIdFromUrl
+        } else {
+          filesToUpload = (!uploadStatus.uploaded || !uploadStatus.documentId) ? documents : []
+        }
+        console.log('DEBUG: filesToUpload:', filesToUpload)
+        if (filesToUpload.length > 0) {
+          const formData = new FormData()
+          filesToUpload.forEach((document, index) => {
+            if (document.data) {
+              const base64Data = document.data.split(',')[1]
+              const byteCharacters = atob(base64Data)
+              const byteNumbers = new Array(byteCharacters.length)
+              for (let j = 0; j < byteCharacters.length; j++) {
+                byteNumbers[j] = byteCharacters.charCodeAt(j)
+              }
+              const byteArray = new Uint8Array(byteNumbers)
+              const blob = new Blob([byteArray], { type: document.type })
+              formData.append('documents', blob, document.name)
+              formData.append(`title_${index}`, document.name || `Untitled Document ${index + 1}`)
+              formData.append(`mimeType_${index}`, document.type)
+              formData.append(`fields_${index}`, JSON.stringify(allFields[index] || []))
+            }
+          })
+          formData.append('signers', JSON.stringify([]))
+          formData.append('subject', 'Draft Upload')
+          formData.append('message', '')
+          formData.append('configuration', JSON.stringify({}))
+          console.log('DEBUG: Calling uploadDocument...')
+          let uploadResult
+          if (isEditMode && uploadDocId) {
+            uploadResult = await uploadDocument(formData, uploadDocId)
+          } else {
+            uploadResult = await uploadDocument(formData)
+          }
+          console.log('DEBUG: uploadResult:', uploadResult)
+          const newFileMap = { ...uploadStatus.fileMap }
+          uploadResult.document.files.forEach((file, idx) => {
+            newFileMap[filesToUpload[idx]?.name] = file.fileId
+          })
+          const newStatus = {
+            uploaded: true,
+            documentId: uploadResult.documentId || uploadDocId,
+            fileMap: newFileMap
+          }
+          setUploadStatus(newStatus)
+          sessionStorage.setItem('editorUploadStatus', JSON.stringify(newStatus))
+          toast.success('Documents uploaded!')
+        } else {
+          console.log('DEBUG: No files to upload, skipping upload')
+        }
+      } catch (err) {
+        console.error('Upload failed:', err)
+        toast.error('Upload failed: ' + (err.message || 'Unknown error'))
+        setIsStepLoading(false)
+        return
+      }
       await new Promise(resolve => setTimeout(resolve, 300))
-      
       setCurrentStep(2)
       setIsStepLoading(false)
     } else {
-      // From step 2, call final send
       handleFinalSend()
     }
   }
@@ -1818,6 +1886,14 @@ export default function NewDocumentEditor() {
       setIsSubmitting(false)
     }
   }, [documents, allFields, router])
+
+  // Clear upload status if on /editor/local-new (fresh mode)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.pathname.includes('local-new')) {
+      sessionStorage.removeItem('editorUploadStatus')
+      setUploadStatus({ uploaded: false, documentId: null, fileMap: {} })
+    }
+  }, [])
 
   if (loading) {
     return <LoadingSpinner message="Loading documents..." />

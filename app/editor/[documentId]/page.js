@@ -2713,29 +2713,126 @@ export default function EditDocumentEditor() {
     window.open('/live/preview', '_blank')
   }
 
-  // Step navigation functions
+  // --- Upload status state ---
+  const [uploadStatus, setUploadStatus] = useState(() => {
+    const saved = sessionStorage.getItem('editorUploadStatus')
+    return saved ? JSON.parse(saved) : { uploaded: false, documentId: null, fileMap: {} }
+  })
+  // --- New: Track background upload ---
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false)
+
+  // --- Helper: detect edit mode ---
+  const isEditMode = documentId !== 'local-new'
+
+  // --- Helper: get file map from uploaded files ---
+  function getFileMapFromResult(result) {
+    const fileMap = {}
+    if (result && result.document && result.document.files) {
+      result.document.files.forEach(file => {
+        fileMap[file.title || file.originalName || file.fileName] = file.fileId
+      })
+    }
+    return fileMap
+  }
+
+  // --- Step navigation ---
   const handleNextStep = async () => {
     if (currentStep === 1) {
-      // Moving from configuration to editor
       if (documents.length === 0) {
         toast.error('Please load documents first')
         return
       }
-      
-      setIsStepLoading(true)
-      
-      // Update URL first
+      // Move to step 2 immediately
       const newSearchParams = new URLSearchParams(searchParams)
       newSearchParams.set('step', '2')
       router.replace(`${window.location.pathname}?${newSearchParams.toString()}`)
-      
-      // Smooth transition delay for better UX
       await new Promise(resolve => setTimeout(resolve, 300))
-      
       setCurrentStep(2)
-      setIsStepLoading(false)
+      // Start upload in background
+      setIsUploadingFiles(true)
+      setTimeout(async () => {
+        try {
+          let newUploadStatus = { ...uploadStatus }
+          if (!isEditMode) {
+            if (!uploadStatus.uploaded || !uploadStatus.documentId) {
+              const formData = new FormData()
+              documents.forEach((document, index) => {
+                if (document.data) {
+                  const base64Data = document.data.split(',')[1]
+                  const byteCharacters = atob(base64Data)
+                  const byteNumbers = new Array(byteCharacters.length)
+                  for (let j = 0; j < byteCharacters.length; j++) {
+                    byteNumbers[j] = byteCharacters.charCodeAt(j)
+                  }
+                  const byteArray = new Uint8Array(byteNumbers)
+                  const blob = new Blob([byteArray], { type: document.type })
+                  formData.append('documents', blob, document.name)
+                  formData.append(`title_${index}`, document.name || `Untitled Document ${index + 1}`)
+                  formData.append(`mimeType_${index}`, document.type)
+                  formData.append(`fields_${index}`, JSON.stringify(allFields[index] || []))
+                }
+              })
+              formData.append('signers', '[]')
+              formData.append('subject', 'Draft Upload')
+              formData.append('message', '')
+              formData.append('configuration', '{}')
+              const result = await uploadDocument(formData)
+              newUploadStatus = {
+                uploaded: true,
+                documentId: result.documentId,
+                fileMap: getFileMapFromResult(result)
+              }
+              setUploadStatus(newUploadStatus)
+              sessionStorage.setItem('editorUploadStatus', JSON.stringify(newUploadStatus))
+            }
+          } else {
+            const filesToUpload = documents.filter(doc => !uploadStatus.fileMap[doc.name])
+            if (filesToUpload.length > 0) {
+              const formData = new FormData()
+              filesToUpload.forEach((document, index) => {
+                if (document.data) {
+                  const base64Data = document.data.split(',')[1]
+                  const byteCharacters = atob(base64Data)
+                  const byteNumbers = new Array(byteCharacters.length)
+                  for (let j = 0; j < byteCharacters.length; j++) {
+                    byteNumbers[j] = byteCharacters.charCodeAt(j)
+                  }
+                  const byteArray = new Uint8Array(byteNumbers)
+                  const blob = new Blob([byteArray], { type: document.type })
+                  formData.append('documents', blob, document.name)
+                  formData.append(`title_${index}`, document.name || `Untitled Document ${index + 1}`)
+                  formData.append(`mimeType_${index}`, document.type)
+                  formData.append(`fields_${index}`, JSON.stringify(allFields[index] || []))
+                }
+              })
+              formData.append('signers', '[]')
+              formData.append('subject', 'Draft Upload')
+              formData.append('message', '')
+              formData.append('configuration', '{}')
+              formData.append('documentId', documentId)
+              const result = await uploadDocument(formData)
+              const newFileMap = { ...uploadStatus.fileMap, ...getFileMapFromResult(result) }
+              newUploadStatus = {
+                uploaded: true,
+                documentId: documentId,
+                fileMap: newFileMap
+              }
+              setUploadStatus(newUploadStatus)
+              sessionStorage.setItem('editorUploadStatus', JSON.stringify(newUploadStatus))
+            } else {
+              // No new files to upload, skip upload
+              setIsUploadingFiles(false)
+              return
+            }
+          }
+        } catch (err) {
+          toast.error('Failed to upload document(s). Please try again.')
+        } finally {
+          setIsUploadingFiles(false)
+        }
+      }, 0)
     } else {
-      // From step 2, get configuration and send
+      // Step 2: Share logic unchanged
       const storedConfig = sessionStorage.getItem('documentConfiguration')
       if (!storedConfig) {
         toast.error('Configuration missing. Please go back to step 1.')
@@ -2745,91 +2842,36 @@ export default function EditDocumentEditor() {
         setCurrentStep(1)
         return
       }
-      
       // Parse config and call the API to update and send document
       const config = JSON.parse(storedConfig)
       handleSend(config)
     }
   }
 
-  const handleBackToConfiguration = async () => {
-    if (currentStep === 1) {
-      // From step 1, go back to dashboard
-      router.push('/dashboard')
-      return
-    }
-    
-    // From step 2, go back to step 1 with smooth transition
-    setIsStepLoading(true)
-    
-    // Update URL first
-    const newSearchParams = new URLSearchParams(searchParams)
-    newSearchParams.set('step', '1')
-    router.replace(`${window.location.pathname}?${newSearchParams.toString()}`)
-    
-    // Smooth transition delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 300))
-    
-    setCurrentStep(1)
-    setIsStepLoading(false)
-  }
-
-  // Send handler (final step) - Modified for updating existing document and local-new flow
+  // --- Update handleSend to use uploadStatus.documentId and fileMap in fresh mode ---
   const handleSend = useCallback(async (config) => {
     if (documents.length === 0) {
       toast.error('Please load documents first')
       return
     }
-
     try {
       setIsSubmitting(true)
-
       if (documentId === 'local-new') {
-        // 1. Upload the document(s) to get a real documentId
-        const formData = new FormData()
-        documents.forEach((document, index) => {
-          if (document.data) {
-            const base64Data = document.data.split(',')[1]
-            const byteCharacters = atob(base64Data)
-            const byteNumbers = new Array(byteCharacters.length)
-            for (let j = 0; j < byteCharacters.length; j++) {
-              byteNumbers[j] = byteCharacters.charCodeAt(j)
-            }
-            const byteArray = new Uint8Array(byteNumbers)
-            const blob = new Blob([byteArray], { type: document.type })
-            formData.append('documents', blob, document.name)
-            formData.append(`title_${index}`, document.name || `Untitled Document ${index + 1}`)
-            formData.append(`mimeType_${index}`, document.type)
-            formData.append(`fields_${index}`, JSON.stringify(allFields[index] || []))
-          }
-        })
-        formData.append('signers', JSON.stringify(config.signers))
-        formData.append('subject', config.subject)
-        formData.append('message', config.message)
-        formData.append('configuration', JSON.stringify({
-          requireAuthentication: config.requireAuthentication,
-          allowDelegation: config.allowDelegation,
-          allowComments: config.allowComments,
-          sendReminders: config.sendReminders,
-          reminderFrequency: config.reminderFrequency,
-          expirationEnabled: config.expirationEnabled,
-          expirationDays: config.expirationDays,
-          signingOrder: config.signingOrder,
-          requireAllSigners: config.requireAllSigners,
-          allowPrinting: config.allowPrinting,
-          allowDownload: config.allowDownload
-        }))
-        // Use authenticated upload function
-        const result = await uploadDocument(formData)
-        const newDocumentId = result.documentId
-        // Now update and send using the new documentId
-        const fileFields = result.document.files.map((file, index) => ({
-          fileId: file.fileId,
-          fields: allFields[index] || []
+        // Use uploaded documentId and fileMap
+        const { documentId: uploadedDocId, fileMap } = uploadStatus
+        if (!uploadedDocId || !fileMap) {
+          toast.error('Files not uploaded. Please go back and try again.')
+          setIsSubmitting(false)
+          return
+        }
+        // Prepare fileFields for update/send
+        const fileFields = documents.map((doc, idx) => ({
+          fileId: fileMap[doc.name],
+          fields: allFields[idx] || []
         }))
         // Update document
-        await updateDocument(newDocumentId, {
-          fileFields: fileFields,
+        await updateDocument(uploadedDocId, {
+          fileFields,
           signers: config.signers,
           subject: config.subject,
           message: config.message,
@@ -2848,8 +2890,8 @@ export default function EditDocumentEditor() {
           }
         })
         // Send document
-        await sendDocument(newDocumentId, {
-          fileFields: fileFields,
+        await sendDocument(uploadedDocId, {
+          fileFields,
           signers: config.signers,
           subject: config.subject,
           message: config.message,
@@ -2868,21 +2910,17 @@ export default function EditDocumentEditor() {
           }
         })
         toast.success('Document shared successfully!')
-        // Clear session storage
         sessionStorage.removeItem('pendingDocument')
         sessionStorage.removeItem('pendingDocuments')
-        // Redirect to dashboard
+        sessionStorage.removeItem('editorUploadStatus')
         router.push('/dashboard')
         return
       }
-
-      // Existing document flow
-      // Prepare fileFields data for the API
+      // Existing document flow (edit mode)
       const fileFields = documents.map((document, index) => ({
         fileId: document.fileId,
         fields: allFields[index] || []
       }))
-      // Prepare update data
       const updateData = {
         fileFields: fileFields,
         signers: config.signers,
@@ -2902,9 +2940,7 @@ export default function EditDocumentEditor() {
           allowDownload: config.allowDownload
         }
       }
-      // Update the existing document using authenticated function
       await updateDocument(documentId, updateData)
-      // Send the document using authenticated function
       await sendDocument(documentId, {
         fileFields: fileFields,
         signers: config.signers,
@@ -2920,7 +2956,7 @@ export default function EditDocumentEditor() {
     } finally {
       setIsSubmitting(false)
     }
-  }, [documents, allFields, documentId, router])
+  }, [documents, allFields, documentId, router, uploadStatus])
 
   // Update field configuration
   const handleFieldConfigUpdate = (fieldId, updatedConfig) => {
@@ -3181,15 +3217,17 @@ export default function EditDocumentEditor() {
             <div className="flex items-center ml-2">
               <button
                 onClick={handleNextStep}
-                disabled={isStepLoading}
+                disabled={isStepLoading || isUploadingFiles}
                 className="flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-xs font-semibold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isStepLoading ? (
+                {isUploadingFiles ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : isStepLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <Send className="w-4 h-4" />
                 )}
-                <span className="ml-1">Share</span>
+                <span className="ml-1">{isUploadingFiles ? 'Uploading...' : isStepLoading ? 'Loading...' : 'Share'}</span>
               </button>
             </div>
           </div>
@@ -3280,16 +3318,18 @@ export default function EditDocumentEditor() {
               </button>
               <button
                 onClick={handleNextStep}
-                disabled={isStepLoading}
+                disabled={isStepLoading || isUploadingFiles}
                 className="flex items-center space-x-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-xs font-semibold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="hidden sm:inline">
-                  {isStepLoading ? 'Loading...' : 'Share Document'}
+                  {isUploadingFiles ? 'Uploading...' : isStepLoading ? 'Loading...' : 'Share Document'}
                 </span>
                 <span className="sm:hidden">
-                  {isStepLoading ? 'Loading...' : 'Share'}
+                  {isUploadingFiles ? 'Uploading...' : isStepLoading ? 'Loading...' : 'Share'}
                 </span>
-                {isStepLoading ? (
+                {isUploadingFiles ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : isStepLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <Send className="w-4 h-4" />
@@ -3582,4 +3622,23 @@ export default function EditDocumentEditor() {
     </div>
   )
 } 
+
+// Restore handleBackToConfiguration for navigation
+const handleBackToConfiguration = async () => {
+  if (currentStep === 1) {
+    // From step 1, go back to dashboard
+    router.push('/dashboard')
+    return
+  }
+  // From step 2, go back to step 1 with smooth transition
+  setIsStepLoading(true)
+  // Update URL first
+  const newSearchParams = new URLSearchParams(searchParams)
+  newSearchParams.set('step', '1')
+  router.replace(`${window.location.pathname}?${newSearchParams.toString()}`)
+  // Smooth transition delay for better UX
+  await new Promise(resolve => setTimeout(resolve, 300))
+  setCurrentStep(1)
+  setIsStepLoading(false)
+}
 
