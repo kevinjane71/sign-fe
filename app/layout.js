@@ -8,13 +8,59 @@ import AuthGuard from './components/AuthGuard'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'esigntap - Professional Document Signing',
-  description: 'Professional document signing made simple. Create, share, and sign documents with ease.',
+  title: 'eSignTap - Most Affordable DocuSign Alternative | Professional Document Signing',
+  description: 'The most affordable DocuSign alternative for professional document signing. Create, share, and sign documents with ease. Save up to 40% compared to DocuSign with our competitive pricing.',
+  keywords: 'DocuSign alternative, affordable document signing, electronic signature, digital signature, document signing software, e-signature, professional document signing, cost-effective DocuSign alternative',
+  openGraph: {
+    title: 'eSignTap - Most Affordable DocuSign Alternative | Professional Document Signing',
+    description: 'The most affordable DocuSign alternative for professional document signing. Create, share, and sign documents with ease. Save up to 40% compared to DocuSign.',
+    url: 'https://esigntap.com',
+    siteName: 'eSignTap',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'eSignTap - Professional Document Signing Platform',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'eSignTap - Most Affordable DocuSign Alternative',
+    description: 'The most affordable DocuSign alternative for professional document signing. Save up to 40% compared to DocuSign.',
+    images: ['/og-image.jpg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'your-google-site-verification',
+    yandex: 'your-yandex-verification',
+    bing: 'your-bing-verification',
+  },
 }
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+        <meta name="theme-color" content="#ffffff" />
+      </head>
       <body className={inter.className}>
         <AuthGuard>
           <div className="min-h-screen bg-gray-50">

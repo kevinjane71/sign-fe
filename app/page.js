@@ -165,8 +165,15 @@ export default function HomePage() {
         <div className="absolute -bottom-40 right-0 w-96 h-96 bg-blue-200 opacity-10 rounded-full blur-3xl z-0" />
         <div className="absolute top-1/2 left-1/2 w-40 h-40 bg-white/30 rounded-full blur-2xl z-0" style={{transform:'translate(-50%,-50%)'}} />
         <div className="relative z-10 max-w-2xl mx-auto text-center">
-          <h1 className="text-5xl sm:text-6xl font-extrabold text-gray-900 drop-shadow mb-4 tracking-tight">Sign documents fast and hassle-free.</h1>
-          <p className="text-lg sm:text-2xl text-gray-700 mb-8 font-medium">Upload, edit, send, and share—right from your mobile or desktop. Get signatures in seconds, anywhere.</p>
+          <div className="inline-block bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+            Save up to 40% compared to DocuSign
+          </div>
+          <h1 className="text-5xl sm:text-6xl font-extrabold text-gray-900 drop-shadow mb-4 tracking-tight">
+            The Most Affordable DocuSign Alternative
+          </h1>
+          <p className="text-lg sm:text-2xl text-gray-700 mb-8 font-medium">
+            Professional document signing at a fraction of the cost. Get all the features you need without the premium price tag.
+          </p>
           {/* Glassmorphic Upload Card */}
           <div className="bg-white/60 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/40 p-8 flex flex-col items-center mx-auto max-w-md ring-2 ring-fuchsia-200/40">
             <div
@@ -205,7 +212,7 @@ export default function HomePage() {
             >
               View My Documents
             </button>
-            <p className="text-xs text-gray-600 mt-2">No account needed for basic signing. Free to start.</p>
+            <p className="text-xs text-gray-600 mt-2">Start free. No credit card required.</p>
           </div>
         </div>
       </section>
@@ -237,8 +244,59 @@ export default function HomePage() {
           <div className="w-14 h-14 rounded-full bg-gradient-to-br from-yellow-400 to-pink-400 flex items-center justify-center mb-2 shadow-lg">
             <Star className="w-7 h-7 text-white" />
           </div>
-          <span className="text-yellow-700 font-bold text-lg">Trusted Worldwide</span>
-          <span className="text-xs text-gray-500 mt-1 text-center">Used by thousands of professionals.</span>
+          <span className="text-yellow-700 font-bold text-lg">Affordable Pricing</span>
+          <span className="text-xs text-gray-500 mt-1 text-center">Save up to 40% vs. DocuSign.</span>
+        </div>
+      </section>
+
+      {/* Pricing Comparison Section */}
+      <section className="w-full bg-white py-16 px-4">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-12">Why Choose eSignTap Over DocuSign?</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-gray-50 rounded-2xl p-8 shadow-lg border border-gray-100">
+              <h3 className="text-xl font-bold mb-4 text-gray-800">eSignTap</h3>
+              <ul className="space-y-4">
+                <li className="flex items-center">
+                  <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                  <span className="text-gray-700">Up to 70% more affordable</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                  <span className="text-gray-700">All essential features included</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                  <span className="text-gray-700">Simple, intuitive interface</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                  <span className="text-gray-700">24/7 customer support</span>
+                </li>
+              </ul>
+            </div>
+            <div className="bg-gray-50 rounded-2xl p-8 shadow-lg border border-gray-100">
+              <h3 className="text-xl font-bold mb-4 text-gray-800">DocuSign</h3>
+              <ul className="space-y-4">
+                <li className="flex items-center">
+                  <CheckCircle className="w-5 h-5 text-red-500 mr-2" />
+                  <span className="text-gray-700">Premium pricing</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="w-5 h-5 text-red-500 mr-2" />
+                  <span className="text-gray-700">Complex feature set</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="w-5 h-5 text-red-500 mr-2" />
+                  <span className="text-gray-700">Steep learning curve</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="w-5 h-5 text-red-500 mr-2" />
+                  <span className="text-gray-700">Limited support hours</span>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 
