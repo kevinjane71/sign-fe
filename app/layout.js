@@ -9,11 +9,11 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
   title: 'eSignTap - Most Affordable DocuSign Alternative | Professional Document Signing',
-  description: 'The most affordable DocuSign alternative for professional document signing. Create, share, and sign documents with ease. Save up to 40% compared to DocuSign with our competitive pricing.',
+  description: 'The most affordable DocuSign alternative for professional document signing. Create, share, and sign documents with ease. Save up to 70% compared to DocuSign with our competitive pricing.',
   keywords: 'DocuSign alternative, affordable document signing, electronic signature, digital signature, document signing software, e-signature, professional document signing, cost-effective DocuSign alternative',
   openGraph: {
     title: 'eSignTap - Most Affordable DocuSign Alternative | Professional Document Signing',
-    description: 'The most affordable DocuSign alternative for professional document signing. Create, share, and sign documents with ease. Save up to 40% compared to DocuSign.',
+    description: 'The most affordable DocuSign alternative for professional document signing. Create, share, and sign documents with ease. Save up to 70% compared to DocuSign.',
     url: 'https://esigntap.com',
     siteName: 'eSignTap',
     images: [
@@ -30,7 +30,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'eSignTap - Most Affordable DocuSign Alternative',
-    description: 'The most affordable DocuSign alternative for professional document signing. Save up to 40% compared to DocuSign.',
+    description: 'The most affordable DocuSign alternative for professional document signing. Save up to 70% compared to DocuSign.',
     images: ['/og-image.jpg'],
   },
   robots: {
@@ -49,6 +49,24 @@ export const metadata = {
     yandex: 'your-yandex-verification',
     bing: 'your-bing-verification',
   },
+  icons: {
+    icon: [
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    other: [
+      {
+        rel: 'mask-icon',
+        url: '/safari-pinned-tab.svg',
+        color: '#5bbad5',
+      },
+    ],
+  },
+  manifest: '/site.webmanifest',
+  themeColor: '#ffffff',
 }
 
 export default function RootLayout({ children }) {
