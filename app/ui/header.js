@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, usePathname } from 'next/navigation'
-import { FileText, User, LogIn, LogOut, Menu, X, FileIcon, RotateCcw, PenTool } from 'lucide-react'
+import { FileText, User, LogIn, LogOut, Menu, X, FileIcon, RotateCcw, PenTool, CreditCard } from 'lucide-react'
 import { useState } from 'react'
 import useAuth from '../hooks/useAuth'
 
@@ -79,15 +79,33 @@ export default function Header() {
           <div className="flex items-center">
             <button
               onClick={handleLogoClick}
-              className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 hover:opacity-90 transition-opacity group"
+              className="flex items-center space-x-2 md:space-x-3 hover:opacity-90 transition-opacity group"
+              style={{ outline: 'none' }}
             >
-              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                <FileText className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-white" />
-              </div>
+              {/* Custom SVG Logo: Document + Signature Stroke */}
+              <span className="inline-block">
+                <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+                  <rect x="3" y="3" width="30" height="30" rx="8" fill="url(#paint0_linear)" />
+                  <rect x="10" y="10" width="16" height="20" rx="3" fill="#fff" fillOpacity="0.13" />
+                  <path d="M13 16h10M13 20h7" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M15 26c2-2 6-2 8 0" stroke="#A78BFA" strokeWidth="2.2" strokeLinecap="round"/>
+                  <defs>
+                    <linearGradient id="paint0_linear" x1="3" y1="3" x2="33" y2="33" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#6D28D9"/>
+                      <stop offset="1" stopColor="#9333EA"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </span>
+              {/* Brand Name and Tagline */}
               <div className="hidden sm:block">
                 <div className="flex flex-col text-left">
-                  <span className="text-base sm:text-lg md:text-2xl font-bold text-white leading-tight">E-SignTap</span>
-                  <span className="text-[10px] sm:text-xs md:text-sm text-white/70 leading-tight">Professional Document Signing</span>
+                  <span className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-[#A78BFA] leading-tight">
+                    eSignTap
+                  </span>
+                  <span className="text-[10px] sm:text-xs md:text-sm text-white/70 leading-tight font-medium tracking-wide">
+                    Digital Signature, Simplified
+                  </span>
                 </div>
               </div>
             </button>
@@ -119,9 +137,10 @@ export default function Header() {
             <nav className="hidden md:flex items-center">
               <button
                 onClick={() => handleNavigation(user ? '/billing' : '/pricing')}
-                className="px-2 md:px-3 py-1 md:py-2 rounded-lg text-xs md:text-sm font-medium transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
+                className="px-2 md:px-3 py-1 md:py-2 rounded-lg text-xs md:text-sm font-medium transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10 flex items-center space-x-1.5"
               >
-                {user ? 'Billing' : 'Pricing'}
+                <CreditCard className="w-4 h-4 md:w-4 md:h-4 mr-1 text-white/80" />
+                <span>{user ? 'Billing' : 'Pricing'}</span>
               </button>
             </nav>
 
@@ -219,6 +238,7 @@ export default function Header() {
                 }}
                 className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
               >
+                <CreditCard className="w-5 h-5 mr-2 text-white/80" />
                 <span className="font-medium text-sm">{user ? 'Billing' : 'Pricing'}</span>
               </button>
 

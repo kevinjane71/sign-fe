@@ -477,9 +477,18 @@ export default function Dashboard() {
 
   const handleConfirmDelete = async () => {
     if (pendingDeleteDoc) {
-      await handleDeleteDocument(pendingDeleteDoc.id)
+      // Optimistically remove the document from the UI
+      setDocuments(prevDocs => prevDocs.filter(doc => doc.id !== pendingDeleteDoc.id))
       setShowDeleteModal(false)
       setPendingDeleteDoc(null)
+      // Call the API in the background
+      try {
+        const response = await handleDeleteDocument(pendingDeleteDoc.id)
+        // (Optional) If you want to re-fetch, you can call fetchDocuments() here
+        // But do not re-add the doc if API fails, just show error
+      } catch (error) {
+        // Error toast is already handled in handleDeleteDocument
+      }
     }
   }
 
