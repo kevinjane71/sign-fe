@@ -26,7 +26,7 @@ const PrivacyPolicy = () => {
             <div className="flex items-start">
               <Shield className="h-6 w-6 text-blue-600 flex-shrink-0 mt-1" />
               <p className="ml-4 text-gray-700 leading-relaxed">
-                At MeetSynk, we take your privacy seriously. This Privacy Policy describes how we collect, use, and protect your personal information when you use our services. By using our website and services, you agree to the terms of this Privacy Policy.
+                At eSignTap, we take your privacy seriously. This Privacy Policy describes how we collect, use, and protect your personal information when you use our services. By using our website and services, you agree to the terms of this Privacy Policy.
               </p>
             </div>
           </div>

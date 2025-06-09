@@ -26,7 +26,7 @@ const TermsAndConditions = () => {
             <div className="flex items-start">
               <Building className="h-6 w-6 text-blue-600 flex-shrink-0 mt-1" />
               <p className="ml-4 text-gray-700 leading-relaxed">
-                For the purpose of these Terms and Conditions, The term "we", "us", "our" used anywhere on this page shall mean <span className="font-semibold">MeetSynk</span>, whose registered/operational office is b1-1101,sector 83 Gurgaon HARYANA 122004. "you", "your", "user", "visitor" shall mean any natural or legal person who is visiting our website and/or agreed to purchase from us.
+                For the purpose of these Terms and Conditions, The term "we", "us", "our" used anywhere on this page shall mean <span className="font-semibold">eSignTap</span>, whose registered/operational office is b1-1101,sector 83 Gurgaon HARYANA 122004. "you", "your", "user", "visitor" shall mean any natural or legal person who is visiting our website and/or agreed to purchase from us.
               </p>
             </div>
           </div>
@@ -105,7 +105,7 @@ const TermsAndConditions = () => {
                 <div className="h-2 w-2 bg-blue-600 rounded-full"></div>
               </div>
               <p className="ml-4 text-gray-700 leading-relaxed">
-                You may not create a link to our website from another website or document without MeetSynk's prior written consent.
+                You may not create a link to our website from another website or document without eSignTap's prior written consent.
               </p>
             </div>
 
@@ -149,7 +149,7 @@ const TermsAndConditions = () => {
         {/* Contact Information */}
         <div className="text-center text-gray-600">
           <p>For any questions regarding these Terms & Conditions, please contact:</p>
-          <p className="font-medium mt-2">support@meetsynk.com</p>
+          <p className="font-medium mt-2">info@eSignTap.com</p>
         </div>
       </div>
     </div>

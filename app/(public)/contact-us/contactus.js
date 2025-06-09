@@ -37,7 +37,7 @@ const ContactPage = () => {
           
           {/* Book Meeting Button */}
           <a
-            href="https://www.meetsynk.com/malik.vk07/contact-us"
+            href="https://www.eSignTap.com/malik.vk07/contact-us"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center px-8 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 shadow-lg hover:shadow-xl text-lg font-medium"
@@ -62,7 +62,7 @@ const ContactPage = () => {
                   <h3 className="text-lg font-medium text-gray-900">Quick Schedule</h3>
                   <p className="text-gray-600 mb-2">Book a meeting directly with our team</p>
                   <a
-                    href="https://www.meetsynk.com/malik.vk07/contact-us"
+                    href="https://www.eSignTap.com/malik.vk07/contact-us"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:text-blue-800 font-medium"
@@ -80,7 +80,7 @@ const ContactPage = () => {
                   </div>
                   <div className="ml-4">
                     <h3 className="text-lg font-medium text-gray-900">Email</h3>
-                    <p className="text-gray-600">admin@meetsynk.com</p>
+                    <p className="text-gray-600">info@eSignTap.com</p>
                     
                   </div>
                 </div>
@@ -207,7 +207,7 @@ const ContactPage = () => {
                   </button>
                   
                   <a
-                    href="https://www.meetsynk.com/malik.vk07/contact-us"
+                    href="https://www.eSignTap.com/malik.vk07/contact-us"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center text-blue-600 hover:text-blue-800 font-medium"
@@ -240,7 +240,7 @@ const ContactPage = () => {
             </button>
             
             <a
-              href="https://www.meetsynk.com/malik.vk07/contact-us"
+              href="https://www.eSignTap.com/malik.vk07/contact-us"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center px-6 py-3 border-2 border-blue-600 bg-blue-600 text-white rounded-xl hover:bg-blue-700 hover:border-blue-700 transition-colors duration-200"

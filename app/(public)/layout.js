@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ["latin"] });
 // Create a separate metadata.ts file if needed
 export async function generateMetadata() {
   return {
-    title: "MeetSynk: Scheduling the meeting and event fast and AI based",
+    title: "eSignTap: e signature for document",
     icons: {
       icon: '/meet.svg',
       shortcut: '/shortcut-icon.png',

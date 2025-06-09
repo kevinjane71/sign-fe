@@ -24,7 +24,7 @@ const RefundPolicy = () => {
           {/* Introduction */}
           <div className="mb-8">
             <p className="text-gray-700 leading-relaxed">
-              MeetSynk believes in helping its customers as far as possible, and has therefore a liberal cancellation policy. Under this policy:
+            eSignTap believes in helping its customers as far as possible, and has therefore a liberal cancellation policy. Under this policy:
             </p>
           </div>
 
@@ -44,7 +44,7 @@ const RefundPolicy = () => {
                 <div className="h-2 w-2 bg-blue-600 rounded-full"></div>
               </div>
               <p className="ml-4 text-gray-700 leading-relaxed">
-                MeetSynk does not accept cancellation requests for perishable items like flowers, eatables etc. However, refund/replacement can be made if the customer establishes that the quality of product delivered is not good.
+              eSignTap does not accept cancellation requests for perishable items like flowers, eatables etc. However, refund/replacement can be made if the customer establishes that the quality of product delivered is not good.
               </p>
             </div>
 
@@ -80,7 +80,7 @@ const RefundPolicy = () => {
                 <div className="h-2 w-2 bg-blue-600 rounded-full"></div>
               </div>
               <p className="ml-4 text-gray-700 leading-relaxed">
-                In case of any Refunds approved by the MeetSynk, it'll take 1-2 days for the refund to be processed to the end customer.
+                In case of any Refunds approved by the eSignTap, it'll take 1-2 days for the refund to be processed to the end customer.
               </p>
             </div>
           </div>
