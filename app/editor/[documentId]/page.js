@@ -2422,16 +2422,22 @@ export default function EditDocumentEditor() {
         setAllFields(fieldsData)
         // If URL has step parameter, ensure it's valid
         const urlStep = searchParams.get('step')
-        if (urlStep) {
-          const step = parseInt(urlStep)
-          if (step >= 1 && step <= 2) {
-            setCurrentStep(step)
-          } else {
-            // Invalid step, redirect to step 1
-            const newSearchParams = new URLSearchParams(searchParams)
-            newSearchParams.set('step', '1')
-            router.replace(`${window.location.pathname}?${newSearchParams.toString()}`)
-            setCurrentStep(1)
+        let step = 1;
+        if (urlStep && !isNaN(parseInt(urlStep))) {
+          step = parseInt(urlStep);
+        }
+        if (step < 1 || step > 2) {
+          // Only update if not already at step=1
+          if (searchParams.get('step') !== '1') {
+            const newSearchParams = new URLSearchParams(searchParams);
+            newSearchParams.set('step', '1');
+            router.replace(`${window.location.pathname}?${newSearchParams.toString()}`);
+          }
+          if (currentStep !== 1) setCurrentStep(1);
+        } else {
+          // Only update state if different
+          if (currentStep !== step) {
+            setCurrentStep(step);
           }
         }
         toast.success(`Loaded ${loadedDocuments.length} document(s)`)
