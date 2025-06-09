@@ -166,7 +166,7 @@ export default function HomePage() {
         <div className="absolute top-1/2 left-1/2 w-32 sm:w-40 h-32 sm:h-40 bg-white/30 rounded-full blur-2xl z-0" style={{transform:'translate(-50%,-50%)'}} />
         <div className="relative z-10 max-w-2xl mx-auto text-center">
           <div className="inline-block bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold mb-4 shadow-sm">
-            Save up to 70% compared to DocuSign
+            Save up to 40% compared to DocuSign
           </div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-gray-900 via-fuchsia-700 to-blue-900 bg-clip-text text-transparent drop-shadow-sm mb-4 tracking-tight leading-tight">
             The Most Affordable DocuSign Alternative
@@ -261,7 +261,7 @@ export default function HomePage() {
               <ul className="space-y-4">
                 <li className="flex items-center">
                   <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span className="text-gray-700">Up to 70% more affordable</span>
+                  <span className="text-gray-700">Up to 40% more affordable</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0" />

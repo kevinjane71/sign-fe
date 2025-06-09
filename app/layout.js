@@ -9,11 +9,11 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
   title: 'eSignTap - Most Affordable DocuSign Alternative | Professional Document Signing',
-  description: 'The most affordable DocuSign alternative for professional document signing. Create, share, and sign documents with ease. Save up to 70% compared to DocuSign with our competitive pricing.',
+  description: 'The most affordable DocuSign alternative for professional document signing. Create, share, and sign documents with ease. Save up to 40% compared to DocuSign with our competitive pricing.',
   keywords: 'DocuSign alternative, affordable document signing, electronic signature, digital signature, document signing software, e-signature, professional document signing, cost-effective DocuSign alternative',
   openGraph: {
     title: 'eSignTap - Most Affordable DocuSign Alternative | Professional Document Signing',
-    description: 'The most affordable DocuSign alternative for professional document signing. Create, share, and sign documents with ease. Save up to 70% compared to DocuSign.',
+    description: 'The most affordable DocuSign alternative for professional document signing. Create, share, and sign documents with ease. Save up to 40% compared to DocuSign.',
     url: 'https://esigntap.com',
     siteName: 'eSignTap',
     images: [
