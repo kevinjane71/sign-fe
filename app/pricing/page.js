@@ -7,68 +7,134 @@ import { Check, Zap, Users, Shield, Star, ArrowRight, FileText, Clock, Headphone
 export default function PricingPage() {
   const router = useRouter()
   const [isAnnual, setIsAnnual] = useState(true)
+  const [currency, setCurrency] = useState('INR')
 
-  const plans = [
-    {
-      name: "Free",
-      description: "Perfect for trying out eSignTap",
-      price: { monthly: 0, annual: 0 },
-      features: [
-        "🎁 ALL PRO FEATURES until July 30th!",
-        "50 documents per month (limited time)",
-        "Unlimited signers (limited time)",
-        "All templates & forms (limited time)",
-        "Priority email support (limited time)",
-        "Custom branding (limited time)",
-        "After July 30th: 3 docs/month",
-        "Basic support (permanent)"
-      ],
-      limitations: [],
-      buttonText: "Get Free Pro Access",
-      buttonStyle: "bg-green-600 text-white hover:bg-green-700 border-2 border-green-600",
-      popular: true
-    },
-    {
-      name: "Pro",
-      description: "Great for individuals & small teams",
-      price: { monthly: 5, annual: 4 },
-      features: [
-        "50 documents per month",
-        "Unlimited signers",
-        "All templates & forms",
-        "Advanced workflows",
-        "Custom branding",
-        "Priority email support",
-        "1-year document storage",
-        "Bulk sending",
-        "Document analytics"
-      ],
-      buttonText: "Start Pro Plan",
-      buttonStyle: "border-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50",
-      popular: false
-    },
-    {
-      name: "Business",
-      description: "Perfect for growing businesses",
-      price: { monthly: 25, annual: 20 },
-      features: [
-        "500 documents per month",
-        "Unlimited signers",
-        "Advanced integrations",
-        "Team management",
-        "Advanced security",
-        "Phone & chat support",
-        "Unlimited storage",
-        "API access",
-        "White-label options",
-        "Advanced analytics",
-        "Compliance features"
-      ],
-      buttonText: "Start Business Trial",
-      buttonStyle: "border-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50",
-      popular: false
-    }
-  ]
+  const planData = {
+    INR: [
+      {
+        name: "Free",
+        description: "Perfect for trying out eSignTap",
+        price: { monthly: 0, annual: 0 },
+        features: [
+          "🎁 ALL PRO FEATURES until July 30th!",
+          "50 documents per month (limited time)",
+          "Unlimited signers (limited time)",
+          "All templates & forms (limited time)",
+          "Priority email support (limited time)",
+          "Custom branding (limited time)",
+          "After July 30th: 3 docs/month",
+          "Basic support (permanent)"
+        ],
+        limitations: [],
+        buttonText: "Get Free Pro Access",
+        buttonStyle: "bg-green-600 text-white hover:bg-green-700 border-2 border-green-600",
+        popular: true
+      },
+      {
+        name: "Pro",
+        description: "Great for individuals & small teams",
+        price: { monthly: 49, annual: 49 },
+        features: [
+          "100 documents per month",
+          "Unlimited signers",
+          "All templates & forms",
+          "Advanced workflows",
+          "Custom branding",
+          "Priority email support",
+          "6-month document storage",
+          "Bulk sending",
+          "Document analytics"
+        ],
+        buttonText: "Start Pro Plan",
+        buttonStyle: "border-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50",
+        popular: false
+      },
+      {
+        name: "Business",
+        description: "Perfect for growing businesses",
+        price: { monthly: 200, annual: 200 },
+        features: [
+          "500 documents per month",
+          "Unlimited signers",
+          "Advanced integrations",
+          "Team management",
+          "Advanced security",
+          "chat support",
+          "20GB storage",
+          "API access",
+          "White-label options",
+          "Advanced analytics",
+          "Compliance features"
+        ],
+        buttonText: "Start Business Trial",
+        buttonStyle: "border-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50",
+        popular: false
+      }
+    ],
+    USD: [
+      {
+        name: "Free",
+        description: "Perfect for trying out eSignTap",
+        price: { monthly: 0, annual: 0 },
+        features: [
+          "🎁 ALL PRO FEATURES until July 30th!",
+          "50 documents per month (limited time)",
+          "Unlimited signers (limited time)",
+          "All templates & forms (limited time)",
+          "Priority email support (limited time)",
+          "Custom branding (limited time)",
+          "After July 30th: 3 docs/month",
+          "Basic support (permanent)"
+        ],
+        limitations: [],
+        buttonText: "Get Free Pro Access",
+        buttonStyle: "bg-green-600 text-white hover:bg-green-700 border-2 border-green-600",
+        popular: true
+      },
+      {
+        name: "Pro",
+        description: "Great for individuals & small teams",
+        price: { monthly: 4, annual: 4 },
+        features: [
+          "100 documents per month",
+          "Unlimited signers",
+          "All templates & forms",
+          "Advanced workflows",
+          "Custom branding",
+          "Priority email support",
+          "1-year document storage",
+          "Bulk sending",
+          "Document analytics"
+        ],
+        buttonText: "Start Pro Plan",
+        buttonStyle: "border-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50",
+        popular: false
+      },
+      {
+        name: "Business",
+        description: "Perfect for growing businesses",
+        price: { monthly: 20, annual: 20 },
+        features: [
+          "500 documents per month",
+          "Unlimited signers",
+          "Advanced integrations",
+          "Team management",
+          "Advanced security",
+          "Phone & chat support",
+          "Unlimited storage",
+          "API access",
+          "White-label options",
+          "Advanced analytics",
+          "Compliance features"
+        ],
+        buttonText: "Start Business Trial",
+        buttonStyle: "border-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50",
+        popular: false
+      }
+    ]
+  }
+
+  const plans = planData[currency]
 
   const handlePlanSelect = (plan) => {
     if (plan.name === "Free") {
@@ -136,6 +202,22 @@ export default function PricingPage() {
       {/* Pricing Cards */}
       <div className="py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-0">Subscription Plans</h2>
+            {/* Currency Toggle */}
+            <div className="flex items-center space-x-2">
+              <span className={`text-sm font-medium ${currency === 'INR' ? 'text-fuchsia-600' : 'text-gray-500'}`}>INR</span>
+              <button
+                onClick={() => setCurrency(currency === 'INR' ? 'USD' : 'INR')}
+                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none ${currency === 'INR' ? 'bg-fuchsia-500' : 'bg-gray-300'}`}
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${currency === 'INR' ? 'translate-x-1' : 'translate-x-6'}`}
+                />
+              </button>
+              <span className={`text-sm font-medium ${currency === 'USD' ? 'text-fuchsia-600' : 'text-gray-500'}`}>USD</span>
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
             {plans.map((plan, index) => (
               <div
@@ -164,7 +246,7 @@ export default function PricingPage() {
                   
                   <div className="mb-4">
                     <span className={`text-4xl font-bold ${plan.popular ? 'text-white' : 'text-gray-900'}`}>
-                      ${isAnnual ? plan.price.annual : plan.price.monthly}
+                      {currency === 'INR' ? '₹' : '$'}{isAnnual ? plan.price.annual : plan.price.monthly}
                     </span>
                     <span className={`text-base ${plan.popular ? 'text-green-100' : 'text-gray-600'}`}>
                       /month
@@ -173,7 +255,7 @@ export default function PricingPage() {
 
                   {isAnnual && plan.price.annual < plan.price.monthly && (
                     <p className={`text-xs ${plan.popular ? 'text-green-100' : 'text-gray-500'}`}>
-                      Billed annually (${plan.price.annual * 12}/year)
+                      Billed annually ({currency === 'INR' ? '₹' : '$'}{plan.price.annual * 12}/year)
                     </p>
                   )}
                 </div>
