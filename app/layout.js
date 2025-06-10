@@ -30,7 +30,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'eSignTap - Most Affordable DocuSign Alternative',
-    description: 'The most affordable DocuSign alternative for professional document signing. Save up to 70% compared to DocuSign.',
+    description: 'The most affordable DocuSign alternative for professional document signing. Save up to 40% compared to DocuSign.',
     images: ['/og-image.jpg'],
   },
   robots: {

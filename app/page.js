@@ -245,7 +245,7 @@ export default function HomePage() {
             <Star className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
           </div>
           <span className="text-yellow-700 font-bold text-base sm:text-lg">Affordable Pricing</span>
-          <span className="text-xs text-gray-500 mt-1 text-center">Save up to 70% vs. DocuSign.</span>
+          <span className="text-xs text-gray-500 mt-1 text-center">Save up to 40% vs. DocuSign.</span>
         </div>
       </section>
 
