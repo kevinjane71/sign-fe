@@ -81,6 +81,7 @@ export default function Dashboard() {
   const [isDuplicating, setIsDuplicating] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [pendingDeleteDoc, setPendingDeleteDoc] = useState(null)
+  const [downloadingDocId, setDownloadingDocId] = useState(null)
   const dropdownRef = useRef(null)
   const fileInputRef = useRef(null)
 
@@ -496,6 +497,36 @@ export default function Dashboard() {
     setShowDeleteModal(false)
     setPendingDeleteDoc(null)
   }
+
+  // Download handler
+  const handleDownloadDocument = async (doc) => {
+    setDownloadingDocId(doc.id);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'}/api/documents/${doc.id}/download`);
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${doc.title || doc.originalName || 'signed-document'}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        let errorMsg = 'Failed to download document';
+        try {
+          const errJson = await response.json();
+          errorMsg = errJson.error || errorMsg;
+        } catch {}
+        toast.error(errorMsg);
+      }
+    } catch (err) {
+      toast.error('Failed to download document. Please try again.');
+    } finally {
+      setDownloadingDocId(null);
+    }
+  };
 
   // Show loading state while checking authentication
   if (!user) {
@@ -991,6 +1022,19 @@ export default function Dashboard() {
                                     <Trash2 className="w-3 h-3 mr-1" />
                                     Delete
                                   </button>
+                                  <button
+                                    onClick={() => handleDownloadDocument(doc)}
+                                    disabled={doc.status !== 'completed' || downloadingDocId === doc.id}
+                                    className={`inline-flex items-center px-3 py-1.5 border border-green-200 text-xs font-medium rounded text-green-600 bg-white hover:bg-green-50 hover:scale-105 transition-all duration-200 ${doc.status !== 'completed' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    title="Download Signed Document"
+                                  >
+                                    {downloadingDocId === doc.id ? (
+                                      <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                                    ) : (
+                                      <Download className="w-3 h-3 mr-1" />
+                                    )}
+                                    Download
+                                  </button>
                                 </div>
                               </td>
                             </tr>
@@ -1062,6 +1106,18 @@ export default function Dashboard() {
                               >
                                 <Trash2 className="w-3 h-3 mr-1" />
                                 Delete
+                              </button>
+                              <button
+                                onClick={() => handleDownloadDocument(doc)}
+                                disabled={doc.status !== 'completed' || downloadingDocId === doc.id}
+                                className={`flex-1 inline-flex items-center justify-center px-3 py-2 border border-green-200 text-xs font-medium rounded text-green-600 bg-white hover:bg-green-50 transition-colors ${doc.status !== 'completed' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                              >
+                                {downloadingDocId === doc.id ? (
+                                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                                ) : (
+                                  <Download className="w-3 h-3 mr-1" />
+                                )}
+                                Download
                               </button>
                             </div>
                           </div>
