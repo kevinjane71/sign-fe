@@ -18,7 +18,8 @@ import {
   X,
   Check,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ChevronDown
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import SignatureModal from '../../components/SignatureModal'
@@ -560,19 +561,41 @@ const SigningFieldComponent = ({
           autoFocus={false}
         />
       ) : field.type === 'dropdown' && field.options ? (
-        <select
-          ref={fieldRef}
-          value={localValue}
-          onChange={(e) => handleChange(e.target.value)}
-          onBlur={handleBlur}
-          className="w-full h-full bg-transparent border-none outline-none text-gray-700"
-          style={{ fontSize: Math.max(16, fontSize), padding: `${paddingY}px ${paddingX}px`, color: '#374151' }}
-        >
-          <option value="" disabled>{field.placeholder || 'Select an option...'}</option>
-          {field.options.map(opt => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
+        <div className="relative w-full h-full">
+          <select
+            ref={fieldRef}
+            value={localValue}
+            onChange={(e) => handleChange(e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+            onFocus={() => handleFieldClick()}
+            className="w-full h-full bg-transparent border-none outline-none text-gray-700 appearance-none cursor-pointer pr-8"
+            style={{ 
+              fontSize: `${fontSize}px`,
+              padding: '2px 4px'
+            }}
+          >
+            <option value="">Select...</option>
+            {field.options.map((option) => {
+              if (typeof option === 'string') {
+                return (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                );
+              } else if (typeof option === 'object' && option !== null) {
+                return (
+                  <option key={option.value} value={option.value}>
+                    {option.label ?? option.value}
+                  </option>
+                );
+              }
+              return null;
+            })}
+          </select>
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+            <ChevronDown className="w-4 h-4 text-gray-500" />
+          </div>
+        </div>
       ) : field.type === FIELD_TYPES.CHECKBOX ? (
         <input
           ref={fieldRef}
@@ -1031,14 +1054,14 @@ export default function SigningPage() {
       <div className="bg-white border-b border-gray-200 px-4 py-3">
         <div className="max-w-7xl mx-auto">
           {/* Mobile Layout */}
-          <div className="block md:hidden space-y-3">
-            {/* Top row - Document title */}
-            <div className="flex items-center justify-between">
-              <h1 className="text-base font-semibold text-gray-900 truncate flex-1 mr-2">
+          <div className="block md:hidden">
+            <div className="flex items-center justify-between gap-2">
+              {/* Document title with ellipsis */}
+              <h1 className="text-base font-semibold text-gray-900 truncate flex-1">
                 {documentData?.title || 'Document Signing'}
               </h1>
               {/* Zoom Controls */}
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-1 shrink-0">
                 <button
                   onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
                   className="p-1.5 text-gray-600 hover:text-gray-900 rounded-md hover:bg-gray-100"
@@ -1055,21 +1078,12 @@ export default function SigningPage() {
                   <ZoomIn className="w-4 h-4" />
                 </button>
               </div>
-            </div>
-
-            {/* Second row - Signer info */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <User className="w-4 h-4" />
-                <span className="truncate">{signerEmail}</span>
-              </div>
-              
               {/* Submit Button - Mobile */}
               {!isViewer && (
                 <button
                   onClick={handleSubmitSignature}
                   disabled={isSubmitting}
-                  className={`px-4 py-2 rounded-md font-medium text-sm transition-colors ${
+                  className={`px-3 py-1.5 rounded-md font-medium text-sm transition-colors shrink-0 ${
                     isSubmitting
                       ? 'bg-blue-400 text-white cursor-not-allowed'
                       : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -1081,59 +1095,43 @@ export default function SigningPage() {
                       <span>Signing...</span>
                     </div>
                   ) : (
-                    'Complete Signing'
+                    <div className="flex items-center space-x-1">
+                      <Check className="w-3 h-3" />
+                      <span>Sign</span>
+                    </div>
                   )}
                 </button>
               )}
             </div>
-
-            {/* Progress indicator for mobile */}
-            {getAllFields().length > 0 && (
-              <div className="flex items-center space-x-2">
-                <div className="flex-1 bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ 
-                      width: `${(Object.keys(fieldValues).filter(key => fieldValues[key]).length / getAllFields().length) * 100}%` 
-                    }}
-                  ></div>
-                </div>
-                <span className="text-xs text-gray-600">
-                  {Object.keys(fieldValues).filter(key => fieldValues[key]).length}/{getAllFields().length}
-                </span>
-              </div>
-            )}
+            {/* Signer info - Below title */}
+            {/* Removed signer email from mobile */}
           </div>
 
           {/* Desktop Layout */}
           <div className="hidden md:flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center">
               <h1 className="text-lg font-semibold text-gray-900">
                 {documentData?.title || 'Document Signing'}
               </h1>
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <User className="w-4 h-4" />
-                <span>{signerEmail}</span>
-              </div>
             </div>
-
+            
             <div className="flex items-center space-x-4">
               {/* Zoom Controls */}
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
-                  className="p-2 text-gray-600 hover:text-gray-900 rounded-md hover:bg-gray-100"
+                  className="p-1.5 text-gray-600 hover:text-gray-900 rounded-md hover:bg-gray-100"
                 >
-                  <ZoomOut className="w-4 h-4" />
+                  <ZoomOut className="w-5 h-5" />
                 </button>
                 <span className="text-sm text-gray-600 min-w-[3rem] text-center">
                   {Math.round(zoom * 100)}%
                 </span>
                 <button
                   onClick={() => setZoom(Math.min(2, zoom + 0.1))}
-                  className="p-2 text-gray-600 hover:text-gray-900 rounded-md hover:bg-gray-100"
+                  className="p-1.5 text-gray-600 hover:text-gray-900 rounded-md hover:bg-gray-100"
                 >
-                  <ZoomIn className="w-4 h-4" />
+                  <ZoomIn className="w-5 h-5" />
                 </button>
               </div>
 
@@ -1142,7 +1140,7 @@ export default function SigningPage() {
                 <button
                   onClick={handleSubmitSignature}
                   disabled={isSubmitting}
-                  className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-md font-medium text-sm transition-colors ${
                     isSubmitting
                       ? 'bg-blue-400 text-white cursor-not-allowed'
                       : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -1151,10 +1149,13 @@ export default function SigningPage() {
                   {isSubmitting ? (
                     <div className="flex items-center space-x-2">
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Signing...</span>
+                      <span>Signing Document...</span>
                     </div>
                   ) : (
-                    'Complete Signing'
+                    <div className="flex items-center space-x-2">
+                      <Check className="w-4 h-4" />
+                      <span>Complete Signing</span>
+                    </div>
                   )}
                 </button>
               )}

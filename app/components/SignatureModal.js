@@ -247,13 +247,14 @@ const SignatureModal = ({ isOpen = true, onClose, onSave, maxSizeMB = 20 }) => {
                   ref={canvasRef}
                   className="w-full border border-gray-200 rounded bg-white cursor-crosshair"
                   style={{ maxHeight: '200px', touchAction: 'none' }}
-                  width={window.innerWidth < 500 ? 300 : 400}
-                  height={window.innerWidth < 500 ? 150 : 200}
+                  width={typeof window !== 'undefined' && window.innerWidth < 500 ? 300 : 400}
+                  height={typeof window !== 'undefined' && window.innerWidth < 500 ? 150 : 200}
                   onMouseDown={startDrawing}
                   onMouseMove={draw}
                   onMouseUp={stopDrawing}
                   onMouseLeave={stopDrawing}
                   onTouchStart={startDrawing}
+                  onTouchMove={draw}
                   onTouchEnd={stopDrawing}
                 />
                 <p className="text-sm text-gray-500 mt-2 text-center">
