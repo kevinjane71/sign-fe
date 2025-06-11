@@ -907,7 +907,7 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
 }
 
 // Document Viewer Component - Modified to show all documents in continuous scroll
-const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentClick, signers, onDocumentDrop, onDocumentDragOver, onDocumentTouchEnd, draggingFieldType, isDraggingFromPalette, dragPreviewPosition, fitToWidth, setFitToWidth }) => {
+const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentClick, signers, onDocumentDrop, onDocumentDragOver, onDocumentTouchEnd, draggingFieldType, isDraggingFromPalette, dragPreviewPosition, fitToWidth, setFitToWidth, setSelectedField, selectedFieldType, handleDocumentClick }) => {
   const [allPages, setAllPages] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -1090,7 +1090,13 @@ const DocumentViewer = ({ documents, zoom, onZoomChange, children, onDocumentCli
     <div 
       ref={containerRef}
       className="w-full h-full overflow-auto bg-gray-100"
-      onClick={onDocumentClick}
+      onClick={(e) => {
+        if (selectedFieldType) {
+          handleDocumentClick(e);
+        } else {
+          setSelectedField(null);
+        }
+      }}
       onDrop={onDocumentDrop}
       onDragOver={onDocumentDragOver}
       onTouchEnd={onDocumentTouchEnd}
@@ -1283,8 +1289,8 @@ const FieldComponent = ({
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
       onClick={(e) => {
-        e.stopPropagation()
-        onSelect(field.id)
+        e.stopPropagation();
+        onSelect(field.id);
       }}
     >
       {/* Field Content */}
@@ -3482,7 +3488,9 @@ export default function EditDocumentEditor() {
                   onZoomChange={setZoom}
                   fitToWidth={fitToWidth}
                   setFitToWidth={setFitToWidth}
-                  onDocumentClick={handleDocumentClick}
+                  setSelectedField={setSelectedField}
+                  selectedFieldType={selectedFieldType}
+                  handleDocumentClick={handleDocumentClick}
                   signers={documentData?.signers || []}
                   onDocumentDrop={handleDocumentDrop}
                   onDocumentDragOver={handleDocumentDragOver}
