@@ -284,22 +284,21 @@ export default function YourSignPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between h-14 sm:h-16 py-2 sm:py-0">
+            <div className="flex items-center w-full sm:w-auto">
               <div className="flex-shrink-0">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                  <PenTool className="w-6 h-6 text-white" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <PenTool className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
               </div>
-              <div className="ml-4">
-                <h1 className="text-xl font-bold text-gray-900">Your Signatures</h1>
-                <p className="text-sm text-gray-500">Manage your digital signatures and stamps</p>
+              <div className="ml-3 sm:ml-4">
+                <h1 className="text-base sm:text-xl font-bold text-gray-900 leading-tight">Your Signatures</h1>
+                <p className="text-xs sm:text-sm text-gray-500 leading-tight">Manage your digital signatures and stamps</p>
               </div>
             </div>
-            
             {/* Mobile Menu Button */}
-            <div className="md:hidden">
+            <div className="sm:hidden mt-2 w-full flex justify-end">
               <button className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100">
                 <MoreVertical className="w-5 h-5" />
               </button>
@@ -308,12 +307,12 @@ export default function YourSignPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
         {/* Tab Navigation */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-4 sm:mb-8">
           <div className="flex">
             <button
-              className={`flex-1 px-6 py-4 text-center font-semibold transition-all duration-200 ${
+              className={`flex-1 px-2 py-2 sm:px-6 sm:py-4 text-center font-semibold text-xs sm:text-base transition-all duration-200 ${
                 tab === "sign" 
                   ? "bg-blue-600 text-white" 
                   : "bg-gray-50 text-gray-700 hover:bg-gray-100"
@@ -321,15 +320,15 @@ export default function YourSignPage() {
               onClick={() => { setTab("sign"); setEditItem(null); setSelectedItems([]); }}
             >
               <div className="flex items-center justify-center">
-                <PenTool className="w-5 h-5 mr-2" />
+                <PenTool className="w-3 h-3 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
                 <span>Signatures</span>
-                <span className="ml-2 px-2 py-1 text-xs bg-black bg-opacity-20 rounded-full">
+                <span className="ml-1 sm:ml-2 px-1 sm:px-2 py-0.5 sm:py-1 text-xs bg-black bg-opacity-20 rounded-full">
                   {tab === "sign" ? items.length : 0}
                 </span>
               </div>
             </button>
             <button
-              className={`flex-1 px-6 py-4 text-center font-semibold transition-all duration-200 ${
+              className={`flex-1 px-2 py-2 sm:px-6 sm:py-4 text-center font-semibold text-xs sm:text-base transition-all duration-200 ${
                 tab === "stamp" 
                   ? "bg-blue-600 text-white" 
                   : "bg-gray-50 text-gray-700 hover:bg-gray-100"
@@ -337,9 +336,9 @@ export default function YourSignPage() {
               onClick={() => { setTab("stamp"); setEditItem(null); setSelectedItems([]); }}
             >
               <div className="flex items-center justify-center">
-                <Stamp className="w-5 h-5 mr-2" />
+                <Stamp className="w-3 h-3 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
                 <span>Stamps</span>
-                <span className="ml-2 px-2 py-1 text-xs bg-black bg-opacity-20 rounded-full">
+                <span className="ml-1 sm:ml-2 px-1 sm:px-2 py-0.5 sm:py-1 text-xs bg-black bg-opacity-20 rounded-full">
                   {tab === "stamp" ? items.length : 0}
                 </span>
               </div>
@@ -348,17 +347,16 @@ export default function YourSignPage() {
         </div>
 
         {/* Controls Bar */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div className="flex items-center space-x-4">
-            <div className="text-sm text-gray-600">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4 mb-4 sm:mb-8">
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <div className="text-xs sm:text-sm text-gray-600">
               <span className="font-medium">{items.length}</span> of <span className="font-medium">{MAX_SIGNS}</span> {tab === "sign" ? "signatures" : "stamps"}
             </div>
-            <div className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+            <div className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
               Max size: 30MB
             </div>
           </div>
-          
-          <div className="flex items-center space-x-3 w-full sm:w-auto">
+          <div className="flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto mt-2 sm:mt-0">
             {/* View Mode Toggle */}
             <div className="hidden sm:flex bg-gray-100 rounded-lg p-1">
               <button
@@ -380,21 +378,23 @@ export default function YourSignPage() {
             </div>
 
             {/* Add Button */}
-            <button
-              className="flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              onClick={() => { setShowModal(true); setEditItem(null); }}
-              disabled={items.length >= MAX_SIGNS || loading}
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              <span className="hidden sm:inline">Add {tab === "sign" ? "Signature" : "Stamp"}</span>
-              <span className="sm:hidden">Add</span>
-            </button>
+            <div className="w-full sm:w-auto flex justify-end sm:justify-start">
+              <button
+                className="flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-sm sm:text-base rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none w-auto sm:w-auto"
+                onClick={() => { setShowModal(true); setEditItem(null); }}
+                disabled={items.length >= MAX_SIGNS || loading}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Add {tab === "sign" ? "Signature" : "Stamp"}</span>
+                <span className="sm:hidden">Add</span>
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+          <div className="bg-red-50 border border-red-200 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
@@ -402,7 +402,7 @@ export default function YourSignPage() {
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-red-800 font-medium">{error}</p>
+                <p className="text-red-800 font-medium text-xs sm:text-sm">{error}</p>
               </div>
             </div>
           </div>
@@ -410,94 +410,88 @@ export default function YourSignPage() {
 
         {/* Content */}
         {loading ? (
-          <div className="flex justify-center items-center py-20">
+          <div className="flex justify-center items-center py-12 sm:py-20">
             <div className="text-center">
-              <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-              <p className="text-gray-600">Loading {tab === "sign" ? "signatures" : "stamps"}...</p>
+              <Loader2 className="w-8 h-8 sm:w-12 sm:h-12 animate-spin text-blue-600 mx-auto mb-2 sm:mb-4" />
+              <p className="text-gray-600 text-sm sm:text-base">Loading {tab === "sign" ? "signatures" : "stamps"}...</p>
             </div>
           </div>
         ) : items.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              {tab === "sign" ? <PenTool className="w-12 h-12 text-gray-400" /> : <Stamp className="w-12 h-12 text-gray-400" />}
+          <div className="text-center py-12 sm:py-20">
+            <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              {tab === "sign" ? <PenTool className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400" /> : <Stamp className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400" />}
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No {tab === "sign" ? "signatures" : "stamps"} yet</h3>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1 sm:mb-2">No {tab === "sign" ? "signatures" : "stamps"} yet</h3>
+            <p className="text-gray-600 text-xs sm:text-base mb-4 sm:mb-8 max-w-md mx-auto">
               Create your first {tab === "sign" ? "digital signature" : "stamp"} to get started. You can draw, type, or upload an image.
             </p>
             <button
               onClick={() => { setShowModal(true); setEditItem(null); }}
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
+              className="inline-flex items-center px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-sm sm:text-base rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
             >
-              <Plus className="w-5 h-5 mr-2" />
+              <Plus className="w-4 h-4 mr-2" />
               Create {tab === "sign" ? "Signature" : "Stamp"}
             </button>
           </div>
         ) : (
-          <div className={`grid gap-6 ${
+          <div className={`grid gap-4 sm:gap-6 ${
             viewMode === "grid" 
-              ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
+              ? "grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4" 
               : "grid-cols-1"
           }`}>
             {items.map((item, index) => (
               <div 
                 key={item.id} 
-                className={`group bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${
-                  viewMode === "list" ? "flex items-center p-4" : "p-6"
-                }`}
+                className={`group bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${viewMode === "list" ? "flex items-center p-2 sm:p-4" : "p-3 sm:p-6"} w-full max-w-xs mx-auto sm:max-w-none`}
               >
                 {/* Image Container */}
-                <div className={`${viewMode === "list" ? "flex-shrink-0 mr-4" : "mb-4"}`}>
-                  <div className={`bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden ${
-                    viewMode === "list" ? "w-20 h-12" : "w-full h-32"
-                  }`}>
-                    <SecureImage
-                      src={item.imageUrl}
-                      alt={item.alias}
-                      className="max-w-full max-h-full object-contain"
-                      style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}
-                    />
-                  </div>
+                <div className={`${viewMode === "list" ? "flex-shrink-0 mr-2 sm:mr-4" : "mb-2 sm:mb-4"}`} style={{ minWidth: 64, minHeight: 40 }}>
+                  <SecureImage
+                    src={item.imageUrl}
+                    alt={item.alias}
+                    className="max-w-[96px] max-h-[48px] sm:max-w-full sm:max-h-full object-contain"
+                    style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}
+                  />
                 </div>
 
                 {/* Content */}
                 <div className={`${viewMode === "list" ? "flex-1 min-w-0" : ""}`}>
-                  <div className={`${viewMode === "list" ? "flex items-center justify-between" : ""}`}>
-                    <div className={`${viewMode === "list" ? "min-w-0 flex-1" : "text-center mb-4"}`}>
-                      <h3 className="font-semibold text-gray-900 truncate text-lg">
+                  <div className={`${viewMode === "list" ? "flex items-center justify-between" : "text-center mb-2 sm:mb-4"}`}>
+                    <div className={`${viewMode === "list" ? "min-w-0 flex-1" : ""}`}>
+                      <h3 className="font-semibold text-gray-900 truncate text-base sm:text-lg">
                         {item.alias}
                       </h3>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
                         {tab === "sign" ? "Digital Signature" : "Stamp"} #{index + 1}
                       </p>
                     </div>
 
                     {/* Actions */}
-                    <div className={`flex items-center space-x-2 ${viewMode === "list" ? "flex-shrink-0 ml-4" : "justify-center"}`}>
+                    <div className={`flex items-center space-x-1 sm:space-x-2 ${viewMode === "list" ? "flex-shrink-0 ml-2 sm:ml-4" : "justify-center"}`}>
                       <button
                         onClick={() => handleDownload(item.imageUrl, item.alias)}
-                        className="p-2 bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-600 rounded-lg transition-colors"
+                        className="p-1 sm:p-2 bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-600 rounded-lg transition-colors"
                         title="Download"
                       >
                         <Download className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleCopy(item.imageUrl)}
-                        className="p-2 bg-gray-100 hover:bg-green-100 text-gray-600 hover:text-green-600 rounded-lg transition-colors"
+                        className="p-1 sm:p-2 bg-gray-100 hover:bg-green-100 text-gray-600 hover:text-green-600 rounded-lg transition-colors"
                         title="Copy URL"
                       >
                         <Copy className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => { setEditItem(item); setShowModal(true); }}
-                        className="p-2 bg-gray-100 hover:bg-yellow-100 text-gray-600 hover:text-yellow-600 rounded-lg transition-colors"
+                        className="p-1 sm:p-2 bg-gray-100 hover:bg-yellow-100 text-gray-600 hover:text-yellow-600 rounded-lg transition-colors"
                         title="Edit"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(item.id)}
-                        className="p-2 bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-600 rounded-lg transition-colors"
+                        className="p-1 sm:p-2 bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-600 rounded-lg transition-colors"
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />
