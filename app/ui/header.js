@@ -225,17 +225,19 @@ export default function Header() {
               </>
             ) : (
               <>
-                {/* If logged out, show Login and Pricing, no hamburger menu */}
+                {/* If logged out, show compact Google Login and Pricing, no hamburger menu */}
                 <button
                   onClick={handleLogin}
-                  className="flex items-center space-x-1 px-2 py-1 md:px-4 md:py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs md:text-base font-semibold transition-all duration-200"
+                  className="flex items-center space-x-2 px-2 py-1 md:px-4 md:py-2 rounded-lg text-xs md:text-base font-semibold transition-all duration-200 shadow-sm"
+                  style={{ minWidth: '110px', height: '36px', background: '#6b4b8e', color: '#fff' }}
                 >
-                  <LogIn className="w-4 h-4" />
+                  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5 mr-1" style={{ display: 'inline-block' }} />
                   <span>Login</span>
                 </button>
                 <button
                   onClick={() => handleNavigation('/pricing')}
-                  className="flex items-center space-x-1 px-2 py-1 md:px-4 md:py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs md:text-base font-semibold transition-all duration-200"
+                  className="flex items-center space-x-1 px-2 py-1 md:px-4 md:py-2 rounded-lg text-xs md:text-base font-semibold transition-all duration-200 shadow-sm"
+                  style={{ minWidth: '110px', height: '36px', background: '#6b4b8e', color: '#fff' }}
                 >
                   <CreditCard className="w-4 h-4" />
                   <span>Pricing</span>
