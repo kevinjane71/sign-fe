@@ -4,7 +4,7 @@ import Header from './ui/header'
 import Footer from './ui/footer'
 import LayoutWrapper from './components/LayoutWrapper'
 import AuthGuard from './components/AuthGuard'
-
+import { Analytics } from "@vercel/analytics/next"
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
@@ -93,6 +93,7 @@ export default function RootLayout({ children }) {
             </LayoutWrapper>
           </div>
         </AuthGuard>
+        <Analytics />
       </body>
     </html>
   )
