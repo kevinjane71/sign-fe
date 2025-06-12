@@ -175,7 +175,7 @@ export default function SignCompletePage() {
                 </div>
               </div>
               
-              <div className="flex items-start space-x-3">
+              {/* <div className="flex items-start space-x-3">
                 <Download className="w-5 h-5 text-green-500 mt-0.5" />
                 <div>
                   <p className="font-medium text-gray-900">Download Available</p>
@@ -198,7 +198,7 @@ export default function SignCompletePage() {
                     Download Signed Document
                   </button>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
 
