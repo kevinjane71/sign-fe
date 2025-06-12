@@ -5,11 +5,12 @@ import SignatureModal from "../components/SignatureModal";
 import { Plus, Trash2, Edit2, Loader2, PenTool, Stamp, MoreVertical, Copy, Download, Grid, List } from "lucide-react";
 import { useToast } from "../components/LayoutWrapper";
 import { isAuthenticated } from "../utils/api";
+import SecureImage from '../components/SecureImage';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
 const API_URL = `${API_BASE_URL}/api/user/signatures`;
 const MAX_SIGNS = 10;
-const MAX_SIZE_MB = 20;
+const MAX_SIZE_MB = 30;
 
 function getAuthHeaders() {
   if (typeof window !== 'undefined') {
@@ -353,7 +354,7 @@ export default function YourSignPage() {
               <span className="font-medium">{items.length}</span> of <span className="font-medium">{MAX_SIGNS}</span> {tab === "sign" ? "signatures" : "stamps"}
             </div>
             <div className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-              Max size: {MAX_SIZE_MB}MB
+              Max size: 30MB
             </div>
           </div>
           
@@ -450,9 +451,9 @@ export default function YourSignPage() {
                   <div className={`bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden ${
                     viewMode === "list" ? "w-20 h-12" : "w-full h-32"
                   }`}>
-                    <img 
-                      src={item.imageUrl} 
-                      alt={item.alias} 
+                    <SecureImage
+                      src={item.imageUrl}
+                      alt={item.alias}
                       className="max-w-full max-h-full object-contain"
                       style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}
                     />
@@ -521,7 +522,7 @@ export default function YourSignPage() {
         initialAlias={editItem ? editItem.alias : ""}
         initialImage={editItem ? editItem.imageUrl : null}
         type={tab}
-        maxSizeMB={MAX_SIZE_MB}
+        maxSizeMB={30}
       />
     </div>
   );

@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom'
 import { X, PenTool, Upload, RotateCcw, Check, Palette } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-const SignatureModal = ({ isOpen = true, onClose, onSave, maxSizeMB = 20 }) => {
+const SignatureModal = ({ isOpen = true, onClose, onSave, maxSizeMB = 30 }) => {
   const [activeTab, setActiveTab] = useState('draw') // 'draw' or 'upload'
   const [isDrawing, setIsDrawing] = useState(false)
   const [hasDrawn, setHasDrawn] = useState(false)
@@ -16,6 +16,7 @@ const SignatureModal = ({ isOpen = true, onClose, onSave, maxSizeMB = 20 }) => {
   const fileInputRef = useRef(null)
   const MAX_SIZE_BYTES = maxSizeMB * 1024 * 1024;
   const [errorMsg, setErrorMsg] = useState("");
+  const [uploadedFile, setUploadedFile] = useState(null);
 
   const penColors = ['#000000', '#0066cc', '#cc0000', '#009900', '#663399', '#cc6600']
   const penWidths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -121,10 +122,11 @@ const SignatureModal = ({ isOpen = true, onClose, onSave, maxSizeMB = 20 }) => {
       return
     }
     if (file.size > MAX_SIZE_BYTES) {
-      setErrorMsg(`File is too large. Max size is ${maxSizeMB}MB.`)
+      setErrorMsg(`File is too large. Max size is 30MB.`)
       return
     }
     setErrorMsg("")
+    setUploadedFile(file)
     const reader = new FileReader()
     reader.onload = (event) => {
       setSignatureData(event.target.result)
@@ -138,12 +140,14 @@ const SignatureModal = ({ isOpen = true, onClose, onSave, maxSizeMB = 20 }) => {
       const canvas = canvasRef.current
       if (!canvas || !hasDrawn) return
       signatureDataUrl = canvas.toDataURL('image/png')
+      onSave(null, signatureDataUrl, null)
+      onClose()
+      return
     } else if (activeTab === 'upload' && signatureData) {
       signatureDataUrl = signatureData
-    }
-    if (signatureDataUrl) {
-      onSave(signatureDataUrl)
+      onSave(null, signatureDataUrl, uploadedFile)
       onClose()
+      return
     }
   }
 
@@ -283,7 +287,7 @@ const SignatureModal = ({ isOpen = true, onClose, onSave, maxSizeMB = 20 }) => {
                     <Upload className="w-12 h-12 text-gray-400 mx-auto" />
                     <div>
                       <p className="text-lg font-medium text-gray-900">Upload signature image</p>
-                      <p className="text-sm text-gray-500">PNG, JPG, or GIF up to {maxSizeMB}MB</p>
+                      <p className="text-sm text-gray-500">PNG, JPG, or GIF up to 30MB</p>
                     </div>
                   </div>
                 )}
