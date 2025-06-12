@@ -1,8 +1,8 @@
 'use client'
 
 import { useRouter, usePathname } from 'next/navigation'
-import { FileText, User, LogIn, LogOut, Menu, X, FileIcon, RotateCcw, PenTool, CreditCard } from 'lucide-react'
-import { useState } from 'react'
+import { FileText, User, LogIn, LogOut, Menu, X, FileIcon, RotateCcw, PenTool, CreditCard, ChevronDown, Users } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
 import useAuth from '../hooks/useAuth'
 
 export default function Header() {
@@ -10,6 +10,25 @@ export default function Header() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { user, isLoading, isRefreshing, logout: handleLogout } = useAuth()
+  const [profileOpen, setProfileOpen] = useState(false)
+  const profileRef = useRef(null)
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setProfileOpen(false)
+      }
+    }
+    if (profileOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [profileOpen])
 
   const handleLogin = () => {
     router.push('/login')
@@ -41,6 +60,17 @@ export default function Header() {
       const targetPath = user ? '/dashboard' : '/'
       router.push(targetPath)
     }
+  }
+
+  const handleProfile = () => {
+    setProfileOpen(false)
+    router.push('/profile')
+  }
+
+  const handleLogoutAndRedirect = () => {
+    setProfileOpen(false)
+    handleLogout()
+    router.push('/')
   }
 
   // Show loading state while checking authentication
@@ -144,6 +174,54 @@ export default function Header() {
                 >
                   {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </button>
+                {/* Profile dropdown (desktop & mobile) */}
+                <div className="relative hidden md:block" ref={profileRef}>
+                  <button
+                    onClick={() => setProfileOpen((v) => !v)}
+                    className="flex items-center space-x-1 px-2 py-1 bg-white/10 hover:bg-white/20 rounded-full focus:outline-none border border-white/20 shadow-md transition-all duration-200"
+                    aria-label="Open profile menu"
+                  >
+                    {user.avatarUrl ? (
+                      <img src={user.avatarUrl} alt="Profile" className="w-7 h-7 rounded-full object-cover border border-white/30" />
+                    ) : (
+                      <User className="w-6 h-6 text-white/90" />
+                    )}
+                    <ChevronDown className="w-4 h-4 text-white/70 ml-1" />
+                  </button>
+                  {profileOpen && (
+                    <div className="absolute right-0 mt-2 w-64 max-w-xs bg-white/90 backdrop-blur-xl border border-purple-200/40 rounded-2xl shadow-2xl z-50 p-4 flex flex-col min-w-[200px] animate-fade-in-up">
+                      <div className="flex items-center space-x-3 mb-3">
+                        {user.avatarUrl ? (
+                          <img src={user.avatarUrl} alt="Profile" className="w-10 h-10 rounded-full object-cover border border-purple-300" />
+                        ) : (
+                          <User className="w-9 h-9 text-purple-500 bg-purple-100 rounded-full p-1" />
+                        )}
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-gray-900 text-base truncate">{user.name || user.email}</span>
+                          <span className="text-xs text-gray-500 truncate">{user.email}</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleProfile}
+                        className="w-full text-left px-3 py-2 rounded-lg text-gray-800 hover:bg-purple-100 font-medium transition-all duration-150 mb-1"
+                      >
+                        Profile
+                      </button>
+                      <button
+                        onClick={() => { handleNavigation('/contacts'); setProfileOpen(false); }}
+                        className="w-full text-left px-3 py-2 rounded-lg text-gray-800 hover:bg-purple-100 font-medium transition-all duration-150 mb-1"
+                      >
+                        Contacts
+                      </button>
+                      <button
+                        onClick={handleLogoutAndRedirect}
+                        className="w-full text-left px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 font-medium transition-all duration-150"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
               </>
             ) : (
               <>
@@ -192,7 +270,21 @@ export default function Header() {
                 <span className="font-medium text-sm">Billing</span>
               </button>
               <button
-                onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                onClick={() => { handleNavigation('/contacts'); setMobileMenuOpen(false); }}
+                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
+              >
+                <Users className="w-5 h-5" />
+                <span className="font-medium text-sm">Contacts</span>
+              </button>
+              <button
+                onClick={() => { handleProfile(); setMobileMenuOpen(false); }}
+                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10"
+              >
+                <User className="w-5 h-5" />
+                <span className="font-medium text-sm">Profile</span>
+              </button>
+              <button
+                onClick={() => { handleLogoutAndRedirect(); setMobileMenuOpen(false); }}
                 className="w-full flex items-center space-x-3 px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200"
               >
                 <LogOut className="w-5 h-5" />

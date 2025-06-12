@@ -135,19 +135,33 @@ const SignatureModal = ({ isOpen = true, onClose, onSave, maxSizeMB = 30 }) => {
   }
 
   const saveSignature = () => {
-    let signatureDataUrl = null
+    let signatureDataUrl = null;
     if (activeTab === 'draw') {
-      const canvas = canvasRef.current
-      if (!canvas || !hasDrawn) return
-      signatureDataUrl = canvas.toDataURL('image/png')
-      onSave(null, signatureDataUrl, null)
-      onClose()
-      return
+      const canvas = canvasRef.current;
+      if (!canvas || !hasDrawn) {
+        setErrorMsg('Please draw your signature first');
+        return;
+      }
+      try {
+        signatureDataUrl = canvas.toDataURL('image/png');
+        if (!signatureDataUrl || !signatureDataUrl.startsWith('data:image/png')) {
+          throw new Error('Failed to generate signature image');
+        }
+        onSave(signatureDataUrl, null);
+        onClose();
+      } catch (error) {
+        console.error('Error saving signature:', error);
+        setErrorMsg('Failed to save signature. Please try again.');
+      }
     } else if (activeTab === 'upload' && signatureData) {
-      signatureDataUrl = signatureData
-      onSave(null, signatureDataUrl, uploadedFile)
-      onClose()
-      return
+      if (!signatureData.startsWith('data:image/')) {
+        setErrorMsg('Invalid image format');
+        return;
+      }
+      onSave(signatureData, uploadedFile);
+      onClose();
+    } else {
+      setErrorMsg('Please provide a signature');
     }
   }
 

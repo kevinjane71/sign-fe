@@ -4,25 +4,10 @@ import React, { useState, useEffect } from "react";
 import { Plus, Search, Edit2, Trash2, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useToast } from "../components/LayoutWrapper";
 import { isAuthenticated } from "../utils/api";
+import { getAuthHeaders } from '../utils/auth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
 const API_URL = `${API_BASE_URL}/api/user/contacts`;
-
-function getAuthHeaders() {
-  if (typeof window !== 'undefined') {
-    try {
-      const userData = localStorage.getItem('user');
-      if (userData) {
-        const user = JSON.parse(userData);
-        const token = user?.accessToken;
-        if (token) return { Authorization: `Bearer ${token}` };
-      }
-    } catch (error) {
-      console.error('Error parsing user data:', error);
-    }
-  }
-  return {};
-}
 
 async function fetchContacts(page = 1, limit = 1000) {
   try {

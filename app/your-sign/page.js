@@ -509,14 +509,8 @@ export default function YourSignPage() {
       <SignatureModal
         isOpen={showModal}
         onClose={() => { setShowModal(false); setEditItem(null); }}
-        onSave={(_fieldId, dataUrl, file) => {
-          handleSave(editItem ? editItem.alias : "", dataUrl, file);
-        }}
-        fieldId={null}
-        initialAlias={editItem ? editItem.alias : ""}
-        initialImage={editItem ? editItem.imageUrl : null}
-        type={tab}
-        maxSizeMB={30}
+        onSave={(imageDataUrl, file) => handleSave(editItem?.alias, imageDataUrl, file)}
+        maxSizeMB={MAX_SIZE_MB}
       />
     </div>
   );

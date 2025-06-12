@@ -37,6 +37,7 @@ import {
 import toast from 'react-hot-toast'
 import { uploadDocument } from '../../utils/api'
 import LoadingSpinner from '../../components/LoadingSpinner'
+import useContactsAutocomplete from '../../hooks/useContactsAutocomplete'
 
 // Field type configurations
 const FIELD_TYPES = {
@@ -168,6 +169,11 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
   const [requireAllSigners, setRequireAllSigners] = useState(true)
   const [allowPrinting, setAllowPrinting] = useState(true)
   const [allowDownload, setAllowDownload] = useState(true)
+
+  // Add contacts autocomplete hook
+  const { contacts, loading: contactsLoading, getSuggestions } = useContactsAutocomplete();
+  const [emailSuggestions, setEmailSuggestions] = useState({}); // {signerId: [suggestions]}
+  const [showSuggestionsFor, setShowSuggestionsFor] = useState(null); // signerId
 
   // Initialize with default values
   useEffect(() => {
@@ -422,10 +428,55 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
                       <input
                         type="email"
                         value={signer.email}
-                        onChange={(e) => updateSigner(signer.id, 'email', e.target.value)}
+                        onChange={e => {
+                          updateSigner(signer.id, 'email', e.target.value);
+                          // Show suggestions if input is not empty
+                          const val = e.target.value;
+                          if (val && contacts.length > 0) {
+                            const filtered = getSuggestions(val);
+                            setEmailSuggestions(prev => ({ ...prev, [signer.id]: filtered }));
+                            setShowSuggestionsFor(signer.id);
+                          } else {
+                            setEmailSuggestions(prev => ({ ...prev, [signer.id]: [] }));
+                            setShowSuggestionsFor(null);
+                          }
+                        }}
+                        onFocus={e => {
+                          const val = e.target.value;
+                          if (val && contacts.length > 0) {
+                            const filtered = getSuggestions(val);
+                            setEmailSuggestions(prev => ({ ...prev, [signer.id]: filtered }));
+                            setShowSuggestionsFor(signer.id);
+                          }
+                        }}
+                        onBlur={() => {
+                          setTimeout(() => setShowSuggestionsFor(null), 150); // Delay to allow click
+                        }}
                         className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                         placeholder="Enter email address"
+                        required
+                        autoComplete="off"
                       />
+                      {/* Suggestions dropdown */}
+                      {showSuggestionsFor === signer.id && emailSuggestions[signer.id] && emailSuggestions[signer.id].length > 0 && (
+                        <div className="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-40 overflow-y-auto">
+                          {emailSuggestions[signer.id].map(contact => (
+                            <button
+                              key={contact.id}
+                              type="button"
+                              onMouseDown={e => {
+                                e.preventDefault();
+                                updateSigner(signer.id, 'email', contact.email);
+                                setShowSuggestionsFor(null);
+                              }}
+                              className="w-full text-left px-3 py-2 hover:bg-blue-50 focus:bg-blue-100 text-sm flex flex-col"
+                            >
+                              <span className="font-medium text-gray-900">{contact.email}</span>
+                              {contact.name && <span className="text-xs text-gray-500">{contact.name}</span>}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

@@ -39,6 +39,10 @@ import {
 import { useToast } from '../../components/LayoutWrapper'
 import { getDocument, updateDocument, sendDocument, getDocumentFile, uploadDocument, deleteDocumentFile } from '../../utils/api'
 import LoadingSpinner from '../../components/LoadingSpinner'
+import useContactsAutocomplete from '../../hooks/useContactsAutocomplete';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
+const API_URL = `${API_BASE_URL}/api/user/contacts`;
 
 // Field type configurations
 const FIELD_TYPES = {
@@ -459,6 +463,13 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
   // In DocumentConfiguration, add local state to track which signer's access code input is open
   const [accessCodeOpenFor, setAccessCodeOpenFor] = useState(null)
 
+  // Replace contacts state/logic with the hook
+  const { contacts, loading: contactsLoading, getSuggestions } = useContactsAutocomplete();
+
+  // --- For email autocomplete ---
+  const [emailSuggestions, setEmailSuggestions] = useState({}); // {signerId: [suggestions]}
+  const [showSuggestionsFor, setShowSuggestionsFor] = useState(null); // signerId
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Compact Header */}
@@ -594,14 +605,60 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
                       <label className="block text-xs font-medium text-gray-700 mb-1">
                         Email Address <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="email"
-                        value={signer.email}
-                        onChange={(e) => updateSigner(signer.id, 'email', e.target.value)}
-                        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Enter email address"
-                        required
-                      />
+                      <div className="relative">
+                        <input
+                          type="email"
+                          value={signer.email}
+                          onChange={e => {
+                            updateSigner(signer.id, 'email', e.target.value);
+                            // Show suggestions if input is not empty
+                            const val = e.target.value;
+                            if (val && contacts.length > 0) {
+                              const filtered = getSuggestions(val);
+                              setEmailSuggestions(prev => ({ ...prev, [signer.id]: filtered }));
+                              setShowSuggestionsFor(signer.id);
+                            } else {
+                              setEmailSuggestions(prev => ({ ...prev, [signer.id]: [] }));
+                              setShowSuggestionsFor(null);
+                            }
+                          }}
+                          onFocus={e => {
+                            const val = e.target.value;
+                            if (val && contacts.length > 0) {
+                              const filtered = getSuggestions(val);
+                              setEmailSuggestions(prev => ({ ...prev, [signer.id]: filtered }));
+                              setShowSuggestionsFor(signer.id);
+                            }
+                          }}
+                          onBlur={() => {
+                            setTimeout(() => setShowSuggestionsFor(null), 150); // Delay to allow click
+                          }}
+                          className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Enter email address"
+                          required
+                          autoComplete="off"
+                        />
+                        {/* Suggestions dropdown */}
+                        {showSuggestionsFor === signer.id && emailSuggestions[signer.id] && emailSuggestions[signer.id].length > 0 && (
+                          <div className="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-40 overflow-y-auto">
+                            {emailSuggestions[signer.id].map(contact => (
+                              <button
+                                key={contact.id}
+                                type="button"
+                                onMouseDown={e => {
+                                  e.preventDefault();
+                                  updateSigner(signer.id, 'email', contact.email);
+                                  setShowSuggestionsFor(null);
+                                }}
+                                className="w-full text-left px-3 py-2 hover:bg-blue-50 focus:bg-blue-100 text-sm flex flex-col"
+                              >
+                                <span className="font-medium text-gray-900">{contact.email}</span>
+                                {contact.name && <span className="text-xs text-gray-500">{contact.name}</span>}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -879,13 +936,13 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
 
           {/* Action Buttons - Compact */}
           <div className="flex justify-between pt-2">
-            <button
+            {/* <button
               onClick={onBack}
               className="flex items-center space-x-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md transition-colors text-xs font-semibold text-gray-700"
             >
               <ArrowLeft className="w-3 h-3" />
               <span>Back to Editor</span>
-            </button>
+            </button> */}
             
             <button
               onClick={handleSend}

@@ -906,9 +906,15 @@ export default function SigningPage() {
     setSignatureModalValue(value || null)
   }
   const handleSignatureValueChange = (fieldId, value) => {
-    handleFieldUpdate(fieldId, value)
-    setActiveSignatureFieldId(null)
-    setSignatureModalValue(null)
+    // Ensure we're passing the full signature data URL
+    if (value && typeof value === 'string' && value.startsWith('data:image/')) {
+      handleFieldUpdate(fieldId, value);
+    } else {
+      console.error('Invalid signature data format');
+      toast.error('Failed to save signature. Please try again.');
+    }
+    setActiveSignatureFieldId(null);
+    setSignatureModalValue(null);
   }
 
   // Handler for submitting access code
@@ -1261,7 +1267,7 @@ export default function SigningPage() {
         <SignatureModal
           isOpen={!!activeSignatureFieldId}
           onClose={() => setActiveSignatureFieldId(null)}
-          onSave={(signature) => handleSignatureValueChange(activeSignatureFieldId, signature)}
+          onSave={(signatureDataUrl) => handleSignatureValueChange(activeSignatureFieldId, signatureDataUrl)}
           maxSizeMB={20}
         />
       )}

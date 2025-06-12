@@ -406,13 +406,13 @@ export default function SharePage() {
 
           {/* Actions */}
           <div className="actions-section">
-            <button 
+            {/* <button 
               onClick={() => router.push(`/editor/new?id=${params.id}`)}
               className="btn btn-secondary"
             >
               <ArrowLeft size={16} />
               Back to Editor
-            </button>
+            </button> */}
             <button 
               onClick={saveConfiguration}
               disabled={saving}
