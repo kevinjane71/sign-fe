@@ -726,8 +726,8 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
               <div className="space-y-4 pt-3 border-t border-gray-200">
                 {/* Security Settings */}
                 <div>
-                  <h3 className="text-xs font-semibold text-gray-700 mb-2">Security & Authentication</h3>
-                  <div className="space-y-2">
+                  {/* <h3 className="text-xs font-semibold text-gray-700 mb-2">Security & Authentication</h3> */}
+                  {/* <div className="space-y-2">
                     <label className="flex items-center">
                       <input
                         type="checkbox"
@@ -747,11 +747,11 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
                       />
                       <span className="ml-2 text-xs text-gray-700">Allow signers to delegate to others</span>
                     </label>
-                  </div>
+                  </div> */}
                 </div>
 
                 {/* Signing Settings */}
-                <div>
+                {/* <div>
                   <h3 className="text-xs font-semibold text-gray-700 mb-2">Signing Process</h3>
                   <div className="space-y-2">
                     <div>
@@ -788,7 +788,7 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
                       <span className="ml-2 text-xs text-gray-700">Allow comments and notes</span>
                     </label>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Reminders & Expiration */}
                 <div>
@@ -849,7 +849,7 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
                 </div>
 
                 {/* Document Permissions */}
-                <div>
+                {/* <div>
                   <h3 className="text-xs font-semibold text-gray-700 mb-2">Document Permissions</h3>
                   <div className="space-y-2">
                     <label className="flex items-center">
@@ -872,7 +872,7 @@ function DocumentConfiguration({ documentFile, documents, allFields, fields, onB
                       <span className="ml-2 text-xs text-gray-700">Allow download</span>
                     </label>
                   </div>
-                </div>
+                </div> */}
               </div>
             )}
           </div>

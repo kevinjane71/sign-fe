@@ -428,11 +428,11 @@ export function DocumentConfiguration({ documentFile, fields, onBack, onSend, is
             <div className="mt-6 pt-6 border-t border-gray-200 space-y-8">
               {/* Security Settings */}
               <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200">
-                <h3 className="font-bold text-lg text-blue-900 mb-4 flex items-center">
+                {/* <h3 className="font-bold text-lg text-blue-900 mb-4 flex items-center">
                   <div className="w-2 h-6 bg-gradient-to-b from-blue-500 to-indigo-500 rounded-full mr-3"></div>
                   Security & Authentication
-                </h3>
-                <div className="space-y-4">
+                </h3> */}
+                {/* <div className="space-y-4">
                   <label className="flex items-center p-3 hover:bg-white rounded-xl transition-all duration-200 cursor-pointer group">
                     <input
                       type="checkbox"
@@ -452,7 +452,7 @@ export function DocumentConfiguration({ documentFile, fields, onBack, onSend, is
                     />
                     <span className="ml-3 text-sm font-medium text-blue-800 group-hover:text-blue-900">Allow signers to delegate to others</span>
                   </label>
-                </div>
+                </div> */}
               </div>
 
               {/* Signing Settings */}

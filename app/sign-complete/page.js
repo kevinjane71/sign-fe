@@ -12,9 +12,10 @@ export default function SignCompletePage() {
   const documentId = searchParams.get('document')
   const signerEmail = searchParams.get('signer')
   
-  const [status, setStatus] = useState('loading') // loading, success, error
+  const [status, setStatus] = useState('loading') // loading, success, error, expired
   const [documentData, setDocumentData] = useState(null)
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!documentId || !signerEmail) {
@@ -23,35 +24,39 @@ export default function SignCompletePage() {
       return
     }
 
-    // Check the signing status
-    const checkSigningStatus = async () => {
+    async function fetchStatus() {
+      setLoading(true)
+      setError(null)
       try {
-        const response = await fetch(`${API_BASE_URL}/api/documents/${documentId}/status`)
-        const result = await response.json()
-
-        if (response.ok) {
-          setDocumentData(result.document)
-          
-          // Check if this signer has completed signing
-          const signer = result.document.signers?.find(s => s.email === signerEmail)
-          if (signer && signer.signed) {
-            setStatus('success')
-          } else {
-            setStatus('error')
-            setError('Document signing not completed. Please complete the signing process first.')
-          }
+        const res = await fetch(`${API_BASE_URL}/api/documents/${documentId}/status`)
+        const result = await res.json()
+        if (!result.success) throw new Error(result.error || 'Unknown error')
+        // Check for expired status
+        if (result.document.status === 'expired' || result.expired) {
+          setStatus('expired')
+          setError('This document has expired. Please contact the sender to re-share.')
+          return
+        }
+        const signer = result.document.signers?.find(s => s.email === signerEmail)
+        if (signer && signer.signed) {
+          setStatus('success')
         } else {
           setStatus('error')
-          setError(result.error || 'Failed to verify signing status')
+          setError('Document signing not completed. Please complete the signing process first.')
         }
       } catch (err) {
-        console.error('Error checking signing status:', err)
-        setStatus('error')
-        setError('Unable to verify signing status. Please check your connection and try again.')
+        if (err.message && err.message.toLowerCase().includes('expired')) {
+          setStatus('expired')
+          setError('This document has expired. Please contact the sender to re-share.')
+        } else {
+          setStatus('error')
+          setError('Failed to fetch document status')
+        }
+      } finally {
+        setLoading(false)
       }
     }
-
-    checkSigningStatus()
+    fetchStatus()
   }, [documentId, signerEmail])
 
   const handleDownloadDocument = async () => {
@@ -77,12 +82,19 @@ export default function SignCompletePage() {
     }
   }
 
-  if (status === 'loading') {
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Verifying signing status...</p>
+      <LoadingSpinner message="Checking document status..." />
+    )
+  }
+
+  if (status === 'expired') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+          <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold mb-2">Document Expired</h2>
+          <p className="text-gray-700 mb-4">{error || 'This document has expired. Please contact the sender to re-share.'}</p>
         </div>
       </div>
     )
