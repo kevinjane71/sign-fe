@@ -11,14 +11,14 @@ const SignatureModal = ({ isOpen = true, onClose, onSave, maxSizeMB = 20 }) => {
   const [hasDrawn, setHasDrawn] = useState(false)
   const [signatureData, setSignatureData] = useState(null)
   const [penColor, setPenColor] = useState('#000000')
-  const [penWidth, setPenWidth] = useState(5)
+  const [penWidth, setPenWidth] = useState(8)
   const canvasRef = useRef(null)
   const fileInputRef = useRef(null)
   const MAX_SIZE_BYTES = maxSizeMB * 1024 * 1024;
   const [errorMsg, setErrorMsg] = useState("");
 
   const penColors = ['#000000', '#0066cc', '#cc0000', '#009900', '#663399', '#cc6600']
-  const penWidths = [1, 2, 3, 4, 5]
+  const penWidths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
   useEffect(() => {
     if (isOpen && activeTab === 'draw') {
