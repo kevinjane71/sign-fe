@@ -7,7 +7,7 @@ import { Check, Zap, Users, Shield, Star, ArrowRight, FileText, Clock, Headphone
 export default function PricingPage() {
   const router = useRouter()
   const [isAnnual, setIsAnnual] = useState(true)
-  const [currency, setCurrency] = useState('INR')
+  const [currency, setCurrency] = useState('USD')
 
   const planData = {
     INR: [
@@ -113,7 +113,7 @@ export default function PricingPage() {
       {
         name: "Business",
         description: "Perfect for growing businesses",
-        price: { monthly: 20, annual: 20 },
+        price: { monthly: 12, annual: 11 },
         features: [
           "500 documents per month",
           "Unlimited signers",
