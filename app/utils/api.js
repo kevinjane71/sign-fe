@@ -376,6 +376,13 @@ export const sendDocumentWorkflow = (documentId) => {
   });
 };
 
+// Delete a file from a document
+export const deleteDocumentFile = (documentId, fileId) => {
+  return apiRequest(`/api/documents/${documentId}/file/${fileId}`, {
+    method: 'DELETE'
+  });
+};
+
 export default {
   getStoredUser,
   getAuthToken,
@@ -398,5 +405,6 @@ export default {
   duplicateDocument,
   getDocumentFile,
   shareDocument,
-  sendDocumentWorkflow
+  sendDocumentWorkflow,
+  deleteDocumentFile
 }; 
