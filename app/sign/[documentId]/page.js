@@ -1260,6 +1260,29 @@ export default function SigningPage() {
               </div>
             </div>
           )}
+
+          {/* Fixed Complete Signing button (desktop only) */}
+          {!isViewer && (
+            <button
+              onClick={handleSubmitSignature}
+              disabled={isSubmitting}
+              className={`mt-6 w-full flex items-center justify-center px-4 py-2 rounded-md font-medium text-sm transition-colors shadow-md
+                ${isSubmitting ? 'bg-blue-400 text-white cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+              style={{ position: 'sticky', bottom: 0, zIndex: 40 }}
+            >
+              {isSubmitting ? (
+                <div className="flex items-center space-x-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Signing Document...</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Check className="w-4 h-4" />
+                  <span>Complete Signing</span>
+                </div>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
