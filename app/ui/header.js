@@ -72,19 +72,18 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 border-b border-purple-800/30 sticky top-0 z-50 shadow-lg">
-      <div className="w-full px-2 sm:px-4 md:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-12 md:h-16 lg:h-20">
-          {/* Logo Section */}
+    <header className="backdrop-blur-2xl bg-gradient-to-r from-slate-900/80 via-purple-900/80 to-slate-900/70 border-b-2 border-transparent border-b-[3px] border-b-purple-400/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.25)] sticky top-0 z-50" style={{boxShadow:'0 4px 32px 0 rgba(80,0,120,0.10)', borderBottom:'3px solid rgba(167,139,250,0.25)'}}>
+      <div className="w-full px-2 sm:px-4 md:px-8 lg:px-16">
+        <div className="flex justify-between items-center h-14 md:h-16 lg:h-18">
+          {/* Logo Section - floating glass card */}
           <div className="flex items-center">
             <button
               onClick={handleLogoClick}
-              className="flex items-center space-x-2 md:space-x-3 hover:opacity-90 transition-opacity group"
+              className="flex items-center space-x-2 md:space-x-2 group focus:outline-none"
               style={{ outline: 'none' }}
             >
-              {/* Custom SVG Logo: Document + Signature Stroke */}
-              <span className="inline-block">
-                <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+              <span className="inline-block rounded-2xl shadow-lg bg-white/10 backdrop-blur-xl border border-white/20 p-1.5 md:p-2 lg:p-2.5 transition-all duration-200 group-hover:scale-105 group-hover:shadow-xl">
+                <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
                   <rect x="3" y="3" width="30" height="30" rx="8" fill="url(#paint0_linear)" />
                   <rect x="10" y="10" width="16" height="20" rx="3" fill="#fff" fillOpacity="0.13" />
                   <path d="M13 16h10M13 20h7" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
@@ -97,28 +96,50 @@ export default function Header() {
                   </defs>
                 </svg>
               </span>
-              {/* Brand Name - always visible */}
-              <span className="text-lg sm:text-xl md:text-2xl font-extrabold tracking-tight text-[#A78BFA] leading-tight ml-2">
+              <span className="text-lg md:text-xl lg:text-2xl font-extrabold tracking-tight bg-gradient-to-r from-[#A78BFA] via-white to-[#60A5FA] text-transparent bg-clip-text drop-shadow-[0_2px_12px_rgba(167,139,250,0.5)] ml-2">
                 eSignTap
               </span>
             </button>
           </div>
 
           {/* Right Side - Navigation and User */}
-          <div className="flex items-center space-x-2 sm:space-x-4 md:space-x-6">
+          <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-6">
             {user ? (
               <>
-                {/* Dashboard button always visible when logged in */}
+                {/* Desktop navigation (md+) - glassy pills */}
+                <nav className="hidden md:flex items-center space-x-4 lg:space-x-6">
+                  <button
+                    onClick={() => handleNavigation('/dashboard')}
+                    className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-md text-white text-sm font-normal transition-all duration-200 group hover:bg-gradient-to-r hover:from-[#A78BFA]/30 hover:to-[#60A5FA]/30 hover:border-[#A78BFA] hover:shadow-[0_0_12px_2px_rgba(167,139,250,0.18)] focus:outline-none"
+                  >
+                    <FileText className="w-5 h-5 text-white group-hover:drop-shadow-[0_0_6px_#A78BFA] transition-all duration-200" />
+                    <span className="group-hover:bg-gradient-to-r group-hover:from-[#A78BFA] group-hover:to-[#60A5FA] group-hover:text-transparent group-hover:bg-clip-text group-hover:drop-shadow-[0_0_8px_#A78BFA] transition-all duration-200">Dashboard</span>
+                  </button>
+                  <button
+                    onClick={() => handleNavigation('/your-sign')}
+                    className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-md text-white text-sm font-normal transition-all duration-200 group hover:bg-gradient-to-r hover:from-[#A78BFA]/30 hover:to-[#60A5FA]/30 hover:border-[#A78BFA] hover:shadow-[0_0_12px_2px_rgba(167,139,250,0.18)] focus:outline-none"
+                  >
+                    <PenTool className="w-5 h-5 text-white group-hover:drop-shadow-[0_0_6px_#A78BFA] transition-all duration-200" />
+                    <span className="group-hover:bg-gradient-to-r group-hover:from-[#A78BFA] group-hover:to-[#60A5FA] group-hover:text-transparent group-hover:bg-clip-text group-hover:drop-shadow-[0_0_8px_#A78BFA] transition-all duration-200">Your Sign</span>
+                  </button>
+                  <button
+                    onClick={() => handleNavigation('/billing')}
+                    className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-md text-white text-sm font-normal transition-all duration-200 group hover:bg-gradient-to-r hover:from-[#A78BFA]/30 hover:to-[#60A5FA]/30 hover:border-[#A78BFA] hover:shadow-[0_0_12px_2px_rgba(167,139,250,0.18)] focus:outline-none"
+                  >
+                    <CreditCard className="w-5 h-5 text-white group-hover:drop-shadow-[0_0_6px_#A78BFA] transition-all duration-200" />
+                    <span className="group-hover:bg-gradient-to-r group-hover:from-[#A78BFA] group-hover:to-[#60A5FA] group-hover:text-transparent group-hover:bg-clip-text group-hover:drop-shadow-[0_0_8px_#A78BFA] transition-all duration-200">Billing</span>
+                  </button>
+                </nav>
+                {/* Mobile: Dashboard button and hamburger menu */}
                 <button
                   onClick={handleDashboard}
-                  className="flex items-center space-x-1 px-2 py-1 md:px-4 md:py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs md:text-base font-semibold transition-all duration-200"
+                  className="flex md:hidden items-center space-x-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium transition-all duration-200"
                 >
                   <span>Dashboard</span>
                 </button>
-                {/* Hamburger menu for mobile and desktop */}
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="p-1 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+                  className="md:hidden p-1 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
                   aria-label="Open menu"
                 >
                   {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -145,7 +166,6 @@ export default function Header() {
             )}
           </div>
         </div>
-
         {/* Hamburger Menu Drawer (only if logged in) */}
         {user && mobileMenuOpen && (
           <div className="md:hidden border-t border-white/20 py-4">
