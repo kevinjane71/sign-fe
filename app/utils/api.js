@@ -140,7 +140,7 @@ export const logout = async () => {
   window.dispatchEvent(new Event('userStateChanged'));
   
   // Redirect to login
-  window.location.href = '/login';
+  window.location.href = '/auth/login';
 };
 
 // Make authenticated API request

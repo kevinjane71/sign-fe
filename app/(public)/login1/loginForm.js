@@ -45,52 +45,79 @@ const LoginForm = () => {
     confirmPassword: '',
     otp: ''
   });
+  const [authenticating, setAuthenticating] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   // Use refs to track component state and cleanup
   const isMountedRef = useRef(true);
   const recaptchaContainerRef = useRef(null);
 
-  // --- Google OAuth code exchange and user state update (client-only) ---
+  // Set isClient to true when component mounts
   useEffect(() => {
-    isMountedRef.current = true;
-    // Only run on client
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
-      if (code && isMountedRef.current) {
-        // Exchange code for user data, update localStorage, and redirect
-        (async () => {
-          try {
-            const response = await fetch(`${API_BASE_URL}/auth/google`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ code })
-            });
-            const result = await response.json();
-            if (result.success) {
-              localStorage.setItem('user', JSON.stringify(result.data));
-              window.dispatchEvent(new Event('userStateChanged'));
-              toast.success(result.message || 'Authentication successful');
-              setTimeout(() => {
-                if (isMountedRef.current) {
-                  window.location.href = '/dashboard';
-                }
-              }, 1000);
-            } else {
-              toast.error(result.error || 'Google authentication failed');
-            }
-          } catch (error) {
-            toast.error('Google authentication failed');
-          }
-        })();
-      }
-    }
-    // Cleanup function
+    setIsClient(true);
     return () => {
       isMountedRef.current = false;
-      cleanupRecaptcha();
     };
   }, []);
+
+  // Handle Google auth code
+  useEffect(() => {
+    if (!isClient) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+
+    if (code) {
+      setAuthenticating(true);
+      (async () => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/auth/google`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code })
+          });
+          const result = await response.json();
+          if (result.success) {
+            localStorage.setItem('user', JSON.stringify(result.data));
+            window.dispatchEvent(new Event('userStateChanged'));
+            toast.success(result.message || 'Authentication successful');
+            setTimeout(() => {
+              window.location.href = '/dashboard';
+            }, 1000);
+          } else {
+            toast.error(result.error || 'Google authentication failed');
+            setAuthenticating(false);
+          }
+        } catch (error) {
+          toast.error('Google authentication failed');
+          setAuthenticating(false);
+        }
+      })();
+    }
+  }, [isClient]);
+
+  // Show loading state while client-side code initializes
+  if (!isClient) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lg text-blue-700 font-semibold">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (authenticating) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lg text-blue-700 font-semibold">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Cleanup function for reCAPTCHA
   const cleanupRecaptcha = () => {
