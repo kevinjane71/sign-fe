@@ -50,15 +50,41 @@ const LoginForm = () => {
   const isMountedRef = useRef(true);
   const recaptchaContainerRef = useRef(null);
 
+  // --- Google OAuth code exchange and user state update (client-only) ---
   useEffect(() => {
     isMountedRef.current = true;
-    
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    if (code && isMountedRef.current) {
-      handleAuthRequest('google', { code });
+    // Only run on client
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      if (code && isMountedRef.current) {
+        // Exchange code for user data, update localStorage, and redirect
+        (async () => {
+          try {
+            const response = await fetch(`${API_BASE_URL}/auth/google`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ code })
+            });
+            const result = await response.json();
+            if (result.success) {
+              localStorage.setItem('user', JSON.stringify(result.data));
+              window.dispatchEvent(new Event('userStateChanged'));
+              toast.success(result.message || 'Authentication successful');
+              setTimeout(() => {
+                if (isMountedRef.current) {
+                  window.location.href = '/dashboard';
+                }
+              }, 1000);
+            } else {
+              toast.error(result.error || 'Google authentication failed');
+            }
+          } catch (error) {
+            toast.error('Google authentication failed');
+          }
+        })();
+      }
     }
-
     // Cleanup function
     return () => {
       isMountedRef.current = false;
