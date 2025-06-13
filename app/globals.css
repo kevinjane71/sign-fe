@@ -763,3 +763,6 @@ body {
   left: 50%;
   transform: translateX(-50%);
 } 
+.meetsynk-float-button{
+  display: none !important;
+}

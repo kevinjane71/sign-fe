@@ -21,7 +21,8 @@ export default function AuthGuard({ children }) {
     '/refund',
     '/price',
     '/contact-us',
-    '/sign'
+    '/sign',
+    '/demo'
   ]
 
   useEffect(() => {
