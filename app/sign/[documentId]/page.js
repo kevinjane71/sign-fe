@@ -562,10 +562,10 @@ const SigningFieldComponent = ({
         />
       ) : field.type === 'dropdown' && field.options ? (
         <div className="relative w-full h-full">
-          <select
-            ref={fieldRef}
-            value={localValue}
-            onChange={(e) => handleChange(e.target.value)}
+        <select
+          ref={fieldRef}
+          value={localValue}
+          onChange={(e) => handleChange(e.target.value)}
             onClick={(e) => e.stopPropagation()}
             onFocus={() => handleFieldClick()}
             className="w-full h-full bg-transparent border-none outline-none text-gray-700 appearance-none cursor-pointer pr-8"
@@ -573,7 +573,7 @@ const SigningFieldComponent = ({
               fontSize: `${fontSize}px`,
               padding: '2px 4px'
             }}
-          >
+        >
             <option value="">Select...</option>
             {field.options.map((option) => {
               if (typeof option === 'string') {
@@ -591,7 +591,7 @@ const SigningFieldComponent = ({
               }
               return null;
             })}
-          </select>
+        </select>
           <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
             <ChevronDown className="w-4 h-4 text-gray-500" />
           </div>
@@ -1120,7 +1120,7 @@ export default function SigningPage() {
                 {documentData?.title || 'Document Signing'}
               </h1>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               {/* Zoom Controls */}
               <div className="flex items-center space-x-2">

@@ -37,13 +37,13 @@ export default function SignCompletePage() {
           setError('This document has expired. Please contact the sender to re-share.')
           return
         }
-        const signer = result.document.signers?.find(s => s.email === signerEmail)
-        if (signer && signer.signed) {
-          setStatus('success')
-        } else {
-          setStatus('error')
-          setError('Document signing not completed. Please complete the signing process first.')
-        }
+          const signer = result.document.signers?.find(s => s.email === signerEmail)
+          if (signer && signer.signed) {
+            setStatus('success')
+          } else {
+            setStatus('error')
+            setError('Document signing not completed. Please complete the signing process first.')
+          }
       } catch (err) {
         if (err.message && err.message.toLowerCase().includes('expired')) {
           setStatus('expired')
