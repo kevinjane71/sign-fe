@@ -16,130 +16,150 @@
             align-items: center;
             justify-content: center;
             padding: 0;
+            margin: 0;
         }
         .login-container {
-            background: #fff;
-            border-radius: 18px;
-            padding: 32px 20px 24px 20px;
-            width: 100%;
-            max-width: 380px;
-            box-shadow: 0 8px 32px rgba(76, 81, 255, 0.10), 0 1.5px 8px rgba(76, 81, 255, 0.08);
-            margin: 0 auto;
+            background: none;
+            border-radius: 0;
+            padding: 0;
+            width: 100vw;
+            max-width: 100vw;
+            box-shadow: none;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
         }
         .logo-section {
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 18px;
+            margin-top: 32px;
         }
         .logo {
-            width: 64px;
-            height: 64px;
-            background: #f5f7ff;
+            width: 44px;
+            height: 44px;
+            background: rgba(255,255,255,0.12);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 16px;
-            font-size: 36px;
-            box-shadow: 0 2px 8px rgba(76, 81, 255, 0.08);
+            margin: 0 auto 10px;
+            font-size: 28px;
+            box-shadow: none;
         }
         .app-title {
-            color: #222;
-            font-size: 26px;
+            color: #fff;
+            font-size: 22px;
             font-weight: bold;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             letter-spacing: 0.5px;
         }
         .app-subtitle {
-            color: #888;
-            font-size: 15px;
+            color: #e0e7ff;
+            font-size: 13px;
         }
         .form-section {
-            margin-bottom: 16px;
+            width: 100vw;
+            max-width: 100vw;
+            margin-bottom: 0;
+            padding: 0 0 0 0;
         }
         .step-title {
-            color: #222;
-            font-size: 20px;
+            color: #fff;
+            font-size: 18px;
             font-weight: bold;
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .step-subtitle {
-            color: #888;
+            color: #e0e7ff;
             text-align: center;
-            margin-bottom: 22px;
-            font-size: 14px;
+            margin-bottom: 16px;
+            font-size: 13px;
         }
         .phone-input-container {
             display: flex;
-            margin-bottom: 18px;
-            gap: 10px;
+            margin-bottom: 14px;
+            gap: 8px;
+            width: 100vw;
+            max-width: 100vw;
+            padding: 0 16px;
+            box-sizing: border-box;
         }
         .country-code {
-            background: #f5f7ff;
-            border-radius: 10px;
-            padding: 0 10px;
+            background: rgba(255,255,255,0.10);
+            border-radius: 8px;
+            padding: 0 8px;
             display: flex;
             align-items: center;
-            color: #222;
+            color: #fff;
             font-weight: 500;
-            font-size: 16px;
-            border: 1px solid #e0e7ff;
+            font-size: 15px;
+            border: 1px solid #a5b4fc;
         }
         .country-select {
             border: none;
             background: transparent;
-            font-size: 16px;
-            color: #222;
+            font-size: 15px;
+            color: #fff;
             outline: none;
             margin-right: 2px;
         }
         .phone-input {
             flex: 1;
-            background: #f5f7ff;
-            border: 1px solid #e0e7ff;
-            border-radius: 10px;
-            padding: 14px 16px;
-            color: #222;
-            font-size: 17px;
+            background: rgba(255,255,255,0.10);
+            border: 1px solid #a5b4fc;
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: #fff;
+            font-size: 16px;
             outline: none;
+            min-width: 0;
         }
         .phone-input::placeholder {
-            color: #bbb;
+            color: #c7d2fe;
         }
         .otp-container {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 22px;
-            gap: 8px;
+            margin-bottom: 16px;
+            gap: 6px;
+            width: 100vw;
+            max-width: 100vw;
+            padding: 0 16px;
+            box-sizing: border-box;
         }
         .otp-input {
-            width: 42px;
-            height: 50px;
-            background: #f5f7ff;
-            border: 1.5px solid #e0e7ff;
-            border-radius: 10px;
-            color: #222;
-            font-size: 20px;
+            width: 32px;
+            height: 38px;
+            background: rgba(255,255,255,0.10);
+            border: 1.2px solid #a5b4fc;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 18px;
             font-weight: bold;
             text-align: center;
             outline: none;
             transition: border-color 0.2s;
         }
         .otp-input:focus {
-            border-color: #667eea;
-            background: #eef1ff;
+            border-color: #fff;
+            background: rgba(255,255,255,0.18);
         }
         .primary-button {
             background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
             border: none;
-            border-radius: 10px;
-            padding: 16px;
+            border-radius: 8px;
+            padding: 13px;
             color: #fff;
-            font-size: 17px;
+            font-size: 16px;
             font-weight: bold;
-            width: 100%;
+            width: 92vw;
+            max-width: 340px;
             cursor: pointer;
-            margin-bottom: 14px;
+            margin-bottom: 10px;
             transition: opacity 0.3s;
             box-shadow: 0 2px 8px rgba(76, 81, 255, 0.08);
         }
@@ -150,32 +170,35 @@
         .back-button {
             background: none;
             border: none;
-            color: #667eea;
-            font-size: 18px;
+            color: #fff;
+            font-size: 16px;
             cursor: pointer;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             display: flex;
             align-items: center;
         }
         .edit-number-link {
-            color: #667eea;
-            font-size: 15px;
+            color: #fff;
+            font-size: 13px;
             text-decoration: underline;
             cursor: pointer;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             display: block;
             text-align: right;
+            padding-right: 16px;
         }
         .error-container {
-            background: #fff0f0;
-            border-radius: 7px;
-            padding: 10px;
-            margin-bottom: 14px;
+            background: rgba(255,0,0,0.08);
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 10px;
             border-left: 3px solid #f44336;
+            margin-left: 16px;
+            margin-right: 16px;
         }
         .error-text {
             color: #f44336;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             text-align: center;
         }
@@ -183,12 +206,12 @@
             text-align: center;
         }
         .countdown-text {
-            color: #888;
-            font-size: 14px;
+            color: #e0e7ff;
+            font-size: 13px;
         }
         .resend-text {
-            color: #667eea;
-            font-size: 15px;
+            color: #fff;
+            font-size: 13px;
             font-weight: 500;
             text-decoration: underline;
             cursor: pointer;
@@ -196,7 +219,7 @@
         .loading {
             display: none;
             text-align: center;
-            color: #667eea;
+            color: #fff;
             margin-top: 18px;
         }
         .hidden {
@@ -212,23 +235,26 @@
                 max-width: 100vw;
                 border-radius: 0;
                 box-shadow: none;
-                padding: 12px 2px 6px 2px;
+                padding: 0;
             }
             .logo {
-                width: 44px;
-                height: 44px;
-                font-size: 24px;
-            }
-            .app-title {
+                width: 36px;
+                height: 36px;
                 font-size: 18px;
             }
+            .app-title {
+                font-size: 15px;
+            }
             .step-title {
-                font-size: 16px;
+                font-size: 13px;
             }
             .otp-input {
-                width: 30px;
-                height: 36px;
-                font-size: 15px;
+                width: 22px;
+                height: 28px;
+                font-size: 13px;
+            }
+            .phone-input, .country-code {
+                font-size: 13px;
             }
         }
     </style>
@@ -448,11 +474,19 @@
             hideError(true);
             verifyOtpBtn.disabled = true;
             verifyOtpText.textContent = 'Verifying...';
+            // DEBUG: Notify before backend call
+            if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'DEBUG', message: 'About to call backend verify-otp' }));
+            }
             try {
                 const result = await confirmationResult.confirm(otp);
                 console.log('✅ Firebase Auth successful:', result.user.uid);
                 // Get Firebase token
                 const firebaseToken = await result.user.getIdToken();
+                // DEBUG: Notify before backend fetch
+                if (window.ReactNativeWebView) {
+                    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'DEBUG', message: 'Calling backend verify-otp...' }));
+                }
                 // Call backend to exchange Firebase auth for JWT tokens
                 const cleanPhoneNumber = result.user.phoneNumber.replace('+91', '');
                 const backendResponse = await fetch('https://ai-kirana-be.vercel.app/api/auth/verify-otp', {
@@ -465,6 +499,10 @@
                         otp: '1234' // Dummy OTP for backend
                     })
                 });
+                // DEBUG: Notify after backend fetch
+                if (window.ReactNativeWebView) {
+                    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'DEBUG', message: 'Backend verify-otp response received' }));
+                }
                 const backendData = await backendResponse.json();
                 if (!backendData.success) {
                     throw new Error(backendData.error || 'Backend authentication failed');
@@ -492,6 +530,9 @@
             } catch (error) {
                 console.error('❌ OTP Verification error:', error);
                 showError(getUserFriendlyError(error), true);
+                if (window.ReactNativeWebView) {
+                    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'DEBUG', message: 'OTP verification error: ' + (error && error.message) }));
+                }
                 if (error.code === 'auth/code-expired') {
                     backToPhone();
                 }
