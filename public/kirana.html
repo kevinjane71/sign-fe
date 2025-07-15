@@ -281,80 +281,70 @@
 
 
     </style>
-</head>
-<body>
-    <!DOCTYPE html>
-<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Kirana - Login</title>
-  <link rel="stylesheet" href="styles.css" />
-</head>
 <body>
-  <div class="login-container">
-    <div class="logo-section">
-      <div class="logo">🏪</div>
-      <div class="app-title">AI Kirana</div>
-      <div class="app-subtitle">Smart POS System</div>
-    </div>
-
-    <div class="form-section">
-      <!-- Phone Number Step -->
-      <div id="phone-step">
-        <div class="step-title">Enter Your Phone Number</div>
-        <div class="step-subtitle">We'll send you a verification code</div>
-        <div class="phone-input-container">
-          <div class="country-code">
-            <select class="country-select" id="country-select">
-              <option value="91" selected>🇮🇳 +91</option>
-              <option value="1">🇺🇸 +1</option>
-              <option value="44">🇬🇧 +44</option>
-              <option value="61">🇦🇺 +61</option>
-            </select>
+    <div class="login-container">
+        <div class="logo-section">
+          <div class="logo">🏪</div>
+          <div class="app-title">AI Kirana</div>
+          <div class="app-subtitle">Smart POS System</div>
+        </div>
+    
+        <div class="form-section">
+          <!-- Phone Number Step -->
+          <div id="phone-step">
+            <div class="step-title">Enter Your Phone Number</div>
+            <div class="step-subtitle">We'll send you a verification code</div>
+            <div class="phone-input-container">
+              <div class="country-code">
+                <select class="country-select" id="country-select">
+                  <option value="91" selected>🇮🇳 +91</option>
+                  <option value="1">🇺🇸 +1</option>
+                  <option value="44">🇬🇧 +44</option>
+                  <option value="61">🇦🇺 +61</option>
+                </select>
+              </div>
+              <input type="tel" class="phone-input" id="phone-input" placeholder="9876543210" maxlength="10" autofocus />
+            </div>
+            <div class="error-container hidden" id="error-container">
+              <div class="error-text" id="error-text"></div>
+            </div>
+            <button class="primary-button" id="send-otp-btn">
+              <span id="send-otp-text">Send OTP</span>
+            </button>
           </div>
-          <input type="tel" class="phone-input" id="phone-input" placeholder="9876543210" maxlength="10" autofocus />
+    
+          <!-- OTP Step -->
+          <div id="otp-step" class="hidden">
+            <button class="back-button">← Back</button>
+            <div class="edit-number-link" id="edit-number-link">Edit phone number</div>
+            <div class="step-title">Enter Verification Code</div>
+            <div class="step-subtitle" id="otp-subtitle">Sent to <span id="country-display">+91</span>-<span id="phone-display"></span></div>
+            <div class="otp-container">
+              <input type="text" class="otp-input" maxlength="1" data-index="0" />
+              <input type="text" class="otp-input" maxlength="1" data-index="1" />
+              <input type="text" class="otp-input" maxlength="1" data-index="2" />
+              <input type="text" class="otp-input" maxlength="1" data-index="3" />
+              <input type="text" class="otp-input" maxlength="1" data-index="4" />
+              <input type="text" class="otp-input" maxlength="1" data-index="5" />
+            </div>
+            <div class="error-container hidden" id="otp-error-container">
+              <div class="error-text" id="otp-error-text"></div>
+            </div>
+            <button class="primary-button" id="verify-otp-btn">
+              <span id="verify-otp-text">Verify & Login</span>
+            </button>
+            <div class="resend-container">
+              <div class="countdown-text hidden" id="countdown-text">Resend OTP in <span id="countdown">60</span>s</div>
+              <div class="resend-text hidden" id="resend-text">Resend OTP</div>
+            </div>
+          </div>
         </div>
-        <div class="error-container hidden" id="error-container">
-          <div class="error-text" id="error-text"></div>
-        </div>
-        <button class="primary-button" id="send-otp-btn">
-          <span id="send-otp-text">Send OTP</span>
-        </button>
+    
+        <div class="loading" id="loading">Loading...</div>
+        <div id="recaptcha-container"></div>
       </div>
 
-      <!-- OTP Step -->
-      <div id="otp-step" class="hidden">
-        <button class="back-button">← Back</button>
-        <div class="edit-number-link" id="edit-number-link">Edit phone number</div>
-        <div class="step-title">Enter Verification Code</div>
-        <div class="step-subtitle" id="otp-subtitle">Sent to <span id="country-display">+91</span>-<span id="phone-display"></span></div>
-        <div class="otp-container">
-          <input type="text" class="otp-input" maxlength="1" data-index="0" />
-          <input type="text" class="otp-input" maxlength="1" data-index="1" />
-          <input type="text" class="otp-input" maxlength="1" data-index="2" />
-          <input type="text" class="otp-input" maxlength="1" data-index="3" />
-          <input type="text" class="otp-input" maxlength="1" data-index="4" />
-          <input type="text" class="otp-input" maxlength="1" data-index="5" />
-        </div>
-        <div class="error-container hidden" id="otp-error-container">
-          <div class="error-text" id="otp-error-text"></div>
-        </div>
-        <button class="primary-button" id="verify-otp-btn">
-          <span id="verify-otp-text">Verify & Login</span>
-        </button>
-        <div class="resend-container">
-          <div class="countdown-text hidden" id="countdown-text">Resend OTP in <span id="countdown">60</span>s</div>
-          <div class="resend-text hidden" id="resend-text">Resend OTP</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="loading" id="loading">Loading...</div>
-    <div id="recaptcha-container"></div>
-  </div>
-</body>
-</html>
 
     <!-- Firebase SDK -->
     <script type="module">
