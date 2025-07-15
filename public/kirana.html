@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Kirana - Login</title>
     <style>
-       * {
+            * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -43,12 +43,11 @@
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6vw;
+            border-radius: 24px;
             padding: 8% 6% 6%;
             width: 100%;
-            max-width: 90vw;
-            min-width: 320px;
             max-width: 400px;
+            min-width: 320px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             position: relative;
         }
@@ -61,7 +60,7 @@
             right: 0;
             bottom: 0;
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-            border-radius: 6vw;
+            border-radius: 24px;
             pointer-events: none;
         }
 
@@ -73,31 +72,23 @@
         }
 
         .logo {
-            width: 20vw;
-            height: 20vw;
-            max-width: 80px;
-            max-height: 80px;
-            min-width: 50px;
-            min-height: 50px;
+            width: 80px;
+            height: 80px;
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
             border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 5vw;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 5%;
-            font-size: 9vw;
-            max-font-size: 36px;
-            min-font-size: 24px;
+            font-size: 36px;
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         .app-title {
             color: #ffffff;
-            font-size: 7vw;
-            max-font-size: 28px;
-            min-font-size: 20px;
+            font-size: 28px;
             font-weight: 700;
             margin-bottom: 1%;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -105,9 +96,7 @@
 
         .app-subtitle {
             color: rgba(255, 255, 255, 0.8);
-            font-size: 4vw;
-            max-font-size: 16px;
-            min-font-size: 12px;
+            font-size: 16px;
             font-weight: 400;
         }
 
@@ -118,9 +107,7 @@
 
         .step-title {
             color: #ffffff;
-            font-size: 6vw;
-            max-font-size: 24px;
-            min-font-size: 18px;
+            font-size: 24px;
             font-weight: 600;
             text-align: center;
             margin-bottom: 2%;
@@ -131,9 +118,7 @@
             color: rgba(255, 255, 255, 0.8);
             text-align: center;
             margin-bottom: 8%;
-            font-size: 3.5vw;
-            max-font-size: 15px;
-            min-font-size: 12px;
+            font-size: 15px;
         }
 
         .phone-input-container {
@@ -147,7 +132,7 @@
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 4vw;
+            border-radius: 16px;
             padding: 0 4%;
             display: flex;
             align-items: center;
@@ -166,9 +151,7 @@
         .country-select {
             border: none;
             background: transparent;
-            font-size: 3.5vw;
-            max-font-size: 16px;
-            min-font-size: 12px;
+            font-size: 16px;
             outline: none;
             appearance: none;
             color: #ffffff;
@@ -188,11 +171,9 @@
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 4vw;
+            border-radius: 16px;
             padding: 4.5% 5%;
-            font-size: 4vw;
-            max-font-size: 16px;
-            min-font-size: 14px;
+            font-size: 16px;
             outline: none;
             transition: all 0.3s ease;
             color: #ffffff;
@@ -220,10 +201,8 @@
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 4vw;
-            font-size: 5vw;
-            max-font-size: 20px;
-            min-font-size: 16px;
+            border-radius: 16px;
+            font-size: 20px;
             font-weight: 600;
             text-align: center;
             outline: none;
@@ -242,12 +221,10 @@
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 4vw;
+            border-radius: 16px;
             padding: 4.5% 6%;
             color: #ffffff;
-            font-size: 4vw;
-            max-font-size: 16px;
-            min-font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             width: 100%;
             cursor: pointer;
@@ -276,9 +253,7 @@
             background: none;
             border: none;
             color: rgba(255, 255, 255, 0.8);
-            font-size: 4vw;
-            max-font-size: 16px;
-            min-font-size: 14px;
+            font-size: 16px;
             cursor: pointer;
             margin-bottom: 4%;
             display: flex;
@@ -293,9 +268,7 @@
 
         .edit-number-link {
             color: rgba(255, 255, 255, 0.8);
-            font-size: 3.5vw;
-            max-font-size: 14px;
-            min-font-size: 12px;
+            font-size: 14px;
             text-decoration: underline;
             cursor: pointer;
             display: block;
@@ -312,16 +285,14 @@
             background: rgba(244, 67, 54, 0.1);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(244, 67, 54, 0.3);
-            border-radius: 3vw;
+            border-radius: 12px;
             padding: 3% 4%;
             margin-bottom: 5%;
         }
 
         .error-text {
             color: #ff6b6b;
-            font-size: 3.5vw;
-            max-font-size: 14px;
-            min-font-size: 12px;
+            font-size: 14px;
             font-weight: 500;
             text-align: center;
         }
@@ -333,16 +304,12 @@
 
         .countdown-text {
             color: rgba(255, 255, 255, 0.7);
-            font-size: 3.5vw;
-            max-font-size: 14px;
-            min-font-size: 12px;
+            font-size: 14px;
         }
 
         .resend-text {
             color: rgba(255, 255, 255, 0.8);
-            font-size: 3.8vw;
-            max-font-size: 15px;
-            min-font-size: 13px;
+            font-size: 15px;
             font-weight: 500;
             text-decoration: underline;
             cursor: pointer;
@@ -370,92 +337,6 @@
             overflow: hidden;
         }
 
-        /* Tablet and larger screens */
-        @media (min-width: 768px) {
-            .container {
-                padding: 2%;
-            }
-
-            .login-container {
-                border-radius: 24px;
-                padding: 6% 5% 4%;
-            }
-
-            .login-container::before {
-                border-radius: 24px;
-            }
-
-            .logo {
-                border-radius: 20px;
-                font-size: 36px;
-                width: 80px;
-                height: 80px;
-            }
-
-            .app-title {
-                font-size: 28px;
-            }
-
-            .app-subtitle {
-                font-size: 16px;
-            }
-
-            .step-title {
-                font-size: 24px;
-            }
-
-            .step-subtitle {
-                font-size: 15px;
-            }
-
-            .country-select {
-                font-size: 16px;
-            }
-
-            .phone-input {
-                font-size: 16px;
-                border-radius: 16px;
-            }
-
-            .country-code {
-                border-radius: 16px;
-            }
-
-            .otp-input {
-                font-size: 20px;
-                border-radius: 16px;
-            }
-
-            .primary-button {
-                font-size: 16px;
-                border-radius: 16px;
-            }
-
-            .back-button {
-                font-size: 16px;
-            }
-
-            .edit-number-link {
-                font-size: 14px;
-            }
-
-            .error-container {
-                border-radius: 12px;
-            }
-
-            .error-text {
-                font-size: 14px;
-            }
-
-            .countdown-text {
-                font-size: 14px;
-            }
-
-            .resend-text {
-                font-size: 15px;
-            }
-        }
-
         /* Small mobile screens */
         @media (max-width: 480px) {
             .container {
@@ -467,6 +348,34 @@
             .login-container {
                 padding: 8% 5% 6%;
                 max-width: 100%;
+                border-radius: 20px;
+            }
+
+            .login-container::before {
+                border-radius: 20px;
+            }
+
+            .logo {
+                width: 60px;
+                height: 60px;
+                font-size: 28px;
+                border-radius: 16px;
+            }
+
+            .app-title {
+                font-size: 22px;
+            }
+
+            .app-subtitle {
+                font-size: 14px;
+            }
+
+            .step-title {
+                font-size: 20px;
+            }
+
+            .step-subtitle {
+                font-size: 13px;
             }
 
             .phone-input-container {
@@ -477,18 +386,56 @@
                 width: 30%;
                 min-width: 90px;
                 padding: 0 2%;
+                border-radius: 14px;
+            }
+
+            .country-select {
+                font-size: 14px;
             }
 
             .phone-input {
                 width: 68%;
+                font-size: 14px;
+                border-radius: 14px;
             }
 
             .otp-container {
                 gap: 2%;
             }
 
+            .otp-input {
+                font-size: 16px;
+                border-radius: 14px;
+            }
+
             .primary-button {
+                font-size: 14px;
+                border-radius: 14px;
                 margin-bottom: 10%;
+            }
+
+            .back-button {
+                font-size: 14px;
+            }
+
+            .edit-number-link {
+                font-size: 12px;
+            }
+
+            .error-container {
+                border-radius: 10px;
+            }
+
+            .error-text {
+                font-size: 12px;
+            }
+
+            .countdown-text {
+                font-size: 12px;
+            }
+
+            .resend-text {
+                font-size: 13px;
             }
 
             .resend-container {
@@ -502,13 +449,39 @@
                 gap: 1.5%;
             }
 
+            .otp-input {
+                font-size: 14px;
+                border-radius: 12px;
+            }
+
             .country-code {
                 width: 32%;
                 min-width: 85px;
+                border-radius: 12px;
             }
 
             .phone-input {
                 width: 66%;
+                border-radius: 12px;
+            }
+
+            .primary-button {
+                border-radius: 12px;
+            }
+
+            .logo {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+                border-radius: 12px;
+            }
+
+            .app-title {
+                font-size: 20px;
+            }
+
+            .step-title {
+                font-size: 18px;
             }
         }
 
@@ -528,22 +501,17 @@
             }
 
             .logo {
-                width: 12vw;
-                height: 12vw;
-                max-width: 48px;
-                max-height: 48px;
-                font-size: 6vw;
-                max-font-size: 24px;
+                width: 48px;
+                height: 48px;
+                font-size: 24px;
             }
 
             .app-title {
-                font-size: 5vw;
-                max-font-size: 20px;
+                font-size: 20px;
             }
 
             .step-title {
-                font-size: 4.5vw;
-                max-font-size: 18px;
+                font-size: 18px;
             }
 
             .step-subtitle {
