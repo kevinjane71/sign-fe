@@ -242,22 +242,85 @@ export default function YourSignPage() {
     setLoading(false);
   };
 
-  const handleCopy = async (imageUrl) => {
+  const handleCopy = async (imageUrl, itemId) => {
     try {
-      await navigator.clipboard.writeText(imageUrl);
-      alert("Image URL copied to clipboard!");
+      // Get the authentication token
+      const userData = localStorage.getItem('user');
+      if (!userData) {
+        toast.error("Please login to copy image URLs");
+        return;
+      }
+      
+      const user = JSON.parse(userData);
+      const token = user?.accessToken;
+      
+      if (!token) {
+        toast.error("Authentication token not found");
+        return;
+      }
+      
+      // Construct the full URL with authentication
+      const fullImageUrl = `${API_BASE_URL}/api/user/signatures/${itemId}/image`;
+      
+      // For copy functionality, we'll copy a message explaining how to use the URL
+      const copyText = `Image URL: ${fullImageUrl}\n\nNote: This URL requires authentication. Use with Bearer token in Authorization header.`;
+      await navigator.clipboard.writeText(copyText);
+      toast.success("Image URL and usage instructions copied to clipboard!");
     } catch (err) {
       console.error('Failed to copy: ', err);
+      toast.error("Failed to copy URL");
     }
   };
 
-  const handleDownload = (imageUrl, alias) => {
-    const link = document.createElement('a');
-    link.href = imageUrl;
-    link.download = `${alias}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownload = async (imageUrl, alias, itemId) => {
+    try {
+      // Get the authentication token
+      const userData = localStorage.getItem('user');
+      if (!userData) {
+        toast.error("Please login to download images");
+        return;
+      }
+      
+      const user = JSON.parse(userData);
+      const token = user?.accessToken;
+      
+      if (!token) {
+        toast.error("Authentication token not found");
+        return;
+      }
+      
+      // Construct the full URL
+      const fullImageUrl = `${API_BASE_URL}/api/user/signatures/${itemId}/image`;
+      
+      // Fetch the image with authentication
+      const response = await fetch(fullImageUrl, {
+        headers: { 
+          Authorization: `Bearer ${token}` 
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch image');
+      }
+      
+      // Create blob and download
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${alias}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the blob URL
+      URL.revokeObjectURL(url);
+      
+      toast.success("Download started!");
+    } catch (err) {
+      console.error('Failed to download: ', err);
+      toast.error("Failed to download image");
+    }
   };
 
   if (!isAuthenticated()) {
@@ -469,14 +532,14 @@ export default function YourSignPage() {
                     {/* Actions */}
                     <div className={`flex items-center space-x-1 sm:space-x-2 ${viewMode === "list" ? "flex-shrink-0 ml-2 sm:ml-4" : "justify-center"}`}>
                       <button
-                        onClick={() => handleDownload(item.imageUrl, item.alias)}
+                        onClick={() => handleDownload(item.imageUrl, item.alias, item.id)}
                         className="p-1 sm:p-2 bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-600 rounded-lg transition-colors"
                         title="Download"
                       >
                         <Download className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleCopy(item.imageUrl)}
+                        onClick={() => handleCopy(item.imageUrl, item.id)}
                         className="p-1 sm:p-2 bg-gray-100 hover:bg-green-100 text-gray-600 hover:text-green-600 rounded-lg transition-colors"
                         title="Copy URL"
                       >
