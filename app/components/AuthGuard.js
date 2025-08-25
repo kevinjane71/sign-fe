@@ -11,7 +11,7 @@ export default function AuthGuard({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const isMountedRef = useRef(true)
 
-  // Public routes that don't require authentication
+  // Public routes that don't require authentication - COMPLETELY bypass all localStorage checks
   const publicRoutes = [
     '/',
     '/login',
@@ -23,7 +23,7 @@ export default function AuthGuard({ children }) {
     '/contact-us',
     '/sign',
     '/demo',
-    '/kibill',
+    '/kibill',    // For React Native WebView - no localStorage needed
     '/meetsynk',
     '/kirana'
   ]
@@ -34,7 +34,7 @@ export default function AuthGuard({ children }) {
     const checkAuth = () => {
       if (!isMountedRef.current) return;
 
-      // Check if current route is public
+      // Check if current route is public FIRST - completely bypass everything else
       const isPublicRoute = publicRoutes.some(route => {
         if (route === '/') {
           return pathname === '/'
@@ -43,16 +43,46 @@ export default function AuthGuard({ children }) {
       })
 
       if (isPublicRoute) {
+        console.log('Public route detected, bypassing auth:', pathname);
         if (isMountedRef.current) {
           setIsAuthenticated(true)
+          setIsLoading(false)
+        }
+        return // EXIT EARLY - no localStorage checks needed
+      }
+
+      // Only do localStorage checks for non-public routes
+      if (typeof window === 'undefined') {
+        if (isMountedRef.current) {
+          setIsAuthenticated(false)
           setIsLoading(false)
         }
         return
       }
 
-      // Check for user token in localStorage
+      // Check for user token in localStorage (with better error handling)
       try {
-        const userData = localStorage.getItem('user')
+        let userData = null;
+        
+        // Safely access localStorage
+        try {
+          if (typeof Storage !== 'undefined' && localStorage) {
+            userData = localStorage.getItem('user')
+          }
+        } catch (localStorageError) {
+          console.warn('localStorage not available:', localStorageError)
+          // If localStorage fails, treat as unauthenticated
+          if (isMountedRef.current) {
+            setIsAuthenticated(false)
+            setTimeout(() => {
+              if (isMountedRef.current) {
+                router.push('/login')
+              }
+            }, 0)
+          }
+          return
+        }
+
         if (userData) {
           const user = JSON.parse(userData)
           if (user && (user.id || user.email)) {
@@ -61,10 +91,13 @@ export default function AuthGuard({ children }) {
             }
           } else {
             // Invalid user data, redirect to login
-            localStorage.removeItem('user')
+            try {
+              localStorage.removeItem('user')
+            } catch (e) {
+              console.warn('Failed to remove user data:', e)
+            }
             if (isMountedRef.current) {
               setIsAuthenticated(false)
-              // Use setTimeout to prevent immediate navigation during render
               setTimeout(() => {
                 if (isMountedRef.current) {
                   router.push('/login')
@@ -77,7 +110,6 @@ export default function AuthGuard({ children }) {
           // No user data, redirect to login
           if (isMountedRef.current) {
             setIsAuthenticated(false)
-            // Use setTimeout to prevent immediate navigation during render
             setTimeout(() => {
               if (isMountedRef.current) {
                 router.push('/login')
@@ -88,10 +120,13 @@ export default function AuthGuard({ children }) {
         }
       } catch (error) {
         console.error('Error checking authentication:', error)
-        localStorage.removeItem('user')
+        try {
+          localStorage.removeItem('user')
+        } catch (e) {
+          console.warn('Failed to remove user data after error:', e)
+        }
         if (isMountedRef.current) {
           setIsAuthenticated(false)
-          // Use setTimeout to prevent immediate navigation during render
           setTimeout(() => {
             if (isMountedRef.current) {
               router.push('/login')
@@ -112,24 +147,65 @@ export default function AuthGuard({ children }) {
     // Listen for storage changes (when user logs in/out in another tab)
     const handleStorageChange = (e) => {
       if (e.key === 'user' && isMountedRef.current) {
-        checkAuth()
+        // Check if current route is still public before running auth check
+        const isPublicRoute = publicRoutes.some(route => {
+          if (route === '/') {
+            return pathname === '/'
+          }
+          return pathname.startsWith(route)
+        })
+        
+        if (!isPublicRoute) {
+          checkAuth()
+        }
       }
     }
 
     // Listen for custom events when user state changes in same tab
     const handleUserChange = () => {
       if (isMountedRef.current) {
-        checkAuth()
+        // Check if current route is still public before running auth check
+        const isPublicRoute = publicRoutes.some(route => {
+          if (route === '/') {
+            return pathname === '/'
+          }
+          return pathname.startsWith(route)
+        })
+        
+        if (!isPublicRoute) {
+          checkAuth()
+        }
       }
     }
 
-    window.addEventListener('storage', handleStorageChange)
-    window.addEventListener('userStateChanged', handleUserChange)
+    // Only add event listeners if we're not on a public route
+    const isPublicRoute = publicRoutes.some(route => {
+      if (route === '/') {
+        return pathname === '/'
+      }
+      return pathname.startsWith(route)
+    })
+
+    if (!isPublicRoute && typeof window !== 'undefined') {
+      try {
+        window.addEventListener('storage', handleStorageChange)
+        window.addEventListener('userStateChanged', handleUserChange)
+      } catch (e) {
+        console.warn('Failed to add event listeners:', e)
+      }
+    }
 
     return () => {
       isMountedRef.current = false
-      window.removeEventListener('storage', handleStorageChange)
-      window.removeEventListener('userStateChanged', handleUserChange)
+      // Only remove listeners if we're in browser environment
+      if (typeof window !== 'undefined') {
+        try {
+          window.removeEventListener('storage', handleStorageChange)
+          window.removeEventListener('userStateChanged', handleUserChange)
+        } catch (e) {
+          console.warn('Failed to remove event listeners:', e)
+        }
+      }
     }
   }, [pathname, router])
 
