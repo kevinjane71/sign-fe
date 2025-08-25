@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subscription & Billing - eSignTap</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Kirana POS - Subscription Plans</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         .loading-spinner {
             border: 2px solid #f3f3f3;
-            border-top: 2px solid #e879f9;
+            border-top: 2px solid #2563eb;
             border-radius: 50%;
             width: 24px;
             height: 24px;
@@ -22,15 +22,23 @@
         }
         
         .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
         }
         
         .card-shadow {
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         
-        .fuchsia-gradient {
-            background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+        .primary-gradient {
+            background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
+        }
+        
+        .success-gradient {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+        }
+        
+        .premium-gradient {
+            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
         }
         
         .loading-overlay {
@@ -47,66 +55,85 @@
         }
         
         .hidden { display: none !important; }
+        
+        /* Mobile-first responsive design */
+        @media (max-width: 640px) {
+            .mobile-padding { padding: 16px; }
+            .mobile-text-sm { font-size: 14px; }
+            .mobile-text-xs { font-size: 12px; }
+        }
+        
+        .feature-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 mobile-padding">
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay hidden">
-        <div class="bg-white p-4 rounded-lg flex items-center space-x-3">
+        <div class="bg-white p-4 rounded-lg flex items-center space-x-3 mx-4">
             <div class="loading-spinner"></div>
             <p class="text-sm text-gray-700" id="loadingMessage">Processing payment...</p>
         </div>
     </div>
 
-    <div class="bg-gray-50 mt-10 sm:p-8">
-        <div class="max-w-7xl mx-auto">
+    <div class="bg-gray-50 py-4 sm:py-8">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6">
             <!-- Header -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-                <div>
-                    <h1 class="text-xl font-semibold text-gray-900">Subscription & Billing</h1>
-                    <p class="text-sm text-gray-500">Manage your payment details and subscription plan</p>
+            <div class="mb-6 text-center">
+                <div class="flex items-center justify-center mb-3">
+                    <div class="w-8 h-8 rounded-lg primary-gradient flex items-center justify-center mr-3">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Kirana POS</h1>
                 </div>
+                <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-2">Subscription Plans</h2>
+                <p class="text-sm sm:text-base text-gray-600">Choose the perfect plan for your store's needs</p>
             </div>
 
             <!-- Loading State -->
-            <div id="loadingState" class="min-h-[300px] flex items-center justify-center bg-gray-50">
+            <div id="loadingState" class="min-h-[200px] flex items-center justify-center">
                 <div class="loading-spinner"></div>
             </div>
 
             <!-- Main Content -->
             <div id="mainContent" class="hidden">
                 <!-- Stats Cards -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
                     <!-- Current Plan Card -->
-                    <div class="bg-white rounded-lg p-3 card-shadow border-t-4 border-t-fuchsia-500">
-                        <div class="flex items-start justify-between">
+                    <div class="bg-white rounded-xl p-4 card-shadow border-l-4 border-l-blue-500">
+                        <div class="flex items-center justify-between">
                             <div>
-                                <h3 class="text-xs text-gray-500">Current Plan</h3>
-                                <p class="mt-1 text-base font-medium text-gray-900" id="currentPlan">Free</p>
-                                <div class="mt-0.5 text-xs text-gray-500 flex items-center gap-1">
-                                    <svg class="h-3 w-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                <h3 class="text-xs text-gray-500 font-medium">CURRENT PLAN</h3>
+                                <p class="mt-1 text-lg font-bold text-gray-900" id="currentPlan">Free</p>
+                                <div class="mt-1 text-xs text-green-600 flex items-center gap-1">
+                                    <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                     </svg>
-                                    <span>Active</span>
+                                    <span class="font-medium">Active</span>
                                 </div>
                             </div>
-                            <div class="p-2 rounded-md bg-fuchsia-50 text-fuchsia-500">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                            <div class="p-2 rounded-lg bg-blue-50 text-blue-600">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                             </div>
                         </div>
                     </div>
 
                     <!-- Next Billing Date Card -->
-                    <div class="bg-white rounded-lg p-3 card-shadow border-t-4 border-t-fuchsia-500">
-                        <div class="flex items-start justify-between">
+                    <div class="bg-white rounded-xl p-4 card-shadow border-l-4 border-l-green-500">
+                        <div class="flex items-center justify-between">
                             <div>
-                                <h3 class="text-xs text-gray-500">Next Billing Date</h3>
-                                <p class="mt-1 text-base font-medium text-gray-900" id="nextBillingDate">NA</p>
+                                <h3 class="text-xs text-gray-500 font-medium">NEXT BILLING</h3>
+                                <p class="mt-1 text-lg font-bold text-gray-900" id="nextBillingDate">NA</p>
                             </div>
-                            <div class="p-2 rounded-md bg-fuchsia-50 text-fuchsia-500">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="p-2 rounded-lg bg-green-50 text-green-600">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
                             </div>
@@ -114,14 +141,14 @@
                     </div>
 
                     <!-- Last Payment Card -->
-                    <div class="bg-white rounded-lg p-3 card-shadow border-t-4 border-t-fuchsia-500">
-                        <div class="flex items-start justify-between">
+                    <div class="bg-white rounded-xl p-4 card-shadow border-l-4 border-l-purple-500">
+                        <div class="flex items-center justify-between">
                             <div>
-                                <h3 class="text-xs text-gray-500">Last Payment</h3>
-                                <p class="mt-1 text-base font-medium text-gray-900" id="lastPaymentDate">NA</p>
+                                <h3 class="text-xs text-gray-500 font-medium">LAST PAYMENT</h3>
+                                <p class="mt-1 text-lg font-bold text-gray-900" id="lastPaymentDate">NA</p>
                             </div>
-                            <div class="p-2 rounded-md bg-fuchsia-50 text-fuchsia-500">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="p-2 rounded-lg bg-purple-50 text-purple-600">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
                                 </svg>
                             </div>
@@ -134,31 +161,70 @@
                     <p class="text-sm flex items-center gap-2" id="paymentStatusText"></p>
                 </div>
 
-                <!-- Currency Toggle -->
-                <div class="flex items-center justify-between mb-8">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-0">Subscription Plans</h2>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm font-medium text-fuchsia-600" id="inrLabel">INR</span>
-                        <button id="currencyToggle" class="relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none bg-fuchsia-500">
-                            <span id="currencySlider" class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform translate-x-1"></span>
-                        </button>
-                        <span class="text-sm font-medium text-gray-500" id="usdLabel">USD</span>
-                    </div>
+                <!-- Pricing Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6" id="pricingCards">
+                    <!-- Cards will be generated dynamically -->
                 </div>
 
-                <!-- Pricing Cards -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" id="pricingCards">
-                    <!-- Cards will be generated dynamically -->
+                <!-- Why Choose Kirana POS -->
+                <div class="mt-8 sm:mt-12 bg-white rounded-xl p-6 card-shadow">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 text-center">Why Choose Kirana POS?</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="p-2 rounded-lg bg-blue-50 text-blue-600">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-900">Mobile First</h4>
+                                <p class="text-sm text-gray-600">Designed for smartphones and tablets</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="p-2 rounded-lg bg-green-50 text-green-600">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-900">Easy to Use</h4>
+                                <p class="text-sm text-gray-600">Simple interface for daily operations</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="p-2 rounded-lg bg-purple-50 text-purple-600">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-900">Fast & Reliable</h4>
+                                <p class="text-sm text-gray-600">Quick billing and inventory management</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="p-2 rounded-lg bg-yellow-50 text-yellow-600">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 11-0 19.5 9.75 9.75 0 010-19.5z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-900">24/7 Support</h4>
+                                <p class="text-sm text-gray-600">Always here to help your business</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Error State -->
-            <div id="errorState" class="hidden min-h-[400px] flex flex-col items-center justify-center bg-gray-50 text-center p-4">
+            <div id="errorState" class="hidden min-h-[300px] flex flex-col items-center justify-center text-center p-4">
                 <svg class="h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                <h3 class="text-lg font-medium text-gray-900 mb-1">No Billing Data Available</h3>
-                <p class="text-sm text-gray-500 max-w-md">Unable to load billing information at this time. Please try again later.</p>
+                <h3 class="text-lg font-medium text-gray-900 mb-1">Unable to Load Plans</h3>
+                <p class="text-sm text-gray-500 max-w-md">Please check your internet connection and try again.</p>
             </div>
         </div>
     </div>
@@ -166,140 +232,83 @@
     <script>
         // Global state
         let billingData = {
-            currentPlan: 'Free',
+            currentPlan: 'Basic',
             nextBillingDate: 'NA',
             lastPaymentDate: 'NA'
         };
-        let userEmail = 'malik.vk07@gmail.com'; // Default email
+        let userEmail = 'store@example.com'; // Default email
         let currency = 'INR';
         let loading = true;
 
         const API_BASE_URL = "https://apis-chi-azure.vercel.app/formio/payment";
 
-        // Plan data
+        // Plan data customized for Kirana POS
         const planData = {
             INR: [
                 {
-                    title: "Free",
+                    title: "Basic",
                     price: 0,
-                    planId: 'free',
-                    colorScheme: "fuchsia",
+                    planId: 'basic',
+                    colorScheme: "blue",
+                    gradient: "primary-gradient",
                     features: [
-                        "🎁 ALL PRO FEATURES until July 30th!",
-                        "50 documents per month (limited time)",
-                        "Unlimited signers (limited time)",
-                        "All templates & forms (limited time)",
-                        "Priority email support (limited time)",
-                        "Custom branding (limited time)",
-                        "After July 30th: 3 docs/month",
-                        "Basic support (permanent)"
+                        "✅ Core POS System",
+                        "✅ Basic Inventory Management", 
+                        "✅ Simple Billing",
+                        "✅ Customer Records",
+                        "✅ Daily Sales Reports",
+                        "✅ Up to 100 products",
+                        "✅ Single device access",
+                        "✅ Email support"
                     ],
-                    buttonText: "Get Free Pro Access",
-                    priceDisplay: "₹0/month"
+                    buttonText: "Current Plan",
+                    priceDisplay: "Free"
                 },
                 {
                     title: "Pro",
                     price: 49,
-                    planId: 'pro',
-                    colorScheme: "fuchsia",
+                    planId: 'pro', 
+                    colorScheme: "green",
+                    gradient: "success-gradient",
+                    popular: true,
                     features: [
-                        "100 documents per month",
-                        "Unlimited signers",
-                        "All templates & forms",
-                        "Advanced workflows",
-                        "Custom branding",
-                        "Priority email support",
-                        "1-year document storage",
-                        "Bulk sending",
-                        "Document analytics"
+                        "🚀 All Basic Features",
+                        "🤖 AI-Powered Analytics",
+                        "📊 Advanced Reports & Insights", 
+                        "📱 Multi-device sync",
+                        "💳 Multiple payment methods",
+                        "📦 Advanced inventory alerts",
+                        "👥 Customer loyalty program",
+                        "📞 Priority phone support",
+                        "☁️ Cloud backup & sync",
+                        "🎯 Sales forecasting"
                     ],
-                    buttonText: "Start Pro Plan",
+                    buttonText: "Upgrade to Pro",
                     priceDisplay: "₹49/month",
-                    subtext: "Billed annually (₹500/year)"
+                    subtext: "Perfect for growing stores"
                 },
                 {
-                    title: "Business",
-                    price: 200,
-                    planId: 'business',
-                    colorScheme: "fuchsia",
+                    title: "Enterprise",
+                    price: 500,
+                    planId: 'enterprise',
+                    colorScheme: "purple",
+                    gradient: "premium-gradient", 
                     features: [
-                        "500 documents per month",
-                        "Unlimited signers",
-                        "Advanced integrations",
-                        "Team management",
-                        "Advanced security",
-                        "Phone & chat support",
-                        "Unlimited storage",
-                        "API access",
-                        "White-label options",
-                        "Advanced analytics",
-                        "Compliance features"
+                        "⭐ All Pro Features",
+                        "🏢 Multi-store management",
+                        "👨‍💼 Staff management & roles",
+                        "🔗 Advanced integrations",
+                        "📈 Business intelligence dashboard",
+                        "🛡️ Advanced security features",
+                        "💡 Custom features & branding",
+                        "🎧 24/7 premium support",
+                        "📋 Compliance & audit reports",
+                        "🚚 Supply chain management",
+                        "💼 Dedicated account manager"
                     ],
-                    buttonText: "Start Business Trial",
-                    priceDisplay: "₹200/month",
-                    subtext: "Billed annually (₹1000/year)"
-                }
-            ],
-            USD: [
-                {
-                    title: "Free",
-                    price: 0,
-                    planId: 'free',
-                    colorScheme: "fuchsia",
-                    features: [
-                        "🎁 ALL PRO FEATURES until July 30th!",
-                        "50 documents per month (limited time)",
-                        "Unlimited signers (limited time)",
-                        "All templates & forms (limited time)",
-                        "Priority email support (limited time)",
-                        "Custom branding (limited time)",
-                        "After July 30th: 3 docs/month",
-                        "Basic support (permanent)"
-                    ],
-                    buttonText: "Get Free Pro Access",
-                    priceDisplay: "$0/month"
-                },
-                {
-                    title: "Pro",
-                    price: 4,
-                    planId: 'pro',
-                    colorScheme: "fuchsia",
-                    features: [
-                        "100 documents per month",
-                        "Unlimited signers",
-                        "All templates & forms",
-                        "Advanced workflows",
-                        "Custom branding",
-                        "Priority email support",
-                        "1-year document storage",
-                        "Bulk sending",
-                        "Document analytics"
-                    ],
-                    buttonText: "Start Pro Plan",
-                    priceDisplay: "$4/month",
-                    subtext: "Billed annually ($48/year)"
-                },
-                {
-                    title: "Business",
-                    price: 20,
-                    planId: 'business',
-                    colorScheme: "fuchsia",
-                    features: [
-                        "500 documents per month",
-                        "Unlimited signers",
-                        "Advanced integrations",
-                        "Team management",
-                        "Advanced security",
-                        "Phone & chat support",
-                        "Unlimited storage",
-                        "API access",
-                        "White-label options",
-                        "Advanced analytics",
-                        "Compliance features"
-                    ],
-                    buttonText: "Start Business Trial",
-                    priceDisplay: "$20/month",
-                    subtext: "Billed annually ($240/year)"
+                    buttonText: "Contact Sales",
+                    priceDisplay: "₹500/month",
+                    subtext: "For large retail operations"
                 }
             ]
         };
@@ -310,7 +319,7 @@
             
             try {
                 const date = new Date(dateString);
-                return date.toLocaleDateString('en-US', {
+                return date.toLocaleDateString('en-IN', {
                     day: 'numeric',
                     month: 'short',
                     year: 'numeric'
@@ -362,6 +371,11 @@
 
         // Payment handling
         async function handlePayment(plan) {
+            if (plan.planId === 'enterprise') {
+                showPaymentStatus('success', 'Contact our sales team for Enterprise plan: sales@kiranapos.com');
+                return;
+            }
+
             try {
                 showLoading('Processing payment...');
                 
@@ -403,15 +417,15 @@
                     key: 'rzp_live_lMZVjvewP7tKIL',
                     amount: orderData.order.amount,
                     currency: "INR",
-                    name: "SnapyForm",
-                    description: `${plan.title} Subscription`,
+                    name: "Kirana POS",
+                    description: `${plan.title} Subscription - Kirana POS`,
                     order_id: orderData.order.id,
                     prefill: {
                         name: "",
                         email: userEmail || ""
                     },
                     theme: {
-                        color: '#E879F9'
+                        color: '#2563eb'
                     },
                     modal: {
                         animation: true,
@@ -457,7 +471,7 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    showPaymentStatus('success', 'Payment successful! Plan will be updated shortly.');
+                    showPaymentStatus('success', 'Payment successful! Your plan will be upgraded shortly.');
                     setTimeout(() => window.location.reload(), 2000);
                 } else {
                     showPaymentStatus('error', 'Payment verification failed');
@@ -521,7 +535,7 @@
             if (loading) return;
 
             // Update stats
-            document.getElementById('currentPlan').textContent = billingData.currentPlan || 'Free';
+            document.getElementById('currentPlan').textContent = billingData.currentPlan || 'Basic';
             document.getElementById('nextBillingDate').textContent = formatDate(billingData.nextBillingDate);
             document.getElementById('lastPaymentDate').textContent = formatDate(billingData.lastPaymentDate);
 
@@ -539,71 +553,48 @@
             
             container.innerHTML = plans.map(plan => {
                 const isCurrentPlan = billingData.currentPlan === plan.title;
-                const activeClass = isCurrentPlan ? 'bg-fuchsia-50 border-fuchsia-500' : 'bg-white border-gray-200';
-                const buttonClass = plan.title === "Free" 
-                    ? 'bg-gray-400 cursor-not-allowed' 
-                    : isCurrentPlan 
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'fuchsia-gradient hover:opacity-90';
+                const activeClass = isCurrentPlan ? 'bg-blue-50 border-blue-500 border-2' : 'bg-white border-gray-200 border';
+                const buttonClass = isCurrentPlan 
+                    ? 'bg-gray-400 cursor-not-allowed text-white' 
+                    : `${plan.gradient} hover:opacity-90 text-white`;
                 
-                const buttonText = plan.title === "Free" 
-                    ? plan.buttonText 
-                    : isCurrentPlan 
-                        ? 'Current Plan' 
-                        : plan.buttonText;
+                const buttonText = isCurrentPlan ? 'Current Plan' : plan.buttonText;
+                const popularBadge = plan.popular ? '<div class="absolute -top-3 left-1/2 transform -translate-x-1/2"><span class="bg-green-500 text-white px-3 py-1 text-xs rounded-full font-medium">MOST POPULAR</span></div>' : '';
 
                 return `
-                    <div class="relative rounded-lg p-4 border-2 transition-all duration-300 ${activeClass}">
-                        ${isCurrentPlan ? '<span class="absolute -top-3 left-4 bg-fuchsia-500 text-white px-2 py-0.5 text-xs rounded-full">Active</span>' : ''}
+                    <div class="relative rounded-2xl p-5 sm:p-6 transition-all duration-300 ${activeClass} ${plan.popular ? 'transform scale-105' : ''}">
+                        ${popularBadge}
+                        ${isCurrentPlan ? '<div class="absolute -top-3 right-4 bg-blue-500 text-white px-3 py-1 text-xs rounded-full font-medium">ACTIVE</div>' : ''}
                         
-                        <div class="text-center mb-4">
-                            <h3 class="text-lg font-medium text-gray-900">${plan.title}</h3>
-                            <div class="mt-2">
-                                <span class="text-2xl font-bold text-gray-900">${plan.priceDisplay || `${currency === 'INR' ? '₹' : '$'}${plan.price}/month`}</span>
-                                ${plan.subtext ? `<div class="text-xs text-gray-500">${plan.subtext}</div>` : ''}
+                        <div class="text-center mb-6">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">${plan.title}</h3>
+                            <div class="mb-3">
+                                <span class="text-3xl sm:text-4xl font-bold text-gray-900">${plan.priceDisplay}</span>
+                                ${plan.subtext ? `<div class="text-sm text-gray-500 mt-1">${plan.subtext}</div>` : ''}
                             </div>
                         </div>
                         
-                        <ul class="space-y-2 mb-4">
+                        <ul class="space-y-3 mb-6">
                             ${plan.features.map(feature => `
                                 <li class="flex items-start text-sm">
-                                    <svg class="h-4 w-4 text-fuchsia-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg class="feature-icon text-${plan.colorScheme}-500 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                     </svg>
-                                    <span class="text-gray-600">${feature}</span>
+                                    <span class="text-gray-700 leading-relaxed">${feature}</span>
                                 </li>
                             `).join('')}
                         </ul>
                         
                         <button
-                            onclick="${plan.title !== "Free" ? `handlePayment(${JSON.stringify(plan).replace(/"/g, '&quot;')})` : ''}"
-                            ${plan.title === "Free" || isCurrentPlan ? 'disabled' : ''}
-                            class="w-full py-2 px-4 rounded-md text-white transition-colors ${buttonClass}"
+                            onclick="${!isCurrentPlan ? `handlePayment(${JSON.stringify(plan).replace(/"/g, '&quot;')})` : ''}"
+                            ${isCurrentPlan ? 'disabled' : ''}
+                            class="w-full py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${buttonClass}"
                         >
                             ${buttonText}
                         </button>
                     </div>
                 `;
             }).join('');
-        }
-
-        function updateCurrencyToggle() {
-            const toggle = document.getElementById('currencyToggle');
-            const slider = document.getElementById('currencySlider');
-            const inrLabel = document.getElementById('inrLabel');
-            const usdLabel = document.getElementById('usdLabel');
-            
-            if (currency === 'INR') {
-                toggle.className = 'relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none bg-fuchsia-500';
-                slider.className = 'inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform translate-x-1';
-                inrLabel.className = 'text-sm font-medium text-fuchsia-600';
-                usdLabel.className = 'text-sm font-medium text-gray-500';
-            } else {
-                toggle.className = 'relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none bg-gray-300';
-                slider.className = 'inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform translate-x-6';
-                inrLabel.className = 'text-sm font-medium text-gray-500';
-                usdLabel.className = 'text-sm font-medium text-fuchsia-600';
-            }
         }
 
         // Event listeners
@@ -614,15 +605,7 @@
                 document.addEventListener('message', handleWebViewMessage);
             }
 
-            // Currency toggle
-            document.getElementById('currencyToggle').addEventListener('click', function() {
-                currency = currency === 'INR' ? 'USD' : 'INR';
-                updateCurrencyToggle();
-                updatePricingCards();
-            });
-
             // Initial setup
-            updateCurrencyToggle();
             fetchBillingData();
         });
     </script>
