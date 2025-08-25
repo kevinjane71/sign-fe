@@ -22,7 +22,10 @@ export default function AuthGuard({ children }) {
     '/price',
     '/contact-us',
     '/sign',
-    '/demo'
+    '/demo',
+    '/kibill',
+    '/meetsynk',
+    '/kirana'
   ]
 
   useEffect(() => {
