@@ -1,6 +1,43 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+
+// Error boundary to prevent crashes from external scripts
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.log('Error caught by boundary:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Something went wrong</h2>
+            <p className="text-gray-600 mb-4">Please refresh the page and try again.</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-4 py-2 bg-fuchsia-500 text-white rounded-md hover:bg-fuchsia-600"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 import { AlertCircle, CheckCircle, Loader2, Calendar, Package, Check, CreditCard } from 'lucide-react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_MEETSYNK_API_BASE_URL || "https://apis-chi-azure.vercel.app/formio/payment";
@@ -85,7 +122,8 @@ const PlanCard = ({
   onPaymentStart,
   buttonText,
   priceDisplay,
-  subtext
+  subtext,
+  userEmail
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const colorMap = {
@@ -137,8 +175,10 @@ const PlanCard = ({
       if (!window.Razorpay) {
         throw new Error('Failed to load Razorpay SDK');
       }
-      // Get user details
-      const userObj = JSON.parse(localStorage.getItem('user'));
+      // Use the current userEmail (no localStorage dependency)
+      if (!userEmail) {
+        throw new Error('User email not available');
+      }
   
       // Convert price to number and calculate paise amount
       const priceInRupees = Number(price);
@@ -157,7 +197,7 @@ const PlanCard = ({
           planId,
           amount: priceInRupees, // Send original amount in rupees
           currency: 'INR',
-          email: userObj?.email
+          email: userEmail
         })
       });
   
@@ -177,8 +217,8 @@ const PlanCard = ({
         description: `${title} Subscription`,
         order_id: orderData.order.id, // Use id from order response
         prefill: {
-          name: userObj?.name || "",
-          email: userObj?.email || ""
+          name: "",
+          email: userEmail || ""
         },
         theme: {
           color: colorScheme === 'blue' ? '#3B82F6' : 
@@ -321,16 +361,63 @@ const BillingDashboard = () => {
   const [error, setError] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [currency, setCurrency] = useState('INR');
+  const [userEmail, setUserEmail] = useState('malik.vk07@gmail.com'); // Default email
+
+  // Handle messages from React Native WebView
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Prevent locator-js and similar debugging tools from interfering
+      window.addEventListener('error', (e) => {
+        if (e.message.includes('locator') || e.message.includes('hook.bundle')) {
+          e.preventDefault();
+          return false;
+        }
+      });
+
+      // Listen for messages from React Native WebView
+      const handleMessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'SET_USER_EMAIL' && data.email) {
+            console.log('Received email from React Native:', data.email);
+            setUserEmail(data.email);
+          }
+        } catch (e) {
+          // Handle non-JSON messages or other message types
+          console.log('Received message:', event.data);
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+      
+      // Also listen for React Native specific message event
+      if (window.ReactNativeWebView) {
+        document.addEventListener('message', handleMessage);
+      }
+
+      return () => {
+        window.removeEventListener('message', handleMessage);
+        if (window.ReactNativeWebView) {
+          document.removeEventListener('message', handleMessage);
+        }
+      };
+    }
+  }, []);
 
   useEffect(() => {
     const fetchBillingData = async () => {
       try {
         setLoading(true);
-        const userObj = JSON.parse(localStorage.getItem('user'));
-        const email = userObj?.email;
+        
+        // Check if we're on client side
+        if (typeof window === 'undefined') {
+          setLoading(false);
+          return;
+        }
 
-        if (!email) {
-            console.log('No user email data found');
+        // Use the userEmail state (either default or from React Native)
+        if (!userEmail) {
+            console.log('No user email available');
             setLoading(false);
             return;
         }
@@ -340,7 +427,7 @@ const BillingDashboard = () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ email })
+          body: JSON.stringify({ email: userEmail })
         });
 
         if (!response.ok) {
@@ -355,14 +442,20 @@ const BillingDashboard = () => {
         }
       } catch (err) {
         console.error('Billing data fetch error:', err);
-        setError(err.message);
+        // Don't show error for common issues, just use default data
+        if (err.message.includes('Failed to fetch') || err.message.includes('network')) {
+          console.log('Using default billing data due to network error');
+          setError(null);
+        } else {
+          setError(err.message);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchBillingData();
-  }, []);
+  }, [userEmail]); // Re-fetch when email changes
 
   const planData = {
     INR: [
@@ -606,6 +699,7 @@ const BillingDashboard = () => {
               onPaymentSuccess={handlePaymentSuccess}
               onPaymentError={handlePaymentError}
               onPaymentStart={handlePaymentStart}
+              userEmail={userEmail}
             />
           ))}
         </div>
@@ -614,4 +708,11 @@ const BillingDashboard = () => {
   );
 };
 
-export default BillingDashboard; 
+// Wrap the default export with ErrorBoundary
+const WrappedBillingDashboard = () => (
+  <ErrorBoundary>
+    <BillingDashboard />
+  </ErrorBoundary>
+);
+
+export default WrappedBillingDashboard; 
