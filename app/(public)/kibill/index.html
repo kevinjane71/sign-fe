@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription & Billing - eSignTap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        .loading-spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #e879f9;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .fuchsia-gradient {
+            background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="bg-white p-4 rounded-lg flex items-center space-x-3">
+            <div class="loading-spinner"></div>
+            <p class="text-sm text-gray-700" id="loadingMessage">Processing payment...</p>
+        </div>
+    </div>
+
+    <div class="bg-gray-50 mt-10 sm:p-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+                <div>
+                    <h1 class="text-xl font-semibold text-gray-900">Subscription & Billing</h1>
+                    <p class="text-sm text-gray-500">Manage your payment details and subscription plan</p>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="min-h-[300px] flex items-center justify-center bg-gray-50">
+                <div class="loading-spinner"></div>
+            </div>
+
+            <!-- Main Content -->
+            <div id="mainContent" class="hidden">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                    <!-- Current Plan Card -->
+                    <div class="bg-white rounded-lg p-3 card-shadow border-t-4 border-t-fuchsia-500">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-xs text-gray-500">Current Plan</h3>
+                                <p class="mt-1 text-base font-medium text-gray-900" id="currentPlan">Free</p>
+                                <div class="mt-0.5 text-xs text-gray-500 flex items-center gap-1">
+                                    <svg class="h-3 w-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span>Active</span>
+                                </div>
+                            </div>
+                            <div class="p-2 rounded-md bg-fuchsia-50 text-fuchsia-500">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Next Billing Date Card -->
+                    <div class="bg-white rounded-lg p-3 card-shadow border-t-4 border-t-fuchsia-500">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-xs text-gray-500">Next Billing Date</h3>
+                                <p class="mt-1 text-base font-medium text-gray-900" id="nextBillingDate">NA</p>
+                            </div>
+                            <div class="p-2 rounded-md bg-fuchsia-50 text-fuchsia-500">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Last Payment Card -->
+                    <div class="bg-white rounded-lg p-3 card-shadow border-t-4 border-t-fuchsia-500">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-xs text-gray-500">Last Payment</h3>
+                                <p class="mt-1 text-base font-medium text-gray-900" id="lastPaymentDate">NA</p>
+                            </div>
+                            <div class="p-2 rounded-md bg-fuchsia-50 text-fuchsia-500">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Status Alert -->
+                <div id="paymentStatus" class="hidden mb-6 p-3 rounded-lg">
+                    <p class="text-sm flex items-center gap-2" id="paymentStatusText"></p>
+                </div>
+
+                <!-- Currency Toggle -->
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-0">Subscription Plans</h2>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm font-medium text-fuchsia-600" id="inrLabel">INR</span>
+                        <button id="currencyToggle" class="relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none bg-fuchsia-500">
+                            <span id="currencySlider" class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform translate-x-1"></span>
+                        </button>
+                        <span class="text-sm font-medium text-gray-500" id="usdLabel">USD</span>
+                    </div>
+                </div>
+
+                <!-- Pricing Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" id="pricingCards">
+                    <!-- Cards will be generated dynamically -->
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" class="hidden min-h-[400px] flex flex-col items-center justify-center bg-gray-50 text-center p-4">
+                <svg class="h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h3 class="text-lg font-medium text-gray-900 mb-1">No Billing Data Available</h3>
+                <p class="text-sm text-gray-500 max-w-md">Unable to load billing information at this time. Please try again later.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let billingData = {
+            currentPlan: 'Free',
+            nextBillingDate: 'NA',
+            lastPaymentDate: 'NA'
+        };
+        let userEmail = 'malik.vk07@gmail.com'; // Default email
+        let currency = 'INR';
+        let loading = true;
+
+        const API_BASE_URL = "https://apis-chi-azure.vercel.app/formio/payment";
+
+        // Plan data
+        const planData = {
+            INR: [
+                {
+                    title: "Free",
+                    price: 0,
+                    planId: 'free',
+                    colorScheme: "fuchsia",
+                    features: [
+                        "🎁 ALL PRO FEATURES until July 30th!",
+                        "50 documents per month (limited time)",
+                        "Unlimited signers (limited time)",
+                        "All templates & forms (limited time)",
+                        "Priority email support (limited time)",
+                        "Custom branding (limited time)",
+                        "After July 30th: 3 docs/month",
+                        "Basic support (permanent)"
+                    ],
+                    buttonText: "Get Free Pro Access",
+                    priceDisplay: "₹0/month"
+                },
+                {
+                    title: "Pro",
+                    price: 49,
+                    planId: 'pro',
+                    colorScheme: "fuchsia",
+                    features: [
+                        "100 documents per month",
+                        "Unlimited signers",
+                        "All templates & forms",
+                        "Advanced workflows",
+                        "Custom branding",
+                        "Priority email support",
+                        "1-year document storage",
+                        "Bulk sending",
+                        "Document analytics"
+                    ],
+                    buttonText: "Start Pro Plan",
+                    priceDisplay: "₹49/month",
+                    subtext: "Billed annually (₹500/year)"
+                },
+                {
+                    title: "Business",
+                    price: 200,
+                    planId: 'business',
+                    colorScheme: "fuchsia",
+                    features: [
+                        "500 documents per month",
+                        "Unlimited signers",
+                        "Advanced integrations",
+                        "Team management",
+                        "Advanced security",
+                        "Phone & chat support",
+                        "Unlimited storage",
+                        "API access",
+                        "White-label options",
+                        "Advanced analytics",
+                        "Compliance features"
+                    ],
+                    buttonText: "Start Business Trial",
+                    priceDisplay: "₹200/month",
+                    subtext: "Billed annually (₹1000/year)"
+                }
+            ],
+            USD: [
+                {
+                    title: "Free",
+                    price: 0,
+                    planId: 'free',
+                    colorScheme: "fuchsia",
+                    features: [
+                        "🎁 ALL PRO FEATURES until July 30th!",
+                        "50 documents per month (limited time)",
+                        "Unlimited signers (limited time)",
+                        "All templates & forms (limited time)",
+                        "Priority email support (limited time)",
+                        "Custom branding (limited time)",
+                        "After July 30th: 3 docs/month",
+                        "Basic support (permanent)"
+                    ],
+                    buttonText: "Get Free Pro Access",
+                    priceDisplay: "$0/month"
+                },
+                {
+                    title: "Pro",
+                    price: 4,
+                    planId: 'pro',
+                    colorScheme: "fuchsia",
+                    features: [
+                        "100 documents per month",
+                        "Unlimited signers",
+                        "All templates & forms",
+                        "Advanced workflows",
+                        "Custom branding",
+                        "Priority email support",
+                        "1-year document storage",
+                        "Bulk sending",
+                        "Document analytics"
+                    ],
+                    buttonText: "Start Pro Plan",
+                    priceDisplay: "$4/month",
+                    subtext: "Billed annually ($48/year)"
+                },
+                {
+                    title: "Business",
+                    price: 20,
+                    planId: 'business',
+                    colorScheme: "fuchsia",
+                    features: [
+                        "500 documents per month",
+                        "Unlimited signers",
+                        "Advanced integrations",
+                        "Team management",
+                        "Advanced security",
+                        "Phone & chat support",
+                        "Unlimited storage",
+                        "API access",
+                        "White-label options",
+                        "Advanced analytics",
+                        "Compliance features"
+                    ],
+                    buttonText: "Start Business Trial",
+                    priceDisplay: "$20/month",
+                    subtext: "Billed annually ($240/year)"
+                }
+            ]
+        };
+
+        // Utility functions
+        function formatDate(dateString) {
+            if (!dateString || dateString === 'NA') return 'NA';
+            
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
+            } catch (error) {
+                console.error('Date formatting error:', error);
+                return dateString;
+            }
+        }
+
+        function showLoading(message = 'Processing payment...') {
+            document.getElementById('loadingMessage').textContent = message;
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        function showPaymentStatus(type, message) {
+            const statusEl = document.getElementById('paymentStatus');
+            const textEl = document.getElementById('paymentStatusText');
+            
+            statusEl.className = `mb-6 p-3 rounded-lg ${
+                type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+            }`;
+            
+            const icon = type === 'success' 
+                ? '<svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>'
+                : '<svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>';
+            
+            textEl.innerHTML = icon + ' ' + message;
+            statusEl.classList.remove('hidden');
+        }
+
+        // WebView message handling
+        function handleWebViewMessage(event) {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === 'SET_USER_EMAIL' && data.email) {
+                    console.log('Received email from React Native:', data.email);
+                    userEmail = data.email;
+                    fetchBillingData(); // Re-fetch with new email
+                }
+            } catch (e) {
+                console.log('Received message:', event.data);
+            }
+        }
+
+        // Payment handling
+        async function handlePayment(plan) {
+            try {
+                showLoading('Processing payment...');
+                
+                if (!window.Razorpay) {
+                    throw new Error('Payment system not available');
+                }
+                
+                if (!userEmail) {
+                    throw new Error('User email not available');
+                }
+                
+                const priceInRupees = Number(plan.price);
+                
+                console.log('Amount being sent:', {
+                    rupees: priceInRupees
+                });
+                
+                // Create order
+                const orderResponse = await fetch(`${API_BASE_URL}/create-order`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        planId: plan.planId,
+                        amount: priceInRupees,
+                        currency: 'INR',
+                        email: userEmail
+                    })
+                });
+                
+                if (!orderResponse.ok) {
+                    throw new Error('Failed to create order');
+                }
+                
+                const orderData = await orderResponse.json();
+                console.log('Order response:', orderData);
+                
+                // Initialize Razorpay
+                const options = {
+                    key: 'rzp_live_lMZVjvewP7tKIL',
+                    amount: orderData.order.amount,
+                    currency: "INR",
+                    name: "SnapyForm",
+                    description: `${plan.title} Subscription`,
+                    order_id: orderData.order.id,
+                    prefill: {
+                        name: "",
+                        email: userEmail || ""
+                    },
+                    theme: {
+                        color: '#E879F9'
+                    },
+                    modal: {
+                        animation: true,
+                        backdropClass: 'bg-black bg-opacity-50',
+                        confirm_close: true,
+                        handleback: true,
+                    },
+                    handler: function (response) {
+                        verifyPayment({
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_signature: response.razorpay_signature,
+                            planId: plan.planId,
+                            amount: plan.price
+                        });
+                    }
+                };
+                
+                const razorpay = new window.Razorpay(options);
+                razorpay.on('payment.failed', function (response) {
+                    handlePaymentError(response.error);
+                });
+                razorpay.open();
+                
+            } catch (error) {
+                console.error('Payment initialization error:', error);
+                handlePaymentError(error);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function verifyPayment(paymentData) {
+            try {
+                showLoading('Verifying payment...');
+                
+                const response = await fetch(`${API_BASE_URL}/razorpay/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(paymentData)
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    showPaymentStatus('success', 'Payment successful! Plan will be updated shortly.');
+                    setTimeout(() => window.location.reload(), 2000);
+                } else {
+                    showPaymentStatus('error', 'Payment verification failed');
+                }
+            } catch (error) {
+                console.error('Verification error:', error);
+                showPaymentStatus('error', 'Payment verification failed');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function handlePaymentError(error) {
+            const message = error.message || 'Payment failed. Please try again.';
+            showPaymentStatus('error', message);
+        }
+
+        // Fetch billing data
+        async function fetchBillingData() {
+            try {
+                showLoading('Loading billing data...');
+                
+                if (!userEmail) {
+                    console.log('No user email available');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/billing`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: userEmail })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch billing data');
+                }
+
+                const data = await response.json();
+                if (data.success && data.billing) {
+                    billingData = data.billing;
+                } else {
+                    throw new Error(data.error || 'Invalid billing data');
+                }
+            } catch (err) {
+                console.error('Billing data fetch error:', err);
+                // Don't show error for common issues, just use default data
+                if (err.message.includes('Failed to fetch') || err.message.includes('network')) {
+                    console.log('Using default billing data due to network error');
+                }
+            } finally {
+                loading = false;
+                hideLoading();
+                updateUI();
+            }
+        }
+
+        // Update UI
+        function updateUI() {
+            if (loading) return;
+
+            // Update stats
+            document.getElementById('currentPlan').textContent = billingData.currentPlan || 'Free';
+            document.getElementById('nextBillingDate').textContent = formatDate(billingData.nextBillingDate);
+            document.getElementById('lastPaymentDate').textContent = formatDate(billingData.lastPaymentDate);
+
+            // Show main content
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+
+            // Update pricing cards
+            updatePricingCards();
+        }
+
+        function updatePricingCards() {
+            const plans = planData[currency];
+            const container = document.getElementById('pricingCards');
+            
+            container.innerHTML = plans.map(plan => {
+                const isCurrentPlan = billingData.currentPlan === plan.title;
+                const activeClass = isCurrentPlan ? 'bg-fuchsia-50 border-fuchsia-500' : 'bg-white border-gray-200';
+                const buttonClass = plan.title === "Free" 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : isCurrentPlan 
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'fuchsia-gradient hover:opacity-90';
+                
+                const buttonText = plan.title === "Free" 
+                    ? plan.buttonText 
+                    : isCurrentPlan 
+                        ? 'Current Plan' 
+                        : plan.buttonText;
+
+                return `
+                    <div class="relative rounded-lg p-4 border-2 transition-all duration-300 ${activeClass}">
+                        ${isCurrentPlan ? '<span class="absolute -top-3 left-4 bg-fuchsia-500 text-white px-2 py-0.5 text-xs rounded-full">Active</span>' : ''}
+                        
+                        <div class="text-center mb-4">
+                            <h3 class="text-lg font-medium text-gray-900">${plan.title}</h3>
+                            <div class="mt-2">
+                                <span class="text-2xl font-bold text-gray-900">${plan.priceDisplay || `${currency === 'INR' ? '₹' : '$'}${plan.price}/month`}</span>
+                                ${plan.subtext ? `<div class="text-xs text-gray-500">${plan.subtext}</div>` : ''}
+                            </div>
+                        </div>
+                        
+                        <ul class="space-y-2 mb-4">
+                            ${plan.features.map(feature => `
+                                <li class="flex items-start text-sm">
+                                    <svg class="h-4 w-4 text-fuchsia-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span class="text-gray-600">${feature}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        
+                        <button
+                            onclick="${plan.title !== "Free" ? `handlePayment(${JSON.stringify(plan).replace(/"/g, '&quot;')})` : ''}"
+                            ${plan.title === "Free" || isCurrentPlan ? 'disabled' : ''}
+                            class="w-full py-2 px-4 rounded-md text-white transition-colors ${buttonClass}"
+                        >
+                            ${buttonText}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateCurrencyToggle() {
+            const toggle = document.getElementById('currencyToggle');
+            const slider = document.getElementById('currencySlider');
+            const inrLabel = document.getElementById('inrLabel');
+            const usdLabel = document.getElementById('usdLabel');
+            
+            if (currency === 'INR') {
+                toggle.className = 'relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none bg-fuchsia-500';
+                slider.className = 'inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform translate-x-1';
+                inrLabel.className = 'text-sm font-medium text-fuchsia-600';
+                usdLabel.className = 'text-sm font-medium text-gray-500';
+            } else {
+                toggle.className = 'relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none bg-gray-300';
+                slider.className = 'inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform translate-x-6';
+                inrLabel.className = 'text-sm font-medium text-gray-500';
+                usdLabel.className = 'text-sm font-medium text-fuchsia-600';
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // WebView message listeners
+            window.addEventListener('message', handleWebViewMessage);
+            if (window.ReactNativeWebView) {
+                document.addEventListener('message', handleWebViewMessage);
+            }
+
+            // Currency toggle
+            document.getElementById('currencyToggle').addEventListener('click', function() {
+                currency = currency === 'INR' ? 'USD' : 'INR';
+                updateCurrencyToggle();
+                updatePricingCards();
+            });
+
+            // Initial setup
+            updateCurrencyToggle();
+            fetchBillingData();
+        });
+    </script>
+</body>
+</html>
