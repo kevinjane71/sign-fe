@@ -237,6 +237,7 @@
             lastPaymentDate: 'NA'
         };
         let userEmail = 'store@example.com'; // Default email
+        let userPhone = ''; // User phone number
         let currency = 'INR';
         let loading = true;
 
@@ -359,13 +360,30 @@
         function handleWebViewMessage(event) {
             try {
                 const data = JSON.parse(event.data);
-                if (data.type === 'SET_USER_EMAIL' && data.email) {
-                    console.log('Received email from React Native:', data.email);
+                console.log('📱 WebView received message:', data);
+                
+                // Handle the new SET_USER_DATA message with both phone and email
+                if (data.type === 'SET_USER_DATA') {
+                    if (data.email) {
+                        console.log('📱 WebView - Received email from React Native:', data.email);
+                        userEmail = data.email;
+                    }
+                    if (data.phone) {
+                        console.log('📱 WebView - Received phone from React Native:', data.phone);
+                        userPhone = data.phone;
+                    }
+                    console.log('📱 WebView - Updated user data - Email:', userEmail, 'Phone:', userPhone);
+                    fetchBillingData(); // Re-fetch with new user data
+                }
+                
+                // Keep backward compatibility with old SET_USER_EMAIL message
+                else if (data.type === 'SET_USER_EMAIL' && data.email) {
+                    console.log('📱 WebView - Received email from React Native (legacy):', data.email);
                     userEmail = data.email;
                     fetchBillingData(); // Re-fetch with new email
                 }
             } catch (e) {
-                console.log('Received message:', event.data);
+                console.log('📱 WebView - Received non-JSON message:', event.data);
             }
         }
 
@@ -495,16 +513,23 @@
                 showLoading('Loading billing data...');
                 
                 if (!userEmail) {
-                    console.log('No user email available');
+                    console.log('📱 WebView - No user email available');
                     return;
                 }
+
+                const requestData = { 
+                    email: userEmail,
+                    phone: userPhone || '' // Include phone number in the request
+                };
+
+                console.log('📱 WebView - Fetching billing data with:', requestData);
 
                 const response = await fetch(`${API_BASE_URL}/billing`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ email: userEmail })
+                    body: JSON.stringify(requestData)
                 });
 
                 if (!response.ok) {
