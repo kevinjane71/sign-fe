@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Kirana POS - Subscription Plans</title>
+    <title>StoreZ - Subscription Plans</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
@@ -89,8 +89,27 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                         </svg>
                     </div>
-                    <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Kirana POS</h1>
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-900">StoreZ</h1>
                 </div>
+                
+                <!-- User Info Display -->
+                <div id="userInfo" class="hidden mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <div class="flex items-center justify-center space-x-4 text-sm">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            <span class="text-blue-700 font-medium" id="displayEmail">Loading...</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                            </svg>
+                            <span class="text-blue-700 font-medium" id="displayPhone">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
                 <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-2">Subscription Plans</h2>
                 <p class="text-sm sm:text-base text-gray-600">Choose the perfect plan for your store's needs</p>
             </div>
@@ -168,7 +187,7 @@
 
                 <!-- Why Choose Kirana POS -->
                 <div class="mt-8 sm:mt-12 bg-white rounded-xl p-6 card-shadow">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4 text-center">Why Choose Kirana POS?</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 text-center">Why Choose StoreZ ?</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="flex items-start space-x-3">
                             <div class="p-2 rounded-lg bg-blue-50 text-blue-600">
@@ -367,12 +386,18 @@
                     if (data.email) {
                         console.log('📱 WebView - Received email from React Native:', data.email);
                         userEmail = data.email;
+                        document.getElementById('displayEmail').textContent = data.email;
                     }
                     if (data.phone) {
                         console.log('📱 WebView - Received phone from React Native:', data.phone);
                         userPhone = data.phone;
+                        document.getElementById('displayPhone').textContent = data.phone;
                     }
                     console.log('📱 WebView - Updated user data - Email:', userEmail, 'Phone:', userPhone);
+                    
+                    // Show user info section
+                    document.getElementById('userInfo').classList.remove('hidden');
+                    
                     fetchBillingData(); // Re-fetch with new user data
                 }
                 
@@ -380,6 +405,12 @@
                 else if (data.type === 'SET_USER_EMAIL' && data.email) {
                     console.log('📱 WebView - Received email from React Native (legacy):', data.email);
                     userEmail = data.email;
+                    document.getElementById('displayEmail').textContent = data.email;
+                    document.getElementById('displayPhone').textContent = userPhone || 'N/A';
+                    
+                    // Show user info section
+                    document.getElementById('userInfo').classList.remove('hidden');
+                    
                     fetchBillingData(); // Re-fetch with new email
                 }
             } catch (e) {
@@ -390,7 +421,7 @@
         // Payment handling
         async function handlePayment(plan) {
             if (plan.planId === 'enterprise') {
-                showPaymentStatus('success', 'Contact our sales team for Enterprise plan: sales@kiranapos.com');
+                showPaymentStatus('success', 'Contact our sales team for Enterprise plan: sales@storez.com');
                 return;
             }
 
@@ -435,8 +466,8 @@
                     key: 'rzp_live_lMZVjvewP7tKIL',
                     amount: orderData.order.amount,
                     currency: "INR",
-                    name: "Kirana POS",
-                    description: `${plan.title} Subscription - Kirana POS`,
+                    name: "StoreZ POS",
+                    description: `${plan.title} Subscription - StoreZ`,
                     order_id: orderData.order.id,
                     prefill: {
                         name: "",
