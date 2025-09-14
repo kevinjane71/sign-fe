@@ -268,9 +268,9 @@
         const planData = {
             INR: [
                 {
-                    title: "Basic",
+                    title: "Free Plan",
                     price: 0,
-                    planId: 'basic',
+                    planId: 'free',
                     colorScheme: "blue",
                     gradient: "primary-gradient",
                     features: [
@@ -287,7 +287,7 @@
                     priceDisplay: "Free"
                 },
                 {
-                    title: "Pro",
+                    title: "Pro Plan",
                     price: 49,
                     planId: 'pro', 
                     colorScheme: "green",
@@ -310,13 +310,13 @@
                     subtext: "Perfect for growing stores"
                 },
                 {
-                    title: "Enterprise",
+                    title: "Basic Plan",
                     price: 499,
                     planId: 'basic',
                     colorScheme: "purple",
                     gradient: "premium-gradient", 
                     features: [
-                        "⭐ All Basic Features",
+                        "⭐ All Free Features",
                         "📦 Up to 1,000 products",
                         "🔄 5,000 transactions per month",
                         "📊 Inventory tracking",
@@ -327,7 +327,7 @@
                         "💳 Multiple payment modes",
                         "🔄 Data synchronization"
                     ],
-                    buttonText: "Upgrade to Enterprise",
+                    buttonText: "Upgrade to Basic",
                     priceDisplay: "499/month",
                     subtext: "For medium-sized stores"
                 }
@@ -579,23 +579,53 @@
 
                 console.log('📱 WebView - Fetching billing data with:', requestData);
 
-                const response = await fetch(`${API_BASE_URL}/billing`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(requestData)
-                });
+                // Try to get subscription status first, then fallback to billing endpoint
+                let response;
+                try {
+                    response = await fetch(`${API_BASE_URL}/subscription/${userId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                } catch (error) {
+                    console.log('📱 WebView - Subscription endpoint failed, trying billing endpoint');
+                    response = await fetch(`${API_BASE_URL}/billing`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+                }
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch billing data');
                 }
 
                 const data = await response.json();
-                if (data.success && data.billing) {
-                    billingData = data.billing;
+                
+                if (data.success) {
+                    if (data.subscription) {
+                        // Handle subscription endpoint response
+                        const sub = data.subscription;
+                        billingData = {
+                            currentPlan: sub.planName || 'Free Plan',
+                            nextBillingDate: sub.endDate || 'NA',
+                            lastPaymentDate: sub.startDate || 'NA',
+                            status: sub.status || 'active',
+                            daysRemaining: sub.daysRemaining || null,
+                            isActive: sub.isActive || false,
+                            isPaid: sub.isPaid || false
+                        };
+                    } else if (data.billing) {
+                        // Handle billing endpoint response
+                        billingData = data.billing;
+                    } else {
+                        throw new Error('Invalid response format');
+                    }
                 } else {
-                    throw new Error(data.error || 'Invalid billing data');
+                    throw new Error(data.error || 'Failed to fetch data');
                 }
             } catch (err) {
                 console.error('Billing data fetch error:', err);
@@ -632,7 +662,9 @@
             const container = document.getElementById('pricingCards');
             
             container.innerHTML = plans.map(plan => {
-                const isCurrentPlan = billingData.currentPlan === plan.title;
+                // Match by plan title or planId for more accurate comparison
+                const isCurrentPlan = (billingData.currentPlan === plan.title) || 
+                                     (billingData.currentPlan.toLowerCase().includes(plan.title.toLowerCase()));
                 const activeClass = isCurrentPlan ? 'bg-blue-50 border-blue-500 border-2' : 'bg-white border-gray-200 border';
                 const buttonClass = isCurrentPlan 
                     ? 'bg-gray-400 cursor-not-allowed text-white' 
