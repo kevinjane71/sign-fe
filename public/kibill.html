@@ -89,7 +89,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                         </svg>
                     </div>
-                    <h1 class="text-xl sm:text-2xl font-bold text-gray-900">StoreZ</h1>
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Kirana POS</h1>
                 </div>
                 
                 <!-- User Info Display -->
@@ -187,7 +187,7 @@
 
                 <!-- Why Choose Kirana POS -->
                 <div class="mt-8 sm:mt-12 bg-white rounded-xl p-6 card-shadow">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4 text-center">Why Choose StoreZ ?</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 text-center">Why Choose Kirana POS ?</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="flex items-start space-x-3">
                             <div class="p-2 rounded-lg bg-blue-50 text-blue-600">
@@ -257,10 +257,12 @@
         };
         let userEmail = 'store@example.com'; // Default email
         let userPhone = ''; // User phone number
+        let userId = ''; // User ID from Firebase
+        let shopId = ''; // Shop ID
         let currency = 'INR';
         let loading = true;
 
-        const API_BASE_URL = "https://apis-chi-azure.vercel.app/formio/payment";
+        const API_BASE_URL = "https://ai-kirana-be.vercel.app/api/payments";
 
         // Plan data customized for Kirana POS
         const planData = {
@@ -278,8 +280,8 @@
                         "✅ Customer Records",
                         "✅ Daily Sales Reports",
                         "✅ Up to 100 products",
-                        "✅ Single device access",
-                        "✅ Email support"
+                        "✅ 500 transactions per month",
+                        "✅ 1 staff account"
                     ],
                     buttonText: "Current Plan",
                     priceDisplay: "Free"
@@ -293,42 +295,41 @@
                     popular: true,
                     features: [
                         "🚀 All Basic Features",
-                        "🤖 AI-Powered Analytics",
-                        "📊 Advanced Reports & Insights", 
-                        "📱 Multi-device sync",
-                        "💳 Multiple payment methods",
-                        "📦 Advanced inventory alerts",
-                        "👥 Customer loyalty program",
-                        "📞 Priority phone support",
-                        "☁️ Cloud backup & sync",
-                        "🎯 Sales forecasting"
+                        "📦 Up to 10,000 products",
+                        "🔄 Unlimited transactions",
+                        "📊 Advanced inventory tracking", 
+                        "🏬 Multi-store support",
+                        "👥 10 staff accounts",
+                        "📞 Priority support",
+                        "📈 Advanced reports",
+                        "☁️ Data backup enabled",
+                        "🎯 Business analytics"
                     ],
                     buttonText: "Upgrade to Pro",
-                    priceDisplay: "₹49/month",
+                    priceDisplay: "49/month",
                     subtext: "Perfect for growing stores"
                 },
                 {
                     title: "Enterprise",
-                    price: 500,
-                    planId: 'enterprise',
+                    price: 499,
+                    planId: 'basic',
                     colorScheme: "purple",
                     gradient: "premium-gradient", 
                     features: [
-                        "⭐ All Pro Features",
-                        "🏢 Multi-store management",
-                        "👨‍💼 Staff management & roles",
-                        "🔗 Advanced integrations",
-                        "📈 Business intelligence dashboard",
-                        "🛡️ Advanced security features",
-                        "💡 Custom features & branding",
-                        "🎧 24/7 premium support",
-                        "📋 Compliance & audit reports",
-                        "🚚 Supply chain management",
-                        "💼 Dedicated account manager"
+                        "⭐ All Basic Features",
+                        "📦 Up to 1,000 products",
+                        "🔄 5,000 transactions per month",
+                        "📊 Inventory tracking",
+                        "👥 3 staff accounts",
+                        "☁️ Data backup",
+                        "📞 Email support",
+                        "📈 Basic reports",
+                        "💳 Multiple payment modes",
+                        "🔄 Data synchronization"
                     ],
-                    buttonText: "Contact Sales",
-                    priceDisplay: "₹500/month",
-                    subtext: "For large retail operations"
+                    buttonText: "Upgrade to Enterprise",
+                    priceDisplay: "499/month",
+                    subtext: "For medium-sized stores"
                 }
             ]
         };
@@ -381,7 +382,7 @@
                 const data = JSON.parse(event.data);
                 console.log('📱 WebView received message:', data);
                 
-                // Handle the new SET_USER_DATA message with both phone and email
+                // Handle the new SET_USER_DATA message with all user data
                 if (data.type === 'SET_USER_DATA') {
                     if (data.email) {
                         console.log('📱 WebView - Received email from React Native:', data.email);
@@ -393,7 +394,15 @@
                         userPhone = data.phone;
                         document.getElementById('displayPhone').textContent = data.phone;
                     }
-                    console.log('📱 WebView - Updated user data - Email:', userEmail, 'Phone:', userPhone);
+                    if (data.uid) {
+                        console.log('📱 WebView - Received userId from React Native:', data.uid);
+                        userId = data.uid;
+                    }
+                    if (data.shopId) {
+                        console.log('📱 WebView - Received shopId from React Native:', data.shopId);
+                        shopId = data.shopId;
+                    }
+                    console.log('📱 WebView - Updated user data - Email:', userEmail, 'Phone:', userPhone, 'UserID:', userId, 'ShopID:', shopId);
                     
                     // Show user info section
                     document.getElementById('userInfo').classList.remove('hidden');
@@ -420,8 +429,13 @@
 
         // Payment handling
         async function handlePayment(plan) {
-            if (plan.planId === 'enterprise') {
-                showPaymentStatus('success', 'Contact our sales team for Enterprise plan: sales@storez.com');
+            if (plan.planId === 'enterprise' || plan.price === 500) {
+                showPaymentStatus('success', 'Contact our sales team for Enterprise plan: support@kiranapos.com');
+                return;
+            }
+            
+            if (plan.price === 0) {
+                showPaymentStatus('success', 'You are already on the free Basic plan!');
                 return;
             }
 
@@ -432,14 +446,20 @@
                     throw new Error('Payment system not available');
                 }
                 
-                if (!userEmail) {
-                    throw new Error('User email not available');
+                if (!userEmail || !userId) {
+                    throw new Error('User data not available');
                 }
                 
                 const priceInRupees = Number(plan.price);
                 
-                console.log('Amount being sent:', {
-                    rupees: priceInRupees
+                console.log('Payment data being sent:', {
+                    planId: plan.planId,
+                    amount: priceInRupees,
+                    currency: 'INR',
+                    email: userEmail,
+                    userId: userId,
+                    phone: userPhone,
+                    shopId: shopId
                 });
                 
                 // Create order
@@ -450,7 +470,10 @@
                         planId: plan.planId,
                         amount: priceInRupees,
                         currency: 'INR',
-                        email: userEmail
+                        email: userEmail,
+                        userId: userId,
+                        phone: userPhone,
+                        shopId: shopId
                     })
                 });
                 
@@ -466,8 +489,8 @@
                     key: 'rzp_live_lMZVjvewP7tKIL',
                     amount: orderData.order.amount,
                     currency: "INR",
-                    name: "StoreZ POS",
-                    description: `${plan.title} Subscription - StoreZ`,
+                    name: "Kirana POS",
+                    description: `${plan.title} Subscription - Kirana POS`,
                     order_id: orderData.order.id,
                     prefill: {
                         name: "",
@@ -488,7 +511,7 @@
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_signature: response.razorpay_signature,
                             planId: plan.planId,
-                            amount: plan.price
+                            userId: userId
                         });
                     }
                 };
@@ -511,7 +534,7 @@
             try {
                 showLoading('Verifying payment...');
                 
-                const response = await fetch(`${API_BASE_URL}/razorpay/verify`, {
+                const response = await fetch(`${API_BASE_URL}/verify`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(paymentData)
@@ -550,7 +573,8 @@
 
                 const requestData = { 
                     email: userEmail,
-                    phone: userPhone || '' // Include phone number in the request
+                    phone: userPhone || '', // Include phone number in the request
+                    userId: userId || '' // Include user ID in the request
                 };
 
                 console.log('📱 WebView - Fetching billing data with:', requestData);
