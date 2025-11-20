@@ -531,7 +531,7 @@ export default function Dashboard() {
   // Show loading state while checking authentication
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
           <p className="text-gray-600">Loading dashboard...</p>
@@ -580,7 +580,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8">
           {/* Upload Section - Left Column - Hidden on Mobile */}
           <div className="hidden lg:block lg:col-span-1">
-            <div className="bg-gradient-to-br from-gray-50 via-white to-rose-50 rounded-xl p-6 border border-gray-100 shadow-sm">
+            <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
                 <div className="text-center mb-4">
                 <div className="w-12 h-12 mx-auto mb-3 bg-gray-200 rounded-full flex items-center justify-center">
                   <Upload className="w-6 h-6 text-emerald-500" />
@@ -924,7 +924,7 @@ export default function Dashboard() {
                         ) : documents.map((doc, index) => (
                             <tr 
                               key={doc.id} 
-                              className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200"
+                              className="hover:bg-emerald-50 transition-all duration-200"
                               style={{ animationDelay: `${index * 100}ms` }}
                             >
                               <td className="px-4 py-3" style={{width: '40%'}}>

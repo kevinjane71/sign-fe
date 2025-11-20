@@ -7,10 +7,7 @@ import { Loader2 } from 'lucide-react'
 export default function AuthGuard({ children }) {
   const router = useRouter()
   const pathname = usePathname()
-  const [isLoading, setIsLoading] = useState(true)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const isMountedRef = useRef(true)
-
+  
   // Public routes that don't require authentication - COMPLETELY bypass all localStorage checks
   const publicRoutes = [
     '/',
@@ -23,13 +20,31 @@ export default function AuthGuard({ children }) {
     '/contact-us',
     '/sign',
     '/demo',
+    '/blog',
     '/kibill',    // For React Native WebView - no localStorage needed
     '/meetsynk',
     '/kirana'
   ]
 
+  // Check if current route is public - initialize state accordingly
+  const isPublicRoute = publicRoutes.some(route => {
+    if (route === '/') {
+      return pathname === '/'
+    }
+    return pathname.startsWith(route)
+  })
+
+  const [isLoading, setIsLoading] = useState(!isPublicRoute) // Skip loading for public routes
+  const [isAuthenticated, setIsAuthenticated] = useState(isPublicRoute) // Auto-authenticate public routes
+  const isMountedRef = useRef(true)
+
   useEffect(() => {
     isMountedRef.current = true;
+
+    // If public route, we're already done - no need to check anything
+    if (isPublicRoute) {
+      return // EXIT EARLY - no localStorage checks needed
+    }
 
     const checkAuth = () => {
       if (!isMountedRef.current) return;
@@ -148,14 +163,14 @@ export default function AuthGuard({ children }) {
     const handleStorageChange = (e) => {
       if (e.key === 'user' && isMountedRef.current) {
         // Check if current route is still public before running auth check
-        const isPublicRoute = publicRoutes.some(route => {
+        const currentIsPublic = publicRoutes.some(route => {
           if (route === '/') {
             return pathname === '/'
           }
           return pathname.startsWith(route)
         })
         
-        if (!isPublicRoute) {
+        if (!currentIsPublic) {
           checkAuth()
         }
       }
@@ -165,27 +180,20 @@ export default function AuthGuard({ children }) {
     const handleUserChange = () => {
       if (isMountedRef.current) {
         // Check if current route is still public before running auth check
-        const isPublicRoute = publicRoutes.some(route => {
+        const currentIsPublic = publicRoutes.some(route => {
           if (route === '/') {
             return pathname === '/'
           }
           return pathname.startsWith(route)
         })
         
-        if (!isPublicRoute) {
+        if (!currentIsPublic) {
           checkAuth()
         }
       }
     }
 
     // Only add event listeners if we're not on a public route
-    const isPublicRoute = publicRoutes.some(route => {
-      if (route === '/') {
-        return pathname === '/'
-      }
-      return pathname.startsWith(route)
-    })
-
     if (!isPublicRoute && typeof window !== 'undefined') {
       try {
         window.addEventListener('storage', handleStorageChange)
@@ -207,7 +215,7 @@ export default function AuthGuard({ children }) {
         }
       }
     }
-  }, [pathname, router])
+  }, [pathname, router, isPublicRoute])
 
   // Cleanup on unmount
   useEffect(() => {

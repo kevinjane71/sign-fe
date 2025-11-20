@@ -119,7 +119,7 @@ const PlanCard = ({
       badge: "bg-fuchsia-500",
       icon: "text-fuchsia-500",
       hover: "hover:bg-fuchsia-100",
-      button: "bg-gradient-to-r from-rose-500 to-fuchsia-500 hover:from-rose-600 hover:to-fuchsia-600"
+      button: "bg-emerald-500 hover:bg-emerald-600"
     }
   };
 

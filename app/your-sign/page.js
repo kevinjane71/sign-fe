@@ -325,7 +325,7 @@ export default function YourSignPage() {
 
   if (!isAuthenticated()) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <PenTool className="w-8 h-8 text-blue-600" />
@@ -344,14 +344,14 @@ export default function YourSignPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between h-14 sm:h-16 py-2 sm:py-0">
             <div className="flex items-center w-full sm:w-auto">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-emerald-500 rounded-xl flex items-center justify-center">
                   <PenTool className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
               </div>
@@ -443,7 +443,7 @@ export default function YourSignPage() {
             {/* Add Button */}
             <div className="w-full sm:w-auto flex justify-end sm:justify-start">
               <button
-                className="flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-sm sm:text-base rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none w-auto sm:w-auto"
+                className="flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm sm:text-base rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none w-auto sm:w-auto"
                 onClick={() => { setShowModal(true); setEditItem(null); }}
                 disabled={items.length >= MAX_SIGNS || loading}
               >
@@ -490,7 +490,7 @@ export default function YourSignPage() {
             </p>
             <button
               onClick={() => { setShowModal(true); setEditItem(null); }}
-              className="inline-flex items-center px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-sm sm:text-base rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
+              className="inline-flex items-center px-4 py-2 sm:px-6 sm:py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm sm:text-base rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
             >
               <Plus className="w-4 h-4 mr-2" />
               Create {tab === "sign" ? "Signature" : "Stamp"}
