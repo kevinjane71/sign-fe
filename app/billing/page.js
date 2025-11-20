@@ -434,7 +434,7 @@ const BillingDashboard = () => {
         planId: 'free',
         colorScheme: "fuchsia",
         features: [
-          "🎁 ALL PRO FEATURES until July 30th!",
+          "🎁 ALL PRO FEATURES until July 30th !",
           "50 documents per month (limited time)",
           "Unlimited signers (limited time)",
           "All templates & forms (limited time)",
