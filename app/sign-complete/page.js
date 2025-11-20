@@ -1,13 +1,13 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { CheckCircle, FileText, Download, AlertCircle, RefreshCw, ExternalLink, ArrowRight, Users, Clock, Calendar, Eye, Loader2, Mail } from 'lucide-react'
 import LoadingSpinner from '../components/LoadingSpinner'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'
 
-export default function SignCompletePage() {
+function SignCompleteContent() {
   const searchParams = useSearchParams()
   const documentId = searchParams.get('document')
   const signerEmail = searchParams.get('signer')
@@ -227,4 +227,12 @@ export default function SignCompletePage() {
       </div>
     )
   }
+}
+
+export default function SignCompletePage() {
+  return (
+    <Suspense fallback={<LoadingSpinner message="Loading..." />}>
+      <SignCompleteContent />
+    </Suspense>
+  )
 } 
