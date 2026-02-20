@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { Mail, Phone, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Mail, Phone, Eye, EyeOff, ArrowRight, Zap, Shield, Users } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { auth } from '../../firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
@@ -100,7 +100,7 @@ export default function LoginForm() {
 
   const handleAuthRequest = async (provider, data) => {
     if (!isMountedRef.current) return;
-    
+
     setIsLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/auth/${provider}`, {
@@ -141,7 +141,7 @@ export default function LoginForm() {
       if (window.recaptchaVerifier) {
         window.recaptchaVerifier.clear();
       }
-      
+
       if (!window.recaptchaVerifier && recaptchaContainerRef.current) {
         window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
           size: 'invisible',
@@ -158,27 +158,27 @@ export default function LoginForm() {
   const handleSendOTP = async (e) => {
     e.preventDefault();
     if (!isMountedRef.current) return;
-    
+
     if (!formData.phone) {
       setError('Please enter a valid phone number');
       return;
     }
-  
+
     setIsLoading(true);
     try {
       if (!auth) throw new Error('Firebase auth not initialized');
-      
+
       setupRecaptcha();
-      const formattedPhone = formData.phone.startsWith('+91') ? 
+      const formattedPhone = formData.phone.startsWith('+91') ?
         formData.phone : `+91${formData.phone}`;
-      
+
       const appVerifier = window.recaptchaVerifier;
       if (!appVerifier) throw new Error('RecaptchaVerifier not initialized');
-  
+
       const confirmation = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
-      
+
       if (!isMountedRef.current) return;
-      
+
       setVerificationId(confirmation);
       setOtpSent(true);
       toast.success('OTP sent successfully');
@@ -196,7 +196,7 @@ export default function LoginForm() {
 
   const handleVerifyOTP = async () => {
     if (!isMountedRef.current) return;
-    
+
     if (!formData.otp || !verificationId) {
       setError('Please enter the OTP');
       return;
@@ -206,9 +206,9 @@ export default function LoginForm() {
     try {
       const result = await verificationId.confirm(formData.otp);
       const idToken = await result.user.getIdToken();
-      
+
       if (!isMountedRef.current) return;
-      
+
       await handleAuthRequest('phone', {
         phone: formData.phone,
         idToken
@@ -227,7 +227,7 @@ export default function LoginForm() {
 
   const handleGoogleLogin = () => {
     if (!isMountedRef.current) return;
-    
+
     try {
       setIsLoading(true);
       localStorage.clear();
@@ -247,7 +247,7 @@ export default function LoginForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isMountedRef.current) return;
-    
+
     setIsLoading(true);
 
     try {
@@ -296,228 +296,303 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-start justify-center px-2 py-6 sm:px-4 sm:py-8">
+    <div className="min-h-screen w-full flex flex-col md:flex-row">
+      {/* Loading Overlay */}
       {isLoading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
-            <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col items-center">
+            <div className="w-12 h-12 border-4 border-purple-600 border-t-blue-600 rounded-full animate-spin"></div>
             <p className="mt-4 text-gray-700">Please wait...</p>
           </div>
         </div>
       )}
-      
+
       <div ref={recaptchaContainerRef} id="recaptcha-container"></div>
-      
-      <div className="w-full max-w-md mt-8 p-4 sm:p-6 bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100">
-        {showForgotPassword ? (
-          <ForgotPassword onBack={() => setShowForgotPassword(false)} />
-        ) : (
-          <>
-            <h2 className="text-2xl md:text-2xl font-bold text-center mb-6 text-blue-600">eSignTap</h2>
-            
-            <div className="space-y-3 mb-6">
-              <button
-                onClick={handleGoogleLogin}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-gray-200 rounded-lg hover:bg-gray-50 hover:border-blue-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                <img src="/gmail.png" alt="Google" width="20" height="20"/>
-                <span className="text-gray-700 text-sm md:text-base">Continue with Google</span>
-              </button>
+
+      {/* Left Panel - Branding (hidden on mobile) */}
+      <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 relative overflow-hidden flex-col justify-between p-12 text-white">
+        {/* Decorative floating shapes */}
+        <div className="absolute top-10 left-10 w-32 h-32 bg-white rounded-full opacity-10 blur-sm"></div>
+        <div className="absolute top-1/3 right-8 w-48 h-48 bg-white rounded-full opacity-5 blur-md"></div>
+        <div className="absolute bottom-20 left-1/4 w-24 h-24 bg-white rounded-full opacity-10 blur-sm"></div>
+        <div className="absolute top-2/3 left-8 w-16 h-16 bg-pink-300 rounded-full opacity-20"></div>
+        <div className="absolute top-16 right-1/3 w-20 h-20 bg-blue-300 rounded-full opacity-15"></div>
+
+        {/* Top section */}
+        <div className="relative z-10">
+          <h1 className="text-4xl lg:text-5xl font-bold tracking-tight">eSignTap</h1>
+          <p className="mt-4 text-xl lg:text-2xl text-white/90 font-light">
+            Sign documents faster than ever
+          </p>
+        </div>
+
+        {/* Feature bullets */}
+        <div className="relative z-10 space-y-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center backdrop-blur-sm">
+              <Zap className="w-6 h-6 text-white" />
             </div>
-
-            <div className="relative mb-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
-              </div>
+            <div>
+              <p className="font-semibold text-lg">Lightning fast document signing</p>
             </div>
-
-            <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
-              <button
-                onClick={() => setLoginMethod('email')}
-                className={`flex-1 py-2 rounded-md text-sm transition-all duration-200 ${
-                  loginMethod === 'email' 
-                    ? 'bg-white shadow-sm text-blue-600' 
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                <Mail className="inline-block w-4 h-4 mr-1" />
-                Email
-              </button>
-              <button
-                onClick={() => setLoginMethod('phone')}
-                className={`flex-1 py-2 rounded-md text-sm transition-all duration-200 ${
-                  loginMethod === 'phone' 
-                    ? 'bg-white shadow-sm text-blue-600' 
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                <Phone className="inline-block w-4 h-4 mr-1" />
-                Phone
-              </button>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center backdrop-blur-sm">
+              <Shield className="w-6 h-6 text-white" />
             </div>
+            <div>
+              <p className="font-semibold text-lg">Bank-level 256-bit encryption</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center backdrop-blur-sm">
+              <Users className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="font-semibold text-lg">Trusted by 500+ businesses</p>
+            </div>
+          </div>
+        </div>
 
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
-                {error}
+        {/* Bottom text */}
+        <div className="relative z-10">
+          <p className="text-white/70 text-sm">Start free, no credit card required</p>
+        </div>
+      </div>
+
+      {/* Right Panel - Form */}
+      <div className="w-full md:w-1/2 flex items-center justify-center bg-white px-4 py-8 sm:px-8 md:px-12 lg:px-16 min-h-screen">
+        <div className="w-full max-w-md">
+          {showForgotPassword ? (
+            <ForgotPassword onBack={() => setShowForgotPassword(false)} />
+          ) : (
+            <>
+              {/* Mobile logo */}
+              <div className="md:hidden text-center mb-6">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
+                  eSignTap
+                </h1>
               </div>
-            )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {loginMethod === 'email' ? (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {isSignup ? "Full Name" : "Email Address"}
-                    </label>
-                    {isSignup && (
+              {/* Heading */}
+              <div className="mb-8">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                  {isSignup ? 'Create your account' : 'Welcome back'}
+                </h2>
+                <p className="mt-2 text-gray-500">
+                  {isSignup ? 'Get started in 30 seconds' : 'Sign in to manage your documents'}
+                </p>
+              </div>
+
+              {/* Google Login Button */}
+              <div className="mb-6">
+                <button
+                  onClick={handleGoogleLogin}
+                  className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border border-gray-300 rounded-xl hover:shadow-lg hover:border-blue-200 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                >
+                  <img src="/gmail.png" alt="Google" width="20" height="20"/>
+                  <span className="text-gray-700 font-medium">Continue with Google</span>
+                </button>
+              </div>
+
+              {/* Divider */}
+              <div className="relative mb-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white text-gray-400">Or continue with</span>
+                </div>
+              </div>
+
+              {/* Email/Phone Toggle */}
+              <div className="flex mb-6 bg-gray-100 rounded-full p-1">
+                <button
+                  onClick={() => setLoginMethod('email')}
+                  className={`flex-1 py-2.5 rounded-full text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                    loginMethod === 'email'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                >
+                  <Mail className="w-4 h-4" />
+                  Email
+                </button>
+                <button
+                  onClick={() => setLoginMethod('phone')}
+                  className={`flex-1 py-2.5 rounded-full text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                    loginMethod === 'phone'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                >
+                  <Phone className="w-4 h-4" />
+                  Phone
+                </button>
+              </div>
+
+              {/* Error display */}
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm">
+                  {error}
+                </div>
+              )}
+
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {loginMethod === 'email' ? (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        {isSignup ? "Full Name" : "Email Address"}
+                      </label>
+                      {isSignup && (
+                        <input
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors duration-200 mb-3 outline-none"
+                          placeholder="Enter your full name"
+                          required
+                        />
+                      )}
                       <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
+                        type="email"
+                        name="email"
+                        value={formData.email}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 mb-3"
-                        placeholder="Enter your full name"
+                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors duration-200 outline-none"
+                        placeholder="Enter your email"
                         required
                       />
-                    )}
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                      placeholder="Enter your email"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Password
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        name="password"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                        placeholder="Enter your password"
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                      >
-                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
                     </div>
-                    {isSignup && (
-                      <div className="mt-3">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Confirm Password
-                        </label>
-                        <div className="relative">
-                          <input
-                            type={showPassword ? 'text' : 'password'}
-                            name="confirmPassword"
-                            value={formData.confirmPassword}
-                            onChange={handleInputChange}
-                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                            placeholder="Confirm your password"
-                            required
-                          />
-                        </div>
-                      </div>
-                    )}
-                    {!isSignup && (
-                      <div className="flex justify-end mt-1">
-                        <button 
-                          type="button" 
-                          onClick={() => setShowForgotPassword(true)}
-                          className="text-xs text-blue-600 hover:text-blue-800"
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          name="password"
+                          value={formData.password}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors duration-200 outline-none"
+                          placeholder="Enter your password"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                         >
-                          Forgot Password?
+                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                         </button>
                       </div>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                      placeholder="Enter your phone number"
-                    />
-                  </div>
-                  {otpSent ? (
+                      {isSignup && (
+                        <div className="mt-3">
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                            Confirm Password
+                          </label>
+                          <div className="relative">
+                            <input
+                              type={showPassword ? 'text' : 'password'}
+                              name="confirmPassword"
+                              value={formData.confirmPassword}
+                              onChange={handleInputChange}
+                              className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors duration-200 outline-none"
+                              placeholder="Confirm your password"
+                              required
+                            />
+                          </div>
+                        </div>
+                      )}
+                      {!isSignup && (
+                        <div className="flex justify-end mt-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setShowForgotPassword(true)}
+                            className="text-xs text-purple-600 hover:text-purple-800 font-medium"
+                          >
+                            Forgot Password?
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Enter OTP
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Phone Number
                       </label>
                       <input
-                        type="text"
-                        name="otp"
-                        value={formData.otp}
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                        placeholder="Enter OTP"
-                        maxLength="6"
+                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors duration-200 outline-none"
+                        placeholder="Enter your phone number"
                       />
+                    </div>
+                    {otpSent ? (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          Enter OTP
+                        </label>
+                        <input
+                          type="text"
+                          name="otp"
+                          value={formData.otp}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors duration-200 outline-none"
+                          placeholder="Enter OTP"
+                          maxLength="6"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleSendOTP}
+                          className="mt-1.5 text-xs text-purple-600 hover:text-purple-800 font-medium"
+                        >
+                          Resend OTP
+                        </button>
+                      </div>
+                    ) : (
                       <button
                         type="button"
                         onClick={handleSendOTP}
-                        className="mt-1 text-xs text-blue-600 hover:text-blue-800"
+                        className="w-full py-2.5 px-4 text-sm bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg hover:scale-[1.01] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 font-medium"
                       >
-                        Resend OTP
+                        Send OTP
                       </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleSendOTP}
-                      className="w-full py-2 px-3 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                    >
-                      Send OTP
-                    </button>
-                  )}
-                </>
-              )}
+                    )}
+                  </>
+                )}
 
-              <button
-                type="submit"
-                className="w-full py-2 px-3 mt-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center text-sm"
-              >
-                {isSignup ? "Sign Up" : "Login"}
-                <ArrowRight className="ml-1 w-4 h-4" />
-              </button>
-              
-              <p className="mt-6 text-center text-xs text-gray-600">
-                {isSignup ? "Already have an account? " : "Don't have an account? "}
-                <button 
-                  type="button"
-                  onClick={() => setIsSignup(!isSignup)}
-                  className="font-medium text-blue-600 hover:text-blue-500"
+                <button
+                  type="submit"
+                  className="w-full py-3 px-4 mt-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg hover:scale-[1.01] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 flex items-center justify-center text-sm font-semibold"
                 >
-                  {isSignup ? "Login" : "Sign up"}
+                  {isSignup ? "Create Account" : "Login"}
+                  <ArrowRight className="ml-2 w-4 h-4" />
                 </button>
-              </p>
-            </form>
-          </>
-        )}
+
+                <p className="mt-6 text-center text-sm text-gray-500">
+                  {isSignup ? "Already have an account? " : "Don't have an account? "}
+                  <button
+                    type="button"
+                    onClick={() => setIsSignup(!isSignup)}
+                    className="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-blue-700 hover:to-purple-700"
+                  >
+                    {isSignup ? "Login" : "Sign up"}
+                  </button>
+                </p>
+              </form>
+            </>
+          )}
+        </div>
       </div>
-      
+
       <Toaster
         position="top-right"
         reverseOrder={false}
@@ -544,4 +619,4 @@ export default function LoginForm() {
       />
     </div>
   );
-} 
+}

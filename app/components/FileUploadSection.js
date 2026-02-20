@@ -145,18 +145,18 @@ export default function FileUploadSection() {
   }
 
   return (
-    <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/40 p-6 sm:p-8 flex flex-col items-center mx-auto max-w-md ring-2 ring-emerald-200/40">
+    <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-6 sm:p-8 flex flex-col items-center mx-auto max-w-md ring-2 ring-purple-200/40">
       <div
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        className="w-full bg-emerald-50 border-2 border-dashed border-emerald-300 rounded-xl shadow p-4 sm:p-6 flex flex-col items-center justify-center mb-4 transition-all hover:border-emerald-400 hover:bg-emerald-100"
+        className="w-full bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 border-2 border-dashed border-purple-300 rounded-2xl shadow p-4 sm:p-6 flex flex-col items-center justify-center mb-4 transition-all hover:border-purple-400 hover:shadow-lg hover:shadow-purple-100"
       >
         <label htmlFor="file-upload" className="w-full flex flex-col items-center cursor-pointer">
           <div className="flex flex-col items-center space-y-2">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-emerald-500 rounded-2xl flex items-center justify-center mb-2 shadow-lg">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-2 shadow-lg shadow-purple-200">
               <Upload className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
             </div>
-            <span className="text-base sm:text-lg font-semibold text-emerald-700">Drop or select a file</span>
+            <span className="text-base sm:text-lg font-bold text-gray-800">Drop or select a file</span>
             <span className="text-xs text-gray-500">PDF, Images, Word, TXT • Up to 50MB</span>
           </div>
           <input
@@ -170,7 +170,7 @@ export default function FileUploadSection() {
           />
         </label>
         {isProcessing && (
-          <div className="mt-4 flex items-center space-x-2 text-emerald-600 animate-pulse">
+          <div className="mt-4 flex items-center space-x-2 text-purple-600 animate-pulse">
             <FileText className="w-5 h-5" />
             <span>Processing...</span>
           </div>
@@ -178,11 +178,11 @@ export default function FileUploadSection() {
       </div>
       <button
         onClick={() => router.push('/dashboard')}
-        className="w-full bg-emerald-500 text-white font-semibold py-3 rounded-xl shadow-lg hover:bg-emerald-600 transition-all transform hover:scale-[1.02] active:scale-[0.98] text-base mb-2 mt-2"
+        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 rounded-xl shadow-lg shadow-purple-200 hover:shadow-xl hover:shadow-purple-300 transition-all transform hover:scale-[1.02] active:scale-[0.98] text-base mb-2 mt-2"
       >
         View My Documents
       </button>
-      <p className="text-xs text-gray-600 mt-2">Start free. No credit card required.</p>
+      <p className="text-xs text-gray-500 mt-2">Start free. No credit card required.</p>
     </div>
   )
 }

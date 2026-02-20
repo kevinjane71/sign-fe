@@ -1,19 +1,19 @@
-import { Inter } from 'next/font/google'
+import { Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 import Header from './ui/header'
 import Footer from './ui/footer'
 import LayoutWrapper from './components/LayoutWrapper'
 import AuthGuard from './components/AuthGuard'
 import { Analytics } from "@vercel/analytics/next"
-const inter = Inter({ subsets: ['latin'] })
+const plusJakartaSans = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'] })
 
 export const metadata = {
   title: 'eSignTap - Most Affordable DocuSign Alternative | Professional Document Signing',
-  description: 'The most affordable DocuSign alternative for professional document signing. Create, share, and sign documents with ease. Save up to 40% compared to DocuSign with our competitive pricing.',
+  description: 'The most affordable DocuSign alternative for professional document signing. Create, share, and sign documents with ease. Save up to 70% compared to DocuSign with our competitive pricing.',
   keywords: 'DocuSign alternative, affordable document signing, electronic signature, digital signature, document signing software, e-signature, professional document signing, cost-effective DocuSign alternative',
   openGraph: {
     title: 'eSignTap - Most Affordable DocuSign Alternative | Professional Document Signing',
-    description: 'The most affordable DocuSign alternative for professional document signing. Create, share, and sign documents with ease. Save up to 40% compared to DocuSign.',
+    description: 'The most affordable DocuSign alternative for professional document signing. Create, share, and sign documents with ease. Save up to 70% compared to DocuSign.',
     url: 'https://esigntap.com',
     siteName: 'eSignTap',
     images: [
@@ -30,7 +30,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'eSignTap - Most Affordable DocuSign Alternative',
-    description: 'The most affordable DocuSign alternative for professional document signing. Save up to 40% compared to DocuSign.',
+    description: 'The most affordable DocuSign alternative for professional document signing. Save up to 70% compared to DocuSign.',
     images: ['/og-image.jpg'],
   },
   robots: {
@@ -69,6 +69,58 @@ export const metadata = {
   themeColor: '#ffffff',
 }
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': 'https://esigntap.com/#organization',
+      name: 'eSignTap',
+      url: 'https://esigntap.com',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://esigntap.com/logo.png',
+      },
+      sameAs: [
+        'https://twitter.com/esigntap',
+        'https://www.linkedin.com/company/esigntap',
+      ],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': 'https://esigntap.com/#website',
+      url: 'https://esigntap.com',
+      name: 'eSignTap',
+      publisher: {
+        '@id': 'https://esigntap.com/#organization',
+      },
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: 'https://esigntap.com/search?q={search_term_string}',
+        'query-input': 'required name=search_term_string',
+      },
+    },
+    {
+      '@type': 'SoftwareApplication',
+      name: 'eSignTap',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web',
+      url: 'https://esigntap.com',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD',
+        description: 'Free plan available. Premium plans starting at competitive prices.',
+      },
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: '4.8',
+        ratingCount: '150',
+      },
+    },
+  ],
+}
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
@@ -78,8 +130,12 @@ export default function RootLayout({ children }) {
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/site.webmanifest" />
         <meta name="theme-color" content="#ffffff" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </head>
-      <body className={inter.className}>
+      <body className={plusJakartaSans.className}>
         <AuthGuard>
           <div className="min-h-screen bg-gray-50">
             <LayoutWrapper>
@@ -97,4 +153,4 @@ export default function RootLayout({ children }) {
       </body>
     </html>
   )
-} 
+}

@@ -533,7 +533,7 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <Loader2 className="w-8 h-8 animate-spin text-purple-600 mx-auto mb-4" />
           <p className="text-gray-600">Loading dashboard...</p>
         </div>
       </div>
@@ -553,7 +553,7 @@ export default function Dashboard() {
       <div className="w-full px-2 sm:px-6 lg:px-24 py-6 lg:py-8">
         {/* Header Section */}
         <div className="mb-4 lg:mb-8">
-          <div className="bg-white rounded-lg p-3 lg:p-8 border border-gray-200">
+          <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 rounded-2xl p-3 lg:p-8 border border-gray-200 shadow-md">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
               <div className="mb-2 lg:mb-0">
                 <h1 className="text-lg lg:text-3xl font-bold mb-1 lg:mb-2 text-gray-900">
@@ -566,7 +566,7 @@ export default function Dashboard() {
               <div className="hidden lg:flex justify-end w-full lg:w-auto mt-4 lg:mt-0">
                 <button
                   onClick={() => document.getElementById('file-upload').click()}
-                  className="inline-flex items-center px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow font-semibold text-base transition-all duration-200"
+                  className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl shadow-lg font-semibold text-base transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5"
                 >
                   <Upload className="w-5 h-5 mr-2" />
                   Upload
@@ -580,10 +580,10 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8">
           {/* Upload Section - Left Column - Hidden on Mobile */}
           <div className="hidden lg:block lg:col-span-1">
-            <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-md">
                 <div className="text-center mb-4">
-                <div className="w-12 h-12 mx-auto mb-3 bg-gray-200 rounded-full flex items-center justify-center">
-                  <Upload className="w-6 h-6 text-emerald-500" />
+                <div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+                  <Upload className="w-6 h-6 text-purple-600" />
                 </div>
                 <h3 className="text-base font-semibold mb-2 text-gray-900">Upload Documents</h3>
                 <p className="text-xs text-gray-600">
@@ -591,9 +591,9 @@ export default function Dashboard() {
                   </p>
                 </div>
 
-                <div 
-                className={`border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 cursor-pointer ${
-                    isDragOver ? 'border-emerald-400 bg-emerald-50' : ''
+                <div
+                className={`border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-purple-300 hover:bg-purple-50 transition-all duration-300 cursor-pointer ${
+                    isDragOver ? 'border-purple-400 bg-purple-50' : ''
                   }`}
                   onDrop={handleDrop}
                   onDragOver={handleDragOver}
@@ -601,7 +601,7 @@ export default function Dashboard() {
                   onClick={() => document.getElementById('file-upload').click()}
                 >
                 <div className="py-3">
-                  <FolderOpen className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                  <FolderOpen className="w-8 h-8 mx-auto mb-2 text-purple-300" />
                   <p className="text-xs font-medium text-gray-900 mb-1">
                       Drop files here or click to browse
                     </p>
@@ -625,7 +625,7 @@ export default function Dashboard() {
             {/* Main Content - Right Column */}
             <div className="lg:col-span-3">
               {/* Header */}
-            <div className="bg-white rounded-xl p-4 mb-4 border border-gray-200 shadow-sm">
+            <div className="bg-white rounded-2xl p-4 mb-4 border border-gray-200 shadow-md">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                   <div>
                   <h1 className="text-xl lg:text-2xl font-bold mb-1 text-gray-900">Document Dashboard</h1>
@@ -637,7 +637,7 @@ export default function Dashboard() {
                 <div className="lg:hidden mt-3">
                   <button
                     onClick={() => document.getElementById('file-upload').click()}
-                    className="w-full inline-flex items-center justify-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow text-sm font-medium transition-all duration-200"
+                    className="w-full inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg shadow text-sm font-medium transition-all duration-300"
                   >
                     <Upload className="w-4 h-4 mr-2" />
                     Upload Document
@@ -649,22 +649,22 @@ export default function Dashboard() {
             {/* Main Content Area: Loading, Empty State, or Data */}
             {isTableLoading ? (
               <div className="flex items-center justify-center min-h-[300px]">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-600 mr-2" />
+                <Loader2 className="w-8 h-8 animate-spin text-purple-600 mr-2" />
                 <span className="text-gray-600 text-sm">Loading documents...</span>
               </div>
             ) : shouldShowEmptyState ? (
-              <div className="bg-white rounded-lg p-8 text-center border border-gray-200">
+              <div className="bg-white rounded-2xl p-8 text-center border border-gray-200 shadow-md">
                 <div className="max-w-md mx-auto">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-emerald-50 rounded-full flex items-center justify-center">
-                    <Upload className="w-8 h-8 text-emerald-500" />
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 rounded-full flex items-center justify-center">
+                    <Upload className="w-8 h-8 text-purple-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Documents Yet</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Ready to Get Started?</h3>
                   <p className="text-sm text-gray-600 mb-6">
                     Get started by uploading your first document. You can upload PDFs, images, and Word documents.
                   </p>
                   <button
                     onClick={() => document.getElementById('file-upload').click()}
-                    className="inline-flex items-center px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow font-medium text-sm transition-all duration-200"
+                    className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg shadow-lg font-medium text-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5"
                   >
                     <Upload className="w-4 h-4 mr-2" />
                     Upload Your First Document
@@ -675,57 +675,57 @@ export default function Dashboard() {
               <>
               {/* Stats Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className="bg-white rounded-2xl p-3 shadow-sm border-l-4 border-l-blue-500 border border-gray-100 hover:shadow-lg hover:shadow-blue-100 hover:-translate-y-1 transition-all duration-300">
                   <div className="flex items-center justify-between">
                     <div>
                         <p className="text-xs font-medium text-gray-600">Total</p>
                         <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.total || 0}</p>
                     </div>
-                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <FileText className="w-4 h-4 text-blue-600" />
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl flex items-center justify-center">
+                        <FileText className="w-5 h-5 text-blue-600" />
                     </div>
                   </div>
                 </div>
 
-                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className="bg-white rounded-2xl p-3 shadow-sm border-l-4 border-l-amber-500 border border-gray-100 hover:shadow-lg hover:shadow-amber-100 hover:-translate-y-1 transition-all duration-300">
                   <div className="flex items-center justify-between">
                     <div>
                         <p className="text-xs font-medium text-gray-600">Draft</p>
                         <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.draft || 0}</p>
                     </div>
-                      <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                        <Edit className="w-4 h-4 text-yellow-600" />
+                      <div className="w-10 h-10 bg-gradient-to-br from-amber-100 to-orange-100 rounded-xl flex items-center justify-center">
+                        <Edit className="w-5 h-5 text-amber-600" />
                     </div>
                   </div>
                 </div>
 
-                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className="bg-white rounded-2xl p-3 shadow-sm border-l-4 border-l-cyan-500 border border-gray-100 hover:shadow-lg hover:shadow-cyan-100 hover:-translate-y-1 transition-all duration-300">
                   <div className="flex items-center justify-between">
                     <div>
                         <p className="text-xs font-medium text-gray-600">Sent</p>
                         <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.sent || 0}</p>
                     </div>
-                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <Send className="w-4 h-4 text-blue-600" />
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center">
+                        <Send className="w-5 h-5 text-blue-600" />
                     </div>
                   </div>
                 </div>
 
-                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className="bg-white rounded-2xl p-3 shadow-sm border-l-4 border-l-emerald-500 border border-gray-100 hover:shadow-lg hover:shadow-emerald-100 hover:-translate-y-1 transition-all duration-300">
                   <div className="flex items-center justify-between">
                     <div>
                         <p className="text-xs font-medium text-gray-600">Completed</p>
                         <p className="text-lg lg:text-xl font-bold text-gray-900">{stats.completed || 0}</p>
                     </div>
-                      <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                        <CheckCircle className="w-4 h-4 text-green-600" />
+                      <div className="w-10 h-10 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl flex items-center justify-center">
+                        <CheckCircle className="w-5 h-5 text-emerald-600" />
                     </div>
                   </div>
                 </div>
               </div>
 
                 {/* Search and Filter */}
-                <div className="bg-white rounded-lg p-3 mb-4 shadow-sm border border-gray-100">
+                <div className="bg-white rounded-2xl p-3 mb-4 shadow-md border border-gray-100">
                   <div className="flex flex-col lg:flex-row gap-3">
                   <div className="flex-1">
                     <div className="relative">
@@ -735,14 +735,14 @@ export default function Dashboard() {
                         placeholder="Search documents..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
                       />
                     </div>
                   </div>
                     <div className="lg:w-40 filter-container">
                       <button
                         onClick={() => setIsFilterOpen(!isFilterOpen)}
-                        className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent flex items-center justify-between hover:bg-gray-50 transition-colors duration-150"
+                        className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent flex items-center justify-between hover:bg-gray-50 transition-all duration-300"
                     >
                         <span className="flex items-center">
                           <Filter className="w-3.5 h-3.5 mr-2 text-gray-500" />
@@ -879,7 +879,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Documents Section */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-100">
+                <div className="bg-white rounded-2xl shadow-md border border-gray-100">
                   <div className="p-4 border-b border-gray-100">
                     <div className="flex items-center justify-between">
                       <h2 className="text-lg font-semibold text-gray-900">Documents</h2>
@@ -892,7 +892,7 @@ export default function Dashboard() {
                     {/* Desktop Table View */}
                     <div className="hidden lg:block overflow-x-auto">
                       <table className="w-full">
-                        <thead className="bg-gray-50">
+                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                           <tr>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '40%'}}>
                               Document
@@ -916,7 +916,7 @@ export default function Dashboard() {
                           <tr>
                             <td colSpan="5" className="px-4 py-8">
                               <div className="flex items-center justify-center">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
                                 <span className="ml-3 text-sm text-gray-600">Loading documents...</span>
                               </div>
                             </td>
@@ -924,7 +924,7 @@ export default function Dashboard() {
                         ) : documents.map((doc, index) => (
                             <tr 
                               key={doc.id} 
-                              className="hover:bg-emerald-50 transition-all duration-200"
+                              className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-purple-50/30 transition-all duration-300"
                               style={{ animationDelay: `${index * 100}ms` }}
                             >
                               <td className="px-4 py-3" style={{width: '40%'}}>
@@ -1008,7 +1008,7 @@ export default function Dashboard() {
                                 <div className="flex items-center space-x-2">
                                   <button
                                     onClick={() => router.push(`/editor/${doc.id}`)}
-                                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 hover:scale-105 transition-all duration-200"
+                                    className="inline-flex items-center px-3 py-1.5 border border-blue-200 text-xs font-medium rounded-lg text-blue-600 bg-white hover:bg-blue-50 hover:scale-105 transition-all duration-300"
                                     title="Edit Document"
                                   >
                                     <Edit className="w-3 h-3 mr-1" />
@@ -1016,7 +1016,7 @@ export default function Dashboard() {
                                   </button>
                                   <button
                                     onClick={() => handleDeleteClick(doc)}
-                                    className="inline-flex items-center px-3 py-1.5 border border-red-200 text-xs font-medium rounded text-red-600 bg-white hover:bg-red-50 hover:scale-105 transition-all duration-200"
+                                    className="inline-flex items-center px-3 py-1.5 border border-red-200 text-xs font-medium rounded-lg text-red-600 bg-white hover:bg-red-50 hover:scale-105 transition-all duration-300"
                                     title="Delete Document"
                                   >
                                     <Trash2 className="w-3 h-3 mr-1" />
@@ -1025,7 +1025,7 @@ export default function Dashboard() {
                                   <button
                                     onClick={() => handleDownloadDocument(doc)}
                                     disabled={doc.status !== 'completed' || downloadingDocId === doc.id}
-                                    className={`inline-flex items-center px-3 py-1.5 border border-green-200 text-xs font-medium rounded text-green-600 bg-white hover:bg-green-50 hover:scale-105 transition-all duration-200 ${doc.status !== 'completed' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-300 hover:scale-105 ${doc.status === 'completed' && downloadingDocId !== doc.id ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border border-transparent shadow-sm hover:shadow-md' : 'border border-green-200 text-green-600 bg-white hover:bg-green-50 opacity-50 cursor-not-allowed'}`}
                                     title="Download Signed Document"
                                   >
                                     {downloadingDocId === doc.id ? (
@@ -1048,16 +1048,16 @@ export default function Dashboard() {
                     {isTableLoading ? (
                       <div className="p-8">
                         <div className="flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
                           <span className="ml-3 text-sm text-gray-600">Loading documents...</span>
                         </div>
                       </div>
                     ) : (
                       <div className="divide-y divide-gray-200">
                         {documents.map((doc, index) => (
-                          <div 
-                            key={doc.id} 
-                            className="p-3 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200"
+                          <div
+                            key={doc.id}
+                            className="p-3 hover:bg-gradient-to-r hover:from-blue-50/50 hover:via-purple-50/50 hover:to-pink-50/50 transition-all duration-300"
                             style={{ animationDelay: `${index * 100}ms` }}
                           >
                             <div className="flex items-start justify-between">
@@ -1095,14 +1095,14 @@ export default function Dashboard() {
                             <div className="mt-3 flex space-x-2">
                               <button
                                 onClick={() => router.push(`/editor/${doc.id}`)}
-                                className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                                className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-blue-200 text-xs font-medium rounded-lg text-blue-600 bg-white hover:bg-blue-50 transition-all duration-300"
                               >
                                 <Edit className="w-3 h-3 mr-1" />
                                 Edit
                               </button>
                               <button
                                 onClick={() => handleDeleteClick(doc)}
-                                className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-red-200 text-xs font-medium rounded text-red-600 bg-white hover:bg-red-50 transition-colors"
+                                className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-red-200 text-xs font-medium rounded-lg text-red-600 bg-white hover:bg-red-50 transition-all duration-300"
                               >
                                 <Trash2 className="w-3 h-3 mr-1" />
                                 Delete
@@ -1110,7 +1110,7 @@ export default function Dashboard() {
                               <button
                                 onClick={() => handleDownloadDocument(doc)}
                                 disabled={doc.status !== 'completed' || downloadingDocId === doc.id}
-                                className={`flex-1 inline-flex items-center justify-center px-3 py-2 border border-green-200 text-xs font-medium rounded text-green-600 bg-white hover:bg-green-50 transition-colors ${doc.status !== 'completed' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                className={`flex-1 inline-flex items-center justify-center px-3 py-2 text-xs font-medium rounded-lg transition-all duration-300 ${doc.status === 'completed' && downloadingDocId !== doc.id ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border border-transparent shadow-sm' : 'border border-green-200 text-green-600 bg-white hover:bg-green-50 opacity-50 cursor-not-allowed'}`}
                               >
                                 {downloadingDocId === doc.id ? (
                                   <Loader2 className="w-3 h-3 mr-1 animate-spin" />
@@ -1137,17 +1137,17 @@ export default function Dashboard() {
                         <button
                           onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                           disabled={currentPage === 1}
-                          className="px-3 py-1 text-xs border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                          className="px-3 py-1 text-xs border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-all duration-300"
                         >
                           Previous
                         </button>
-                        <span className="px-3 py-1 text-xs bg-blue-50 text-blue-600 rounded">
+                        <span className="px-3 py-1 text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium shadow-sm">
                           {currentPage} of {totalPages}
                         </span>
                         <button
                           onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                           disabled={currentPage === totalPages}
-                          className="px-3 py-1 text-xs border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                          className="px-3 py-1 text-xs border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-all duration-300"
                         >
                           Next
                         </button>
@@ -1169,8 +1169,8 @@ export default function Dashboard() {
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Delete Document</h2>
             <p className="text-gray-700 mb-4">Are you sure you want to delete <span className="font-bold">{pendingDeleteDoc?.title || pendingDeleteDoc?.originalName || 'this document'}</span>? This action cannot be undone.</p>
             <div className="flex justify-end space-x-2">
-              <button onClick={handleCancelDelete} className="px-4 py-2 rounded bg-gray-100 text-gray-700 hover:bg-gray-200">Cancel</button>
-              <button onClick={handleConfirmDelete} className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">Delete</button>
+              <button onClick={handleCancelDelete} className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all duration-300">Cancel</button>
+              <button onClick={handleConfirmDelete} className="px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 shadow-sm hover:shadow-md transition-all duration-300">Delete</button>
             </div>
           </div>
         </Modal>
