@@ -27,7 +27,7 @@ export default function FileUploadSection() {
     const allowedTypes = [
       'application/pdf',
       'image/jpeg',
-      'image/jpg', 
+      'image/jpg',
       'image/png',
       'image/gif',
       'image/webp',
@@ -66,7 +66,7 @@ export default function FileUploadSection() {
       const reader = new FileReader()
       reader.onload = (e) => {
         const fileData = e.target.result
-        
+
         const selectedFile = {
           name: file.name,
           size: file.size,
@@ -81,7 +81,7 @@ export default function FileUploadSection() {
         if (processedCount === validFiles.length) {
           // Filter out any undefined entries and store in sessionStorage
           const finalFiles = processedFiles.filter(Boolean)
-          
+
           if (finalFiles.length === 1) {
             // Single file - use old format for backward compatibility
             sessionStorage.setItem('pendingDocument', JSON.stringify(finalFiles[0]))
@@ -89,9 +89,9 @@ export default function FileUploadSection() {
             // Multiple files - use new format
             sessionStorage.setItem('pendingDocuments', JSON.stringify(finalFiles))
           }
-          
+
           toast.success(`${finalFiles.length} document(s) loaded successfully!`)
-          
+
           // Navigate directly to editor
           router.push('/editor/local-new?step=1')
         }
@@ -100,7 +100,7 @@ export default function FileUploadSection() {
       reader.onerror = () => {
         toast.error(`Error reading ${file.name}`)
         processedCount++
-        
+
         // Check if all files are processed (including errors)
         if (processedCount === validFiles.length) {
           const finalFiles = processedFiles.filter(Boolean)
@@ -110,7 +110,7 @@ export default function FileUploadSection() {
             } else {
               sessionStorage.setItem('pendingDocuments', JSON.stringify(finalFiles))
             }
-            
+
             toast.success(`${finalFiles.length} document(s) loaded successfully!`)
             router.push('/editor/local-new?step=1')
           } else {
@@ -145,15 +145,15 @@ export default function FileUploadSection() {
   }
 
   return (
-    <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-6 sm:p-8 flex flex-col items-center mx-auto max-w-md ring-2 ring-purple-200/40">
+    <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-6 sm:p-8 flex flex-col items-center mx-auto max-w-md ring-2 ring-emerald-200/40">
       <div
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        className="w-full bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 border-2 border-dashed border-purple-300 rounded-2xl shadow p-4 sm:p-6 flex flex-col items-center justify-center mb-4 transition-all hover:border-purple-400 hover:shadow-lg hover:shadow-purple-100"
+        className="w-full bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 border-2 border-dashed border-emerald-300 rounded-2xl shadow p-4 sm:p-6 flex flex-col items-center justify-center mb-4 transition-all hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-100"
       >
         <label htmlFor="file-upload" className="w-full flex flex-col items-center cursor-pointer">
           <div className="flex flex-col items-center space-y-2">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-2 shadow-lg shadow-purple-200">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl flex items-center justify-center mb-2 shadow-lg shadow-emerald-200">
               <Upload className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
             </div>
             <span className="text-base sm:text-lg font-bold text-gray-800">Drop or select a file</span>
@@ -170,7 +170,7 @@ export default function FileUploadSection() {
           />
         </label>
         {isProcessing && (
-          <div className="mt-4 flex items-center space-x-2 text-purple-600 animate-pulse">
+          <div className="mt-4 flex items-center space-x-2 text-emerald-600 animate-pulse">
             <FileText className="w-5 h-5" />
             <span>Processing...</span>
           </div>
@@ -178,7 +178,7 @@ export default function FileUploadSection() {
       </div>
       <button
         onClick={() => router.push('/dashboard')}
-        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 rounded-xl shadow-lg shadow-purple-200 hover:shadow-xl hover:shadow-purple-300 transition-all transform hover:scale-[1.02] active:scale-[0.98] text-base mb-2 mt-2"
+        className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold py-3 rounded-xl shadow-lg shadow-emerald-200 hover:shadow-xl hover:shadow-emerald-300 transition-all transform hover:scale-[1.02] active:scale-[0.98] text-base mb-2 mt-2"
       >
         View My Documents
       </button>
@@ -186,4 +186,3 @@ export default function FileUploadSection() {
     </div>
   )
 }
-

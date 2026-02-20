@@ -153,17 +153,17 @@ export default function Header() {
   if (isLoading) {
     return (
       <header className="sticky top-0 z-50">
-        <div className="h-[3px] bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
+        <div className="h-[3px] bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
         <div className="bg-white/80 backdrop-blur-xl border-b border-gray-200/60">
           <div className="w-full px-4 md:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16 md:h-18">
               <div className="flex items-center">
                 <div className="flex items-center space-x-2 md:space-x-3">
-                  <div className="w-10 h-10 md:w-11 md:h-11 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25">
+                  <div className="w-10 h-10 md:w-11 md:h-11 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/25">
                     <FileText className="w-5 h-5 md:w-6 md:h-6 text-white" />
                   </div>
                   <div className="hidden sm:block">
-                    <span className="text-xl md:text-2xl font-extrabold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
+                    <span className="text-xl md:text-2xl font-extrabold bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 bg-clip-text text-transparent">
                       eSignTap
                     </span>
                   </div>
@@ -182,7 +182,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50">
       {/* Colorful gradient accent line */}
-      <div className="h-[3px] bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
+      <div className="h-[3px] bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
 
       <div className="bg-white/80 backdrop-blur-xl border-b border-gray-200/60">
         <div className="w-full px-4 md:px-6 lg:px-8">
@@ -193,10 +193,10 @@ export default function Header() {
                 onClick={handleLogoClick}
                 className="flex items-center space-x-2 md:space-x-3 group focus:outline-none"
               >
-                <div className="w-10 h-10 md:w-11 md:h-11 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 transition-all duration-300 group-hover:scale-105">
+                <div className="w-10 h-10 md:w-11 md:h-11 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/25 group-hover:shadow-emerald-500/40 transition-all duration-300 group-hover:scale-105">
                   <FileText className="w-5 h-5 md:w-6 md:h-6 text-white" />
                 </div>
-                <span className="hidden sm:block text-xl md:text-2xl font-extrabold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
+                <span className="hidden sm:block text-xl md:text-2xl font-extrabold bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 bg-clip-text text-transparent">
                   eSignTap
                 </span>
               </button>
@@ -210,21 +210,21 @@ export default function Header() {
                   <nav className="hidden md:flex items-center space-x-1">
                     <button
                       onClick={() => handleNavigation('/dashboard')}
-                      className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-gray-700 text-sm font-semibold hover:bg-gray-100 hover:text-blue-600 transition-all duration-200"
+                      className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-gray-700 text-sm font-semibold hover:bg-gray-100 hover:text-emerald-600 transition-all duration-200"
                     >
                       <FileText className="w-4 h-4" />
                       <span>Dashboard</span>
                     </button>
                     <button
                       onClick={() => handleNavigation('/your-sign')}
-                      className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-gray-700 text-sm font-semibold hover:bg-gray-100 hover:text-purple-600 transition-all duration-200"
+                      className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-gray-700 text-sm font-semibold hover:bg-gray-100 hover:text-teal-600 transition-all duration-200"
                     >
                       <PenTool className="w-4 h-4" />
                       <span>Your Sign</span>
                     </button>
                     <button
                       onClick={() => handleNavigation('/billing')}
-                      className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-gray-700 text-sm font-semibold hover:bg-gray-100 hover:text-pink-600 transition-all duration-200"
+                      className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-gray-700 text-sm font-semibold hover:bg-gray-100 hover:text-cyan-600 transition-all duration-200"
                     >
                       <CreditCard className="w-4 h-4" />
                       <span>Billing</span>
@@ -255,9 +255,9 @@ export default function Header() {
                       aria-label="Open profile menu"
                     >
                       {user.avatarUrl ? (
-                        <img src={user.avatarUrl} alt="Profile" className="w-7 h-7 rounded-full object-cover ring-2 ring-purple-200" />
+                        <img src={user.avatarUrl} alt="Profile" className="w-7 h-7 rounded-full object-cover ring-2 ring-teal-200" />
                       ) : (
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
                           <User className="w-4 h-4 text-white" />
                         </div>
                       )}
@@ -265,11 +265,11 @@ export default function Header() {
                     </button>
                     {profileOpen && (
                       <div className="absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                        <div className="flex items-center space-x-3 mb-2 px-3 py-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl">
+                        <div className="flex items-center space-x-3 mb-2 px-3 py-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl">
                           {user.avatarUrl ? (
-                            <img src={user.avatarUrl} alt="Profile" className="w-9 h-9 rounded-full object-cover ring-2 ring-purple-200" />
+                            <img src={user.avatarUrl} alt="Profile" className="w-9 h-9 rounded-full object-cover ring-2 ring-teal-200" />
                           ) : (
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
                               <User className="w-5 h-5 text-white" />
                             </div>
                           )}
@@ -280,14 +280,14 @@ export default function Header() {
                         </div>
                         <button
                           onClick={handleProfile}
-                          className="w-full text-left px-3 py-2.5 rounded-xl text-gray-700 hover:bg-blue-50 hover:text-blue-700 text-sm font-semibold transition-all duration-200 flex items-center space-x-2"
+                          className="w-full text-left px-3 py-2.5 rounded-xl text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 text-sm font-semibold transition-all duration-200 flex items-center space-x-2"
                         >
                           <User className="w-4 h-4" />
                           <span>Profile</span>
                         </button>
                         <button
                           onClick={() => { handleNavigation('/contacts'); setProfileOpen(false); }}
-                          className="w-full text-left px-3 py-2.5 rounded-xl text-gray-700 hover:bg-purple-50 hover:text-purple-700 text-sm font-semibold transition-all duration-200 flex items-center space-x-2"
+                          className="w-full text-left px-3 py-2.5 rounded-xl text-gray-700 hover:bg-teal-50 hover:text-teal-700 text-sm font-semibold transition-all duration-200 flex items-center space-x-2"
                         >
                           <Users className="w-4 h-4" />
                           <span>Contacts</span>
@@ -338,7 +338,7 @@ export default function Header() {
                                       <div className={`w-8 h-8 rounded-lg ${item.color} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200`}>
                                         <item.icon className="w-4 h-4" />
                                       </div>
-                                      <span className="text-sm font-semibold text-gray-700 group-hover:text-blue-600 transition-colors">{item.label}</span>
+                                      <span className="text-sm font-semibold text-gray-700 group-hover:text-emerald-600 transition-colors">{item.label}</span>
                                     </button>
                                   ))}
                                 </div>
@@ -348,7 +348,7 @@ export default function Header() {
                           <div className="mt-4 pt-3 border-t border-gray-100">
                             <button
                               onClick={() => handleNavigation('/solutions')}
-                              className="flex items-center space-x-1.5 text-sm font-semibold text-purple-600 hover:text-purple-800 transition-colors px-2"
+                              className="flex items-center space-x-1.5 text-sm font-semibold text-emerald-600 hover:text-emerald-800 transition-colors px-2"
                             >
                               <span>View all solutions</span>
                               <ArrowRight className="w-4 h-4" />
@@ -385,7 +385,7 @@ export default function Header() {
                                   <item.icon className="w-4 h-4" />
                                 </div>
                                 <div className="min-w-0">
-                                  <div className="text-sm font-semibold text-gray-700 group-hover:text-purple-600 transition-colors">{item.label}</div>
+                                  <div className="text-sm font-semibold text-gray-700 group-hover:text-teal-600 transition-colors">{item.label}</div>
                                 </div>
                               </button>
                             ))}
@@ -393,7 +393,7 @@ export default function Header() {
                           <div className="mt-2 pt-2 border-t border-gray-100">
                             <button
                               onClick={() => handleNavigation('/use-cases')}
-                              className="flex items-center space-x-1.5 text-sm font-semibold text-purple-600 hover:text-purple-800 transition-colors px-2"
+                              className="flex items-center space-x-1.5 text-sm font-semibold text-emerald-600 hover:text-emerald-800 transition-colors px-2"
                             >
                               <span>View all use cases</span>
                               <ArrowRight className="w-4 h-4" />
@@ -429,7 +429,7 @@ export default function Header() {
                                 <item.icon className="w-5 h-5" />
                               </div>
                               <div className="min-w-0">
-                                <div className="text-sm font-bold text-gray-900 group-hover:text-purple-600 transition-colors">{item.label}</div>
+                                <div className="text-sm font-bold text-gray-900 group-hover:text-teal-600 transition-colors">{item.label}</div>
                                 <div className="text-xs text-gray-500 mt-0.5 leading-relaxed">{item.desc}</div>
                               </div>
                             </button>
@@ -464,7 +464,7 @@ export default function Header() {
                                 <item.icon className="w-4 h-4" />
                               </div>
                               <div className="min-w-0">
-                                <div className="text-sm font-semibold text-gray-700 group-hover:text-purple-600 transition-colors">{item.label}</div>
+                                <div className="text-sm font-semibold text-gray-700 group-hover:text-teal-600 transition-colors">{item.label}</div>
                                 <div className="text-xs text-gray-500">{item.desc}</div>
                               </div>
                             </button>
@@ -484,7 +484,7 @@ export default function Header() {
                   {/* Start Free CTA */}
                   <button
                     onClick={handleLogin}
-                    className="hidden md:flex items-center space-x-1.5 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-full text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105 transition-all duration-300"
+                    className="hidden md:flex items-center space-x-1.5 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-full text-sm font-bold shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-105 transition-all duration-300"
                   >
                     <span>Start Free</span>
                     <ArrowRight className="w-4 h-4" />
@@ -493,7 +493,7 @@ export default function Header() {
                   {/* Mobile: Login button + menu toggle */}
                   <button
                     onClick={handleLogin}
-                    className="md:hidden flex items-center space-x-1.5 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full text-sm font-bold shadow-md"
+                    className="md:hidden flex items-center space-x-1.5 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-full text-sm font-bold shadow-md"
                   >
                     <span>Start Free</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -519,28 +519,28 @@ export default function Header() {
             <div className="border-t border-gray-200/60 py-3 space-y-1">
               <button
                 onClick={() => { handleNavigation('/dashboard'); setMobileMenuOpen(false); }}
-                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200"
+                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all duration-200"
               >
-                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                  <FileIcon className="w-4 h-4 text-blue-600" />
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                  <FileIcon className="w-4 h-4 text-emerald-600" />
                 </div>
                 <span className="font-semibold text-sm">Dashboard</span>
               </button>
               <button
                 onClick={() => { handleNavigation('/your-sign'); setMobileMenuOpen(false); }}
-                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-all duration-200"
+                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-teal-50 hover:text-teal-700 transition-all duration-200"
               >
-                <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
-                  <PenTool className="w-4 h-4 text-purple-600" />
+                <div className="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center">
+                  <PenTool className="w-4 h-4 text-teal-600" />
                 </div>
                 <span className="font-semibold text-sm">Your Sign</span>
               </button>
               <button
                 onClick={() => { handleNavigation('/billing'); setMobileMenuOpen(false); }}
-                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-pink-50 hover:text-pink-700 transition-all duration-200"
+                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-cyan-50 hover:text-cyan-700 transition-all duration-200"
               >
-                <div className="w-8 h-8 rounded-lg bg-pink-100 flex items-center justify-center">
-                  <CreditCard className="w-4 h-4 text-pink-600" />
+                <div className="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center">
+                  <CreditCard className="w-4 h-4 text-cyan-600" />
                 </div>
                 <span className="font-semibold text-sm">Billing</span>
               </button>
@@ -564,10 +564,10 @@ export default function Header() {
               </button>
               <button
                 onClick={() => { handleProfile(); setMobileMenuOpen(false); }}
-                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-all duration-200"
+                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all duration-200"
               >
-                <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
-                  <User className="w-4 h-4 text-indigo-600" />
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                  <User className="w-4 h-4 text-emerald-600" />
                 </div>
                 <span className="font-semibold text-sm">Profile</span>
               </button>
@@ -594,7 +594,7 @@ export default function Header() {
               {/* Solutions section */}
               <div className="px-4 py-2 flex items-center justify-between">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Solutions</span>
-                <button onClick={() => { handleNavigation('/solutions'); setMobileMenuOpen(false); }} className="text-xs font-semibold text-purple-600">View all</button>
+                <button onClick={() => { handleNavigation('/solutions'); setMobileMenuOpen(false); }} className="text-xs font-semibold text-emerald-600">View all</button>
               </div>
               {solutionCategories[0].items.slice(0, 3).concat(solutionCategories[1].items.slice(0, 2)).map((item) => (
                 <button
@@ -614,7 +614,7 @@ export default function Header() {
               {/* Use Cases section */}
               <div className="px-4 py-2 flex items-center justify-between">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Use Cases</span>
-                <button onClick={() => { handleNavigation('/use-cases'); setMobileMenuOpen(false); }} className="text-xs font-semibold text-purple-600">View all</button>
+                <button onClick={() => { handleNavigation('/use-cases'); setMobileMenuOpen(false); }} className="text-xs font-semibold text-emerald-600">View all</button>
               </div>
               {useCaseItems.slice(0, 4).map((item) => (
                 <button

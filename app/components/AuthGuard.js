@@ -7,66 +7,37 @@ import { Loader2 } from 'lucide-react'
 export default function AuthGuard({ children }) {
   const router = useRouter()
   const pathname = usePathname()
-  
-  // Public routes that don't require authentication - COMPLETELY bypass all localStorage checks
-  const publicRoutes = [
-    '/',
-    '/login',
-    '/pricing',
-    '/terms',
-    '/privacy',
-    '/refund',
-    '/price',
-    '/contact-us',
-    '/sign',
-    '/demo',
-    '/blog',
-    '/kibill',    // For React Native WebView - no localStorage needed
-    '/meetsynk',
-    '/kirana'
+
+  // Protected routes that REQUIRE authentication - everything else is public
+  const protectedRoutes = [
+    '/dashboard',
+    '/your-sign',
+    '/billing',
+    '/profile',
+    '/contacts',
+    '/prepare-document',
+    '/sign-document',
   ]
 
-  // Check if current route is public - initialize state accordingly
-  const isPublicRoute = publicRoutes.some(route => {
-    if (route === '/') {
-      return pathname === '/'
-    }
-    return pathname.startsWith(route)
-  })
+  // Check if current route requires auth
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
 
-  const [isLoading, setIsLoading] = useState(!isPublicRoute) // Skip loading for public routes
-  const [isAuthenticated, setIsAuthenticated] = useState(isPublicRoute) // Auto-authenticate public routes
+  const [isLoading, setIsLoading] = useState(isProtectedRoute) // Only show loading for protected routes
+  const [isAuthenticated, setIsAuthenticated] = useState(!isProtectedRoute) // Auto-allow public routes
   const isMountedRef = useRef(true)
 
   useEffect(() => {
     isMountedRef.current = true;
 
-    // If public route, we're already done - no need to check anything
-    if (isPublicRoute) {
+    // If NOT a protected route, we're already done - no need to check anything
+    if (!isProtectedRoute) {
       return // EXIT EARLY - no localStorage checks needed
     }
 
     const checkAuth = () => {
       if (!isMountedRef.current) return;
 
-      // Check if current route is public FIRST - completely bypass everything else
-      const isPublicRoute = publicRoutes.some(route => {
-        if (route === '/') {
-          return pathname === '/'
-        }
-        return pathname.startsWith(route)
-      })
-
-      if (isPublicRoute) {
-        console.log('Public route detected, bypassing auth:', pathname);
-        if (isMountedRef.current) {
-          setIsAuthenticated(true)
-          setIsLoading(false)
-        }
-        return // EXIT EARLY - no localStorage checks needed
-      }
-
-      // Only do localStorage checks for non-public routes
+      // Only do localStorage checks for protected routes
       if (typeof window === 'undefined') {
         if (isMountedRef.current) {
           setIsAuthenticated(false)
@@ -78,7 +49,7 @@ export default function AuthGuard({ children }) {
       // Check for user token in localStorage (with better error handling)
       try {
         let userData = null;
-        
+
         // Safely access localStorage
         try {
           if (typeof Storage !== 'undefined' && localStorage) {
@@ -86,7 +57,6 @@ export default function AuthGuard({ children }) {
           }
         } catch (localStorageError) {
           console.warn('localStorage not available:', localStorageError)
-          // If localStorage fails, treat as unauthenticated
           if (isMountedRef.current) {
             setIsAuthenticated(false)
             setTimeout(() => {
@@ -162,39 +132,18 @@ export default function AuthGuard({ children }) {
     // Listen for storage changes (when user logs in/out in another tab)
     const handleStorageChange = (e) => {
       if (e.key === 'user' && isMountedRef.current) {
-        // Check if current route is still public before running auth check
-        const currentIsPublic = publicRoutes.some(route => {
-          if (route === '/') {
-            return pathname === '/'
-          }
-          return pathname.startsWith(route)
-        })
-        
-        if (!currentIsPublic) {
-          checkAuth()
-        }
+        checkAuth()
       }
     }
 
     // Listen for custom events when user state changes in same tab
     const handleUserChange = () => {
       if (isMountedRef.current) {
-        // Check if current route is still public before running auth check
-        const currentIsPublic = publicRoutes.some(route => {
-          if (route === '/') {
-            return pathname === '/'
-          }
-          return pathname.startsWith(route)
-        })
-        
-        if (!currentIsPublic) {
-          checkAuth()
-        }
+        checkAuth()
       }
     }
 
-    // Only add event listeners if we're not on a public route
-    if (!isPublicRoute && typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
       try {
         window.addEventListener('storage', handleStorageChange)
         window.addEventListener('userStateChanged', handleUserChange)
@@ -205,7 +154,6 @@ export default function AuthGuard({ children }) {
 
     return () => {
       isMountedRef.current = false
-      // Only remove listeners if we're in browser environment
       if (typeof window !== 'undefined') {
         try {
           window.removeEventListener('storage', handleStorageChange)
@@ -215,7 +163,7 @@ export default function AuthGuard({ children }) {
         }
       }
     }
-  }, [pathname, router, isPublicRoute])
+  }, [pathname, router, isProtectedRoute])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -229,17 +177,17 @@ export default function AuthGuard({ children }) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <Loader2 className="w-8 h-8 animate-spin text-emerald-600 mx-auto mb-4" />
           <p className="text-gray-600">Checking authentication...</p>
         </div>
       </div>
     )
   }
 
-  // If not authenticated and not on public route, don't render children
+  // If not authenticated and on protected route, don't render children
   if (!isAuthenticated) {
     return null
   }
 
   return children
-} 
+}

@@ -46,32 +46,32 @@ export default function HomePage() {
       {/* ===================== HERO SECTION ===================== */}
       <section className="relative w-full flex flex-col items-center justify-center pt-16 sm:pt-24 pb-16 sm:pb-24 px-4 overflow-hidden">
         {/* Decorative blobs */}
-        <div className="absolute top-0 left-0 w-72 sm:w-[500px] h-72 sm:h-[500px] bg-blue-400 opacity-15 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute top-20 right-0 w-64 sm:w-[400px] h-64 sm:h-[400px] bg-purple-500 opacity-15 rounded-full blur-3xl translate-x-1/3" />
+        <div className="absolute top-0 left-0 w-72 sm:w-[500px] h-72 sm:h-[500px] bg-emerald-400 opacity-15 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute top-20 right-0 w-64 sm:w-[400px] h-64 sm:h-[400px] bg-teal-500 opacity-15 rounded-full blur-3xl translate-x-1/3" />
         <div className="absolute bottom-0 left-1/3 w-72 sm:w-[450px] h-72 sm:h-[450px] bg-pink-400 opacity-10 rounded-full blur-3xl" />
         <div className="absolute top-1/2 right-1/4 w-40 sm:w-60 h-40 sm:h-60 bg-yellow-300 opacity-10 rounded-full blur-2xl" />
 
         {/* Floating shapes */}
-        <div className="absolute top-24 left-[10%] w-4 h-4 bg-blue-500 rounded-full opacity-40 animate-bounce" style={{ animationDuration: '3s' }} />
-        <div className="absolute top-40 right-[15%] w-6 h-6 bg-purple-500 rounded-lg opacity-30 animate-bounce" style={{ animationDuration: '4s', animationDelay: '1s' }} />
-        <div className="absolute bottom-32 left-[20%] w-5 h-5 bg-pink-500 rounded-full opacity-30 animate-bounce" style={{ animationDuration: '3.5s', animationDelay: '0.5s' }} />
+        <div className="absolute top-24 left-[10%] w-4 h-4 bg-emerald-500 rounded-full opacity-40 animate-bounce" style={{ animationDuration: '3s' }} />
+        <div className="absolute top-40 right-[15%] w-6 h-6 bg-teal-500 rounded-lg opacity-30 animate-bounce" style={{ animationDuration: '4s', animationDelay: '1s' }} />
+        <div className="absolute bottom-32 left-[20%] w-5 h-5 bg-cyan-500 rounded-full opacity-30 animate-bounce" style={{ animationDuration: '3.5s', animationDelay: '0.5s' }} />
         <div className="absolute top-60 left-[5%] w-3 h-3 bg-yellow-400 rounded-sm opacity-40 animate-bounce" style={{ animationDuration: '2.5s', animationDelay: '1.5s' }} />
         <div className="absolute bottom-40 right-[10%] w-4 h-4 bg-emerald-400 rounded-full opacity-30 animate-bounce" style={{ animationDuration: '3.2s', animationDelay: '0.8s' }} />
 
         <div className="relative z-10 max-w-5xl mx-auto text-center">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-tight mb-6">
-            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 bg-clip-text text-transparent">
               Sign Documents in
             </span>
             <br />
-            <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-teal-600 via-cyan-500 to-sky-400 bg-clip-text text-transparent">
               Minutes, Not Days
             </span>
           </h1>
 
           <p className="text-lg sm:text-xl md:text-2xl text-gray-600 mb-10 font-medium leading-relaxed max-w-2xl mx-auto">
             The most affordable e-signature platform.{' '}
-            <span className="text-purple-600 font-bold">Save up to 70%</span> compared to DocuSign.
+            <span className="text-emerald-600 font-bold">Save up to 70%</span> compared to DocuSign.
           </p>
 
           {/* Upload Card */}
@@ -90,7 +90,7 @@ export default function HomePage() {
             </span>
             <span className="hidden sm:inline text-gray-300">|</span>
             <span className="flex items-center gap-1.5">
-              <Lock className="w-4 h-4 text-blue-500" />
+              <Lock className="w-4 h-4 text-emerald-500" />
               256-bit encryption
             </span>
           </div>
@@ -137,12 +137,12 @@ export default function HomePage() {
 
             {/* Step 1 */}
             <div className="relative z-10 flex flex-col items-center text-center">
-              <div className="w-16 h-16 rounded-full bg-blue-500 text-white flex items-center justify-center text-2xl font-extrabold mb-4 shadow-lg shadow-blue-500/30">
+              <div className="w-16 h-16 rounded-full bg-emerald-500 text-white flex items-center justify-center text-2xl font-extrabold mb-4 shadow-lg shadow-emerald-500/30">
                 1
               </div>
-              <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-blue-100 hover:border-blue-300 transition-all w-full">
-                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mx-auto mb-4">
-                  <Upload className="w-6 h-6 text-blue-600" />
+              <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-emerald-100 hover:border-emerald-300 transition-all w-full">
+                <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+                  <Upload className="w-6 h-6 text-emerald-600" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Upload Your Document</h3>
                 <p className="text-gray-500 text-sm">Drag and drop your PDF, Word, or any document format. We handle the rest.</p>
@@ -151,12 +151,12 @@ export default function HomePage() {
 
             {/* Step 2 */}
             <div className="relative z-10 flex flex-col items-center text-center">
-              <div className="w-16 h-16 rounded-full bg-purple-500 text-white flex items-center justify-center text-2xl font-extrabold mb-4 shadow-lg shadow-purple-500/30">
+              <div className="w-16 h-16 rounded-full bg-teal-500 text-white flex items-center justify-center text-2xl font-extrabold mb-4 shadow-lg shadow-teal-500/30">
                 2
               </div>
-              <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-purple-100 hover:border-purple-300 transition-all w-full">
-                <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-6 h-6 text-purple-600" />
+              <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-teal-100 hover:border-teal-300 transition-all w-full">
+                <div className="w-12 h-12 rounded-xl bg-teal-100 flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-6 h-6 text-teal-600" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Add Signers & Fields</h3>
                 <p className="text-gray-500 text-sm">Place signature fields, add recipients, and customize your signing workflow.</p>
@@ -165,12 +165,12 @@ export default function HomePage() {
 
             {/* Step 3 */}
             <div className="relative z-10 flex flex-col items-center text-center">
-              <div className="w-16 h-16 rounded-full bg-pink-500 text-white flex items-center justify-center text-2xl font-extrabold mb-4 shadow-lg shadow-pink-500/30">
+              <div className="w-16 h-16 rounded-full bg-cyan-500 text-white flex items-center justify-center text-2xl font-extrabold mb-4 shadow-lg shadow-cyan-500/30">
                 3
               </div>
-              <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-pink-100 hover:border-pink-300 transition-all w-full">
-                <div className="w-12 h-12 rounded-xl bg-pink-100 flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="w-6 h-6 text-pink-600" />
+              <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-cyan-100 hover:border-cyan-300 transition-all w-full">
+                <div className="w-12 h-12 rounded-xl bg-cyan-100 flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="w-6 h-6 text-cyan-600" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Get It Signed!</h3>
                 <p className="text-gray-500 text-sm">Recipients sign from any device. Get notified instantly when it is done.</p>
@@ -237,8 +237,8 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Large card - spans 2 cols */}
-            <div className="sm:col-span-2 bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl p-8 border-2 border-transparent hover:border-blue-300 transition-all group">
-              <div className="w-14 h-14 rounded-2xl bg-blue-500 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20">
+            <div className="sm:col-span-2 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl p-8 border-2 border-transparent hover:border-emerald-300 transition-all group">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-500 flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/20">
                 <PenTool className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Drag & Drop Editor</h3>
@@ -246,8 +246,8 @@ export default function HomePage() {
             </div>
 
             {/* Small card */}
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl p-8 border-2 border-transparent hover:border-purple-300 transition-all">
-              <div className="w-14 h-14 rounded-2xl bg-purple-500 flex items-center justify-center mb-4 shadow-lg shadow-purple-500/20">
+            <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-3xl p-8 border-2 border-transparent hover:border-teal-300 transition-all">
+              <div className="w-14 h-14 rounded-2xl bg-teal-500 flex items-center justify-center mb-4 shadow-lg shadow-teal-500/20">
                 <Users className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Multi-Signer Support</h3>
@@ -282,8 +282,8 @@ export default function HomePage() {
             </div>
 
             {/* Large card - spans 2 cols */}
-            <div className="sm:col-span-2 bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 rounded-3xl p-8 border-2 border-transparent hover:border-pink-300 transition-all">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center mb-4 shadow-lg shadow-pink-500/20">
+            <div className="sm:col-span-2 bg-gradient-to-br from-cyan-50 via-teal-50 to-emerald-50 rounded-3xl p-8 border-2 border-transparent hover:border-teal-300 transition-all">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center mb-4 shadow-lg shadow-teal-500/20">
                 <Smartphone className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Works on Any Device</h3>
@@ -307,15 +307,15 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* eSignTap card */}
-            <div className="bg-white rounded-3xl p-8 shadow-xl border-2 border-purple-200 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
+            <div className="bg-white rounded-3xl p-8 shadow-xl border-2 border-emerald-200 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
                   <FileText className="w-5 h-5 text-white" />
                 </div>
                 <h3 className="text-2xl font-extrabold text-gray-900">eSignTap</h3>
               </div>
-              <p className="text-3xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">From $4.99/mo</p>
+              <p className="text-3xl font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-6">From $4.99/mo</p>
               <ul className="space-y-4">
                 {[
                   'Up to 70% more affordable',
@@ -366,7 +366,7 @@ export default function HomePage() {
       </section>
 
       {/* ===================== FREE TOOLS PROMO ===================== */}
-      <section className="w-full py-16 sm:py-24 px-4 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 relative overflow-hidden">
+      <section className="w-full py-16 sm:py-24 px-4 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 relative overflow-hidden">
         {/* Decorative shapes */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/4" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-white opacity-5 rounded-full translate-y-1/2 -translate-x-1/4" />
@@ -383,23 +383,23 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Link href="/tools/sign-pdf-free" className="group bg-white rounded-3xl p-8 shadow-2xl hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(0,0,0,0.2)] transition-all duration-200">
-              <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mb-4">
-                <PenTool className="w-7 h-7 text-blue-600" />
+              <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center mb-4">
+                <PenTool className="w-7 h-7 text-emerald-600" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Sign PDF Free</h3>
               <p className="text-gray-500 mb-6">Sign any PDF online, no account needed. Quick, easy, and completely free.</p>
-              <span className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-full font-semibold text-sm group-hover:gap-3 transition-all">
+              <span className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-3 rounded-full font-semibold text-sm group-hover:gap-3 transition-all">
                 Sign a PDF Now <ArrowRight className="w-4 h-4" />
               </span>
             </Link>
 
             <Link href="/tools/esignature-generator" className="group bg-white rounded-3xl p-8 shadow-2xl hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(0,0,0,0.2)] transition-all duration-200">
-              <div className="w-14 h-14 rounded-2xl bg-pink-100 flex items-center justify-center mb-4">
-                <FileText className="w-7 h-7 text-pink-600" />
+              <div className="w-14 h-14 rounded-2xl bg-teal-100 flex items-center justify-center mb-4">
+                <FileText className="w-7 h-7 text-teal-600" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">E-Signature Generator</h3>
               <p className="text-gray-500 mb-6">Create your digital signature in seconds. Type, draw, or upload your signature.</p>
-              <span className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-3 rounded-full font-semibold text-sm group-hover:gap-3 transition-all">
+              <span className="inline-flex items-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-600 text-white px-6 py-3 rounded-full font-semibold text-sm group-hover:gap-3 transition-all">
                 Create Signature <ArrowRight className="w-4 h-4" />
               </span>
             </Link>
@@ -423,21 +423,21 @@ export default function HomePage() {
                 name: 'Sarah Chen',
                 title: 'Operations Manager',
                 company: 'TechCorp',
-                color: 'border-l-blue-500',
+                color: 'border-l-emerald-500',
               },
               {
                 quote: 'We switched from DocuSign and saved over $3,000 a year. Same features, way better price. Highly recommend.',
                 name: 'Michael Torres',
                 title: 'Head of Legal',
                 company: 'GlobalHR',
-                color: 'border-l-purple-500',
+                color: 'border-l-teal-500',
               },
               {
                 quote: 'The multi-signer feature is a game changer for our real estate closings. Documents get signed in hours, not days.',
                 name: 'Jessica Park',
                 title: 'Senior Agent',
                 company: 'PropMax Realty',
-                color: 'border-l-pink-500',
+                color: 'border-l-cyan-500',
               },
             ].map((t) => (
               <div key={t.name} className={`bg-white rounded-2xl p-8 shadow-lg border border-gray-100 border-l-4 ${t.color}`}>
@@ -449,7 +449,7 @@ export default function HomePage() {
                 </div>
                 {/* Quote */}
                 <p className="text-gray-700 mb-6 leading-relaxed">
-                  <span className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent leading-none">&ldquo;</span>
+                  <span className="text-4xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent leading-none">&ldquo;</span>
                   {t.quote}
                 </p>
                 <div>
@@ -491,7 +491,7 @@ export default function HomePage() {
       </section>
 
       {/* ===================== FINAL CTA ===================== */}
-      <section className="w-full py-16 sm:py-24 px-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 relative overflow-hidden">
+      <section className="w-full py-16 sm:py-24 px-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 relative overflow-hidden">
         <div className="absolute top-0 left-1/4 w-40 h-40 bg-white opacity-5 rounded-full" />
         <div className="absolute bottom-0 right-1/3 w-60 h-60 bg-white opacity-5 rounded-full" />
 

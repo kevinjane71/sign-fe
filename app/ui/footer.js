@@ -53,7 +53,7 @@ export default function Footer() {
   return (
     <footer className="bg-gradient-to-b from-slate-900 to-slate-950 text-white mt-auto">
       {/* Colorful gradient accent line */}
-      <div className="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
+      <div className="h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Top section - Brand + Newsletter */}
@@ -62,7 +62,7 @@ export default function Footer() {
             {/* Brand */}
             <div>
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/25">
+                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/25">
                   <FileText className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-2xl font-bold text-white">eSignTap</span>
@@ -81,10 +81,10 @@ export default function Footer() {
                   <input
                     type="email"
                     placeholder="Enter your email"
-                    className="w-full pl-11 pr-4 py-3 bg-slate-800/80 border border-slate-700 rounded-full text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    className="w-full pl-11 pr-4 py-3 bg-slate-800/80 border border-slate-700 rounded-full text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                   />
                 </div>
-                <button className="ml-3 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white text-sm font-semibold rounded-full transition-all duration-200 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 whitespace-nowrap">
+                <button className="ml-3 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-sm font-semibold rounded-full transition-all duration-200 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 whitespace-nowrap">
                   Subscribe
                 </button>
               </div>
@@ -104,7 +104,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className={`text-sm hover:text-white transition-colors duration-200 ${link.bold ? 'text-purple-400 font-semibold' : 'text-gray-400'}`}
+                    className={`text-sm hover:text-white transition-colors duration-200 ${link.bold ? 'text-emerald-400 font-semibold' : 'text-gray-400'}`}
                   >
                     {link.name}
                   </Link>
@@ -123,7 +123,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className={`text-sm hover:text-white transition-colors duration-200 ${link.bold ? 'text-purple-400 font-semibold' : 'text-gray-400'}`}
+                    className={`text-sm hover:text-white transition-colors duration-200 ${link.bold ? 'text-emerald-400 font-semibold' : 'text-gray-400'}`}
                   >
                     {link.name}
                   </Link>
@@ -142,7 +142,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className={`text-sm hover:text-white transition-colors duration-200 ${link.bold ? 'text-purple-400 font-semibold' : 'text-gray-400'}`}
+                    className={`text-sm hover:text-white transition-colors duration-200 ${link.bold ? 'text-emerald-400 font-semibold' : 'text-gray-400'}`}
                   >
                     {link.name}
                   </Link>
@@ -161,7 +161,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className={`text-sm hover:text-white transition-colors duration-200 ${link.bold ? 'text-purple-400 font-semibold' : 'text-gray-400'}`}
+                    className={`text-sm hover:text-white transition-colors duration-200 ${link.bold ? 'text-emerald-400 font-semibold' : 'text-gray-400'}`}
                   >
                     {link.name}
                   </Link>

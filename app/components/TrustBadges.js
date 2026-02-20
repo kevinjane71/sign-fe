@@ -10,11 +10,11 @@ export default function TrustBadges() {
             256-bit AES Encryption
           </span>
           <span className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-blue-500" />
+            <Shield className="w-4 h-4 text-emerald-500" />
             ESIGN Act & eIDAS Compliant
           </span>
           <span className="flex items-center gap-2">
-            <FileCheck className="w-4 h-4 text-purple-500" />
+            <FileCheck className="w-4 h-4 text-teal-500" />
             Full Audit Trail
           </span>
           <span className="flex items-center gap-2">
