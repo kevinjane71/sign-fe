@@ -59,6 +59,17 @@ export default function HomePage() {
         <div className="absolute bottom-40 right-[10%] w-4 h-4 bg-emerald-400 rounded-full opacity-30 animate-bounce" style={{ animationDuration: '3.2s', animationDelay: '0.8s' }} />
 
         <div className="relative z-10 max-w-5xl mx-auto text-center">
+          {/* Eyebrow badge */}
+          <div className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full bg-white/80 backdrop-blur border border-emerald-200 shadow-sm">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="text-xs sm:text-sm font-semibold bg-gradient-to-r from-emerald-700 to-teal-600 bg-clip-text text-transparent">
+              New • Multi-signer workflows now live
+            </span>
+          </div>
+
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-tight mb-6">
             <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 bg-clip-text text-transparent">
               Sign Documents in
@@ -93,6 +104,27 @@ export default function HomePage() {
               <Lock className="w-4 h-4 text-emerald-500" />
               256-bit encryption
             </span>
+          </div>
+
+          {/* Live stats strip */}
+          <div className="mt-10 grid grid-cols-3 gap-3 sm:gap-6 max-w-2xl mx-auto">
+            {[
+              { value: '2M+', label: 'Documents signed' },
+              { value: '500+', label: 'Happy businesses' },
+              { value: '70%', label: 'Avg. cost savings' },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className="bg-white/70 backdrop-blur rounded-2xl border border-emerald-100 px-3 py-4 sm:py-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <div className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                  {s.value}
+                </div>
+                <div className="text-[11px] sm:text-xs text-gray-500 font-semibold uppercase tracking-wide mt-1">
+                  {s.label}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -195,7 +227,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               { icon: Building2, title: 'Real Estate', desc: 'Close deals faster with streamlined contract signing for agents and brokers.', color: 'orange', bg: 'bg-orange-100', text: 'text-orange-600', border: 'hover:border-orange-300', href: '/solutions/real-estate' },
-              { icon: Briefcase, title: 'HR & Recruiting', desc: 'Onboard new hires in minutes with digital offer letters and NDAs.', color: 'purple', bg: 'bg-purple-100', text: 'text-purple-600', border: 'hover:border-purple-300', href: '/solutions/hr' },
+              { icon: Briefcase, title: 'HR & Recruiting', desc: 'Onboard new hires in minutes with digital offer letters and NDAs.', color: 'teal', bg: 'bg-teal-100', text: 'text-teal-600', border: 'hover:border-teal-300', href: '/solutions/hr' },
               { icon: Scale, title: 'Legal', desc: 'Legally binding signatures with full audit trails and compliance built in.', color: 'blue', bg: 'bg-blue-100', text: 'text-blue-600', border: 'hover:border-blue-300', href: '/solutions/legal' },
               { icon: Heart, title: 'Healthcare', desc: 'HIPAA-friendly document workflows for patient forms and consent documents.', color: 'pink', bg: 'bg-pink-100', text: 'text-pink-600', border: 'hover:border-pink-300', href: '/solutions/healthcare' },
               { icon: Store, title: 'Small Business', desc: 'Affordable plans built for growing businesses. No enterprise bloat.', color: 'emerald', bg: 'bg-emerald-100', text: 'text-emerald-600', border: 'hover:border-emerald-300', href: '/solutions/small-business' },

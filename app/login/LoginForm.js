@@ -301,7 +301,7 @@ export default function LoginForm() {
       {isLoading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col items-center">
-            <div className="w-12 h-12 border-4 border-purple-600 border-t-blue-600 rounded-full animate-spin"></div>
+            <div className="w-12 h-12 border-4 border-emerald-600 border-t-teal-600 rounded-full animate-spin"></div>
             <p className="mt-4 text-gray-700">Please wait...</p>
           </div>
         </div>
@@ -310,7 +310,7 @@ export default function LoginForm() {
       <div ref={recaptchaContainerRef} id="recaptcha-container"></div>
 
       {/* Left Panel - Branding (hidden on mobile) */}
-      <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 relative overflow-hidden flex-col justify-between p-12 text-white">
+      <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-500 relative overflow-hidden flex-col justify-between p-12 text-white">
         {/* Decorative floating shapes */}
         <div className="absolute top-10 left-10 w-32 h-32 bg-white rounded-full opacity-10 blur-sm"></div>
         <div className="absolute top-1/3 right-8 w-48 h-48 bg-white rounded-full opacity-5 blur-md"></div>
@@ -369,7 +369,7 @@ export default function LoginForm() {
             <>
               {/* Mobile logo */}
               <div className="md:hidden text-center mb-6">
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 bg-clip-text text-transparent">
                   eSignTap
                 </h1>
               </div>
@@ -388,7 +388,7 @@ export default function LoginForm() {
               <div className="mb-6">
                 <button
                   onClick={handleGoogleLogin}
-                  className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border border-gray-300 rounded-xl hover:shadow-lg hover:border-blue-200 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                  className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border border-gray-300 rounded-xl hover:shadow-lg hover:border-emerald-200 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
                 >
                   <img src="/gmail.png" alt="Google" width="20" height="20"/>
                   <span className="text-gray-700 font-medium">Continue with Google</span>
@@ -411,7 +411,7 @@ export default function LoginForm() {
                   onClick={() => setLoginMethod('email')}
                   className={`flex-1 py-2.5 rounded-full text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 ${
                     loginMethod === 'email'
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
+                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
                       : 'text-gray-600 hover:text-gray-800'
                   }`}
                 >
@@ -422,7 +422,7 @@ export default function LoginForm() {
                   onClick={() => setLoginMethod('phone')}
                   className={`flex-1 py-2.5 rounded-full text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 ${
                     loginMethod === 'phone'
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
+                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
                       : 'text-gray-600 hover:text-gray-800'
                   }`}
                 >
@@ -452,7 +452,7 @@ export default function LoginForm() {
                           name="name"
                           value={formData.name}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors duration-200 mb-3 outline-none"
+                          className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors duration-200 mb-3 outline-none"
                           placeholder="Enter your full name"
                           required
                         />
@@ -462,7 +462,7 @@ export default function LoginForm() {
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors duration-200 outline-none"
+                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors duration-200 outline-none"
                         placeholder="Enter your email"
                         required
                       />
@@ -477,7 +477,7 @@ export default function LoginForm() {
                           name="password"
                           value={formData.password}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors duration-200 outline-none"
+                          className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors duration-200 outline-none"
                           placeholder="Enter your password"
                           required
                         />
@@ -500,7 +500,7 @@ export default function LoginForm() {
                               name="confirmPassword"
                               value={formData.confirmPassword}
                               onChange={handleInputChange}
-                              className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors duration-200 outline-none"
+                              className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors duration-200 outline-none"
                               placeholder="Confirm your password"
                               required
                             />
@@ -512,7 +512,7 @@ export default function LoginForm() {
                           <button
                             type="button"
                             onClick={() => setShowForgotPassword(true)}
-                            className="text-xs text-purple-600 hover:text-purple-800 font-medium"
+                            className="text-xs text-emerald-600 hover:text-emerald-800 font-medium"
                           >
                             Forgot Password?
                           </button>
@@ -531,7 +531,7 @@ export default function LoginForm() {
                         name="phone"
                         value={formData.phone}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors duration-200 outline-none"
+                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors duration-200 outline-none"
                         placeholder="Enter your phone number"
                       />
                     </div>
@@ -545,14 +545,14 @@ export default function LoginForm() {
                           name="otp"
                           value={formData.otp}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors duration-200 outline-none"
+                          className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors duration-200 outline-none"
                           placeholder="Enter OTP"
                           maxLength="6"
                         />
                         <button
                           type="button"
                           onClick={handleSendOTP}
-                          className="mt-1.5 text-xs text-purple-600 hover:text-purple-800 font-medium"
+                          className="mt-1.5 text-xs text-emerald-600 hover:text-emerald-800 font-medium"
                         >
                           Resend OTP
                         </button>
@@ -561,7 +561,7 @@ export default function LoginForm() {
                       <button
                         type="button"
                         onClick={handleSendOTP}
-                        className="w-full py-2.5 px-4 text-sm bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg hover:scale-[1.01] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 font-medium"
+                        className="w-full py-2.5 px-4 text-sm bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl hover:shadow-lg hover:scale-[1.01] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 font-medium"
                       >
                         Send OTP
                       </button>
@@ -571,7 +571,7 @@ export default function LoginForm() {
 
                 <button
                   type="submit"
-                  className="w-full py-3 px-4 mt-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg hover:scale-[1.01] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 flex items-center justify-center text-sm font-semibold"
+                  className="w-full py-3 px-4 mt-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl hover:shadow-lg hover:scale-[1.01] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 flex items-center justify-center text-sm font-semibold"
                 >
                   {isSignup ? "Create Account" : "Login"}
                   <ArrowRight className="ml-2 w-4 h-4" />
@@ -582,7 +582,7 @@ export default function LoginForm() {
                   <button
                     type="button"
                     onClick={() => setIsSignup(!isSignup)}
-                    className="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-blue-700 hover:to-purple-700"
+                    className="font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent hover:from-emerald-700 hover:to-teal-700"
                   >
                     {isSignup ? "Login" : "Sign up"}
                   </button>

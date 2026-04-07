@@ -177,7 +177,12 @@ export default function FileUploadSection() {
         )}
       </div>
       <button
-        onClick={() => router.push('/dashboard')}
+        onClick={() => {
+          // Hard navigate so the destination page (login or dashboard) renders cleanly
+          // without relying on AuthGuard's client-side redirect (which can leave a blank page).
+          if (typeof window === 'undefined') return
+          window.location.href = user ? '/dashboard' : '/login'
+        }}
         className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold py-3 rounded-xl shadow-lg shadow-emerald-200 hover:shadow-xl hover:shadow-emerald-300 transition-all transform hover:scale-[1.02] active:scale-[0.98] text-base mb-2 mt-2"
       >
         View My Documents

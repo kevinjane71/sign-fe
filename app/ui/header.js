@@ -31,8 +31,8 @@ const solutionCategories = [
     items: [
       { icon: Store, label: 'Small Business', path: '/solutions/small-business', color: 'bg-emerald-100 text-emerald-600' },
       { icon: Palette, label: 'Freelancers', path: '/solutions/freelancers', color: 'bg-pink-100 text-pink-600' },
-      { icon: Briefcase, label: 'HR & Recruiting', path: '/solutions/hr', color: 'bg-violet-100 text-violet-600' },
-      { icon: UserPlus, label: 'Recruitment', path: '/solutions/recruitment', color: 'bg-purple-100 text-purple-600' },
+      { icon: Briefcase, label: 'HR & Recruiting', path: '/solutions/hr', color: 'bg-teal-100 text-teal-600' },
+      { icon: UserPlus, label: 'Recruitment', path: '/solutions/recruitment', color: 'bg-emerald-100 text-emerald-600' },
       { icon: Factory, label: 'Manufacturing', path: '/solutions/manufacturing', color: 'bg-gray-100 text-gray-600' },
     ],
   },
@@ -41,7 +41,7 @@ const solutionCategories = [
 const useCaseItems = [
   { icon: FileSignature, label: 'NDA Signing', desc: 'Sign NDAs online instantly', path: '/use-cases/nda-signing', color: 'bg-blue-100 text-blue-600' },
   { icon: Home, label: 'Lease Agreements', desc: 'Electronic lease signing', path: '/use-cases/lease-agreements', color: 'bg-indigo-100 text-indigo-600' },
-  { icon: Briefcase, label: 'Employment Contracts', desc: 'Sign offer letters & contracts', path: '/use-cases/employment-contracts', color: 'bg-violet-100 text-violet-600' },
+  { icon: Briefcase, label: 'Employment Contracts', desc: 'Sign offer letters & contracts', path: '/use-cases/employment-contracts', color: 'bg-teal-100 text-teal-600' },
   { icon: FileText, label: 'Sales Contracts', desc: 'E-sign sales contracts', path: '/use-cases/sales-contracts', color: 'bg-emerald-100 text-emerald-600' },
   { icon: ShieldCheck, label: 'Consent Forms', desc: 'Digital consent form signing', path: '/use-cases/consent-forms', color: 'bg-rose-100 text-rose-600' },
   { icon: FileText, label: 'Waivers', desc: 'Sign waivers electronically', path: '/use-cases/waivers', color: 'bg-amber-100 text-amber-600' },
@@ -49,14 +49,14 @@ const useCaseItems = [
 
 const toolsItems = [
   { icon: PenLine, label: 'Sign PDF Free', desc: 'Upload and sign any PDF instantly', path: '/tools/sign-pdf-free', color: 'bg-blue-100 text-blue-600' },
-  { icon: Sparkles, label: 'E-Signature Generator', desc: 'Create your digital signature', path: '/tools/esignature-generator', color: 'bg-purple-100 text-purple-600' },
+  { icon: Sparkles, label: 'E-Signature Generator', desc: 'Create your digital signature', path: '/tools/esignature-generator', color: 'bg-teal-100 text-teal-600' },
   { icon: FileText, label: 'Fill PDF Free', desc: 'Fill PDF forms online for free', path: '/tools/fill-pdf-free', color: 'bg-emerald-100 text-emerald-600' },
   { icon: ShieldCheck, label: 'NDA Generator', desc: 'Create free NDA templates', path: '/tools/nda-generator', color: 'bg-amber-100 text-amber-600' },
 ]
 
 const resourceItems = [
   { icon: BookOpen, label: 'Guides', desc: 'E-signature guides & tutorials', path: '/guides', color: 'bg-blue-100 text-blue-600' },
-  { icon: FileText, label: 'Templates', desc: 'Free document templates', path: '/templates', color: 'bg-purple-100 text-purple-600' },
+  { icon: FileText, label: 'Templates', desc: 'Free document templates', path: '/templates', color: 'bg-cyan-100 text-cyan-600' },
   { icon: BookOpen, label: 'Glossary', desc: 'E-signature terms explained', path: '/glossary', color: 'bg-emerald-100 text-emerald-600' },
   { icon: BookOpen, label: 'Blog', desc: 'Tips, news & insights', path: '/blog', color: 'bg-pink-100 text-pink-600' },
 ]
@@ -76,6 +76,34 @@ export default function Header() {
   const useCasesRef = useRef(null)
   const toolsRef = useRef(null)
   const resourcesRef = useRef(null)
+  // Delayed-close timer so dropdowns don't snap shut while the user is moving the
+  // mouse from the trigger toward the menu items.
+  const closeTimerRef = useRef(null)
+
+  const cancelClose = () => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = null
+    }
+  }
+
+  const openDropdown = (setter) => {
+    cancelClose()
+    // Close any other open dropdown so only one is visible at a time
+    setSolutionsOpen(false)
+    setUseCasesOpen(false)
+    setToolsOpen(false)
+    setResourcesOpen(false)
+    setter(true)
+  }
+
+  const scheduleCloseDropdown = (setter) => {
+    cancelClose()
+    closeTimerRef.current = setTimeout(() => {
+      setter(false)
+      closeTimerRef.current = null
+    }, 200)
+  }
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -312,8 +340,8 @@ export default function Header() {
                     <div
                       className="relative"
                       ref={solutionsRef}
-                      onMouseEnter={() => setSolutionsOpen(true)}
-                      onMouseLeave={() => setSolutionsOpen(false)}
+                      onMouseEnter={() => openDropdown(setSolutionsOpen)}
+                      onMouseLeave={() => scheduleCloseDropdown(setSolutionsOpen)}
                     >
                       <button
                         onClick={() => setSolutionsOpen((v) => !v)}
@@ -323,7 +351,8 @@ export default function Header() {
                         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${solutionsOpen ? 'rotate-180' : ''}`} />
                       </button>
                       {solutionsOpen && (
-                        <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-[680px] bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-5 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="absolute left-1/2 -translate-x-1/2 pt-3 w-[680px] z-50">
+                        <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-5 animate-in fade-in slide-in-from-top-2 duration-200">
                           <div className="grid grid-cols-3 gap-6">
                             {solutionCategories.map((cat) => (
                               <div key={cat.title}>
@@ -355,6 +384,7 @@ export default function Header() {
                             </button>
                           </div>
                         </div>
+                        </div>
                       )}
                     </div>
 
@@ -362,8 +392,8 @@ export default function Header() {
                     <div
                       className="relative"
                       ref={useCasesRef}
-                      onMouseEnter={() => setUseCasesOpen(true)}
-                      onMouseLeave={() => setUseCasesOpen(false)}
+                      onMouseEnter={() => openDropdown(setUseCasesOpen)}
+                      onMouseLeave={() => scheduleCloseDropdown(setUseCasesOpen)}
                     >
                       <button
                         onClick={() => setUseCasesOpen((v) => !v)}
@@ -373,7 +403,8 @@ export default function Header() {
                         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${useCasesOpen ? 'rotate-180' : ''}`} />
                       </button>
                       {useCasesOpen && (
-                        <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-[420px] bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="absolute left-1/2 -translate-x-1/2 pt-3 w-[420px] z-50">
+                        <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-3 animate-in fade-in slide-in-from-top-2 duration-200">
                           <div className="grid grid-cols-2 gap-0.5">
                             {useCaseItems.map((item) => (
                               <button
@@ -400,6 +431,7 @@ export default function Header() {
                             </button>
                           </div>
                         </div>
+                        </div>
                       )}
                     </div>
 
@@ -407,8 +439,8 @@ export default function Header() {
                     <div
                       className="relative"
                       ref={toolsRef}
-                      onMouseEnter={() => setToolsOpen(true)}
-                      onMouseLeave={() => setToolsOpen(false)}
+                      onMouseEnter={() => openDropdown(setToolsOpen)}
+                      onMouseLeave={() => scheduleCloseDropdown(setToolsOpen)}
                     >
                       <button
                         onClick={() => setToolsOpen((v) => !v)}
@@ -418,7 +450,8 @@ export default function Header() {
                         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${toolsOpen ? 'rotate-180' : ''}`} />
                       </button>
                       {toolsOpen && (
-                        <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-[340px] bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="absolute left-1/2 -translate-x-1/2 pt-3 w-[340px] z-50">
+                        <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-3 animate-in fade-in slide-in-from-top-2 duration-200">
                           {toolsItems.map((item) => (
                             <button
                               key={item.path}
@@ -435,6 +468,7 @@ export default function Header() {
                             </button>
                           ))}
                         </div>
+                        </div>
                       )}
                     </div>
 
@@ -442,8 +476,8 @@ export default function Header() {
                     <div
                       className="relative"
                       ref={resourcesRef}
-                      onMouseEnter={() => setResourcesOpen(true)}
-                      onMouseLeave={() => setResourcesOpen(false)}
+                      onMouseEnter={() => openDropdown(setResourcesOpen)}
+                      onMouseLeave={() => scheduleCloseDropdown(setResourcesOpen)}
                     >
                       <button
                         onClick={() => setResourcesOpen((v) => !v)}
@@ -453,7 +487,8 @@ export default function Header() {
                         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${resourcesOpen ? 'rotate-180' : ''}`} />
                       </button>
                       {resourcesOpen && (
-                        <div className="absolute right-0 mt-2 w-[300px] bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="absolute right-0 pt-3 w-[300px] z-50">
+                        <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-3 animate-in fade-in slide-in-from-top-2 duration-200">
                           {resourceItems.map((item) => (
                             <button
                               key={item.path}
@@ -469,6 +504,7 @@ export default function Header() {
                               </div>
                             </button>
                           ))}
+                        </div>
                         </div>
                       )}
                     </div>
