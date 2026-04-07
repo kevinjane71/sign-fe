@@ -232,7 +232,7 @@ export default function ESignatureGeneratorPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-teal-50">
         {/* Hero */}
         <section className="pt-16 pb-10 px-4 text-center max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 text-sm font-semibold px-4 py-1.5 rounded-full mb-6">
@@ -257,7 +257,7 @@ export default function ESignatureGeneratorPage() {
                 onClick={() => setMode('draw')}
                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all ${
                   mode === 'draw'
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
+                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -268,7 +268,7 @@ export default function ESignatureGeneratorPage() {
                 onClick={() => setMode('type')}
                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all ${
                   mode === 'type'
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
+                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -426,7 +426,7 @@ export default function ESignatureGeneratorPage() {
               disabled={!canDownload}
               className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-white font-semibold text-lg shadow-lg transition-all ${
                 canDownload
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]'
                   : 'bg-gray-300 cursor-not-allowed'
               }`}
             >
@@ -451,7 +451,7 @@ export default function ESignatureGeneratorPage() {
               },
               {
                 num: '2',
-                color: 'from-purple-500 to-purple-600',
+                color: 'from-emerald-500 to-emerald-600',
                 title: 'Customize Color & Style',
                 desc: 'Select your ink color and line thickness. Preview your signature in real time until it looks perfect.',
               },
@@ -508,7 +508,7 @@ export default function ESignatureGeneratorPage() {
               },
               {
                 icon: Zap,
-                color: 'text-purple-600 bg-purple-100',
+                color: 'text-emerald-600 bg-emerald-100',
                 title: 'Save Time',
                 desc: 'No more printing, signing by hand, scanning, and emailing. Sign digitally in seconds.',
               },
@@ -535,7 +535,7 @@ export default function ESignatureGeneratorPage() {
 
         {/* CTA */}
         <section className="max-w-3xl mx-auto px-4 pb-16">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 md:p-12 text-center text-white shadow-2xl">
+          <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-3xl p-8 md:p-12 text-center text-white shadow-2xl">
             <h2 className="text-3xl font-bold mb-3">Sign Documents with eSignTap</h2>
             <p className="text-blue-100 text-lg mb-2">
               Use your new signature to sign real documents.

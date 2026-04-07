@@ -173,7 +173,7 @@ export default function SignPdfFreePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero / Header */}
-      <section className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 py-16 px-4">
+      <section className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 py-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <span className="inline-block bg-white/20 text-white text-sm font-semibold px-4 py-1.5 rounded-full mb-6 backdrop-blur-sm">
             100% Free &mdash; No Signup Required
@@ -206,15 +206,15 @@ export default function SignPdfFreePage() {
                 <div
                   className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-200 cursor-pointer ${
                     isDraggingOver
-                      ? 'border-purple-400 bg-purple-50'
-                      : 'border-gray-300 hover:border-purple-400 hover:bg-purple-50/30'
+                      ? 'border-emerald-400 bg-emerald-50'
+                      : 'border-gray-300 hover:border-emerald-400 hover:bg-emerald-50/30'
                   }`}
                   onDrop={handleDrop}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg">
+                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg">
                     <Upload className="w-8 h-8 text-white" />
                   </div>
                   <p className="text-xl font-bold text-gray-800 mb-2">Drop your PDF here or click to browse</p>
@@ -235,7 +235,7 @@ export default function SignPdfFreePage() {
                   {/* File info bar */}
                   <div className="flex items-center justify-between mb-6 bg-gray-50 rounded-xl p-4">
                     <div className="flex items-center gap-3">
-                      <FileText className="w-5 h-5 text-purple-600" />
+                      <FileText className="w-5 h-5 text-emerald-600" />
                       <span className="font-medium text-gray-800 text-sm truncate max-w-[200px] md:max-w-none">
                         {fileName}
                       </span>
@@ -298,7 +298,7 @@ export default function SignPdfFreePage() {
                         <button
                           onClick={applySignature}
                           disabled={!signatureDataUrl}
-                          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold text-sm hover:shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold text-sm hover:shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           <CheckCircle className="w-4 h-4" />
                           Apply Signature
@@ -308,7 +308,7 @@ export default function SignPdfFreePage() {
                   ) : (
                     <button
                       onClick={() => setShowSignPad(true)}
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:shadow-lg hover:scale-105 transition-all duration-200"
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold hover:shadow-lg hover:scale-105 transition-all duration-200"
                     >
                       <PenTool className="w-5 h-5" />
                       Draw Your Signature
@@ -330,14 +330,14 @@ export default function SignPdfFreePage() {
 
                   <Link
                     href="/login"
-                    className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 text-white font-bold text-lg px-10 py-4 rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 mb-4"
+                    className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 text-white font-bold text-lg px-10 py-4 rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 mb-4"
                   >
                     <Download className="w-5 h-5" />
                     Download Signed PDF &mdash; Free Account
                   </Link>
                   <p className="text-gray-400 text-sm mb-6">No credit card required</p>
 
-                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 max-w-lg mx-auto border border-blue-100">
+                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-6 max-w-lg mx-auto border border-blue-100">
                     <p className="font-semibold text-gray-800 mb-3">With a free account you also get:</p>
                     <ul className="text-sm text-gray-600 space-y-2 text-left max-w-xs mx-auto">
                       <li className="flex items-center gap-2">
@@ -361,7 +361,7 @@ export default function SignPdfFreePage() {
 
                   <button
                     onClick={resetAll}
-                    className="mt-8 text-sm text-gray-500 hover:text-purple-600 font-medium transition-colors"
+                    className="mt-8 text-sm text-gray-500 hover:text-emerald-600 font-medium transition-colors"
                   >
                     Sign another PDF
                   </button>
@@ -381,14 +381,14 @@ export default function SignPdfFreePage() {
           <p className="text-center text-gray-500 mb-12 text-lg">Three simple steps. No software to install.</p>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-extrabold mb-4 shadow-lg">
+              <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center text-white text-2xl font-extrabold mb-4 shadow-lg">
                 1
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">Upload Your PDF</h3>
               <p className="text-gray-500">Drag and drop your PDF file or click to browse. Files stay in your browser and are never uploaded to any server.</p>
             </div>
             <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white text-2xl font-extrabold mb-4 shadow-lg">
+              <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full flex items-center justify-center text-white text-2xl font-extrabold mb-4 shadow-lg">
                 2
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">Draw Your Signature</h3>
@@ -446,7 +446,7 @@ export default function SignPdfFreePage() {
       {/* CTA Section */}
       <section className="py-20 px-4 bg-gray-50">
         <div className="max-w-3xl mx-auto">
-          <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 rounded-2xl p-10 md:p-14 text-center shadow-2xl">
+          <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 rounded-2xl p-10 md:p-14 text-center shadow-2xl">
             <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">
               Need More Features?
             </h2>
@@ -478,7 +478,7 @@ export default function SignPdfFreePage() {
               >
                 <summary className="flex items-center justify-between cursor-pointer px-6 py-5 font-semibold text-gray-900 text-lg list-none">
                   {faq.q}
-                  <span className="ml-4 text-purple-500 group-open:rotate-45 transition-transform duration-200 text-2xl font-light">
+                  <span className="ml-4 text-emerald-500 group-open:rotate-45 transition-transform duration-200 text-2xl font-light">
                     +
                   </span>
                 </summary>
@@ -490,7 +490,7 @@ export default function SignPdfFreePage() {
       </section>
 
       {/* Bottom CTA */}
-      <section className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 py-20 px-4">
+      <section className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 py-20 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-6">
             Ready to Sign Your PDF?
@@ -536,7 +536,7 @@ function StepIndicator({ number, label, active, done }) {
           done
             ? 'bg-green-500 text-white'
             : active
-            ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white'
+            ? 'bg-gradient-to-br from-emerald-600 to-teal-600 text-white'
             : 'bg-gray-200 text-gray-500'
         }`}
       >

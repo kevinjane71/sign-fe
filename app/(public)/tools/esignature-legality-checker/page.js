@@ -183,7 +183,7 @@ export default function EsignatureLegalityCheckerPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 py-16 sm:py-24 px-4">
+      <section className="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 py-16 sm:py-24 px-4">
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, #fff 0%, transparent 50%)' }} />
         <div className="relative max-w-4xl mx-auto text-center">
           <span className="inline-block bg-white/20 text-white text-sm font-semibold px-4 py-1.5 rounded-full mb-6 backdrop-blur-sm">
@@ -249,7 +249,7 @@ export default function EsignatureLegalityCheckerPage() {
           <div className="hidden md:block overflow-hidden rounded-2xl border border-gray-200 shadow-lg bg-white">
             <table className="w-full">
               <thead>
-                <tr className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                <tr className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white">
                   <th className="px-6 py-4 text-left font-bold text-sm uppercase tracking-wider">Country / Region</th>
                   <th className="px-6 py-4 text-left font-bold text-sm uppercase tracking-wider">Governing Law</th>
                   <th className="px-6 py-4 text-left font-bold text-sm uppercase tracking-wider">Status</th>
@@ -301,7 +301,7 @@ export default function EsignatureLegalityCheckerPage() {
             {regions.map((row, index) => (
               <div key={index} className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center flex-shrink-0">
                     <Globe className="w-6 h-6 text-white" />
                   </div>
                   <div>
@@ -311,7 +311,7 @@ export default function EsignatureLegalityCheckerPage() {
                         {row.status}
                       </span>
                     </div>
-                    <p className="text-sm font-medium text-purple-600 mb-2">{row.law}</p>
+                    <p className="text-sm font-medium text-emerald-600 mb-2">{row.law}</p>
                     <p className="text-gray-600 leading-relaxed" dangerouslySetInnerHTML={{ __html: row.details }} />
                   </div>
                 </div>
@@ -400,7 +400,7 @@ export default function EsignatureLegalityCheckerPage() {
                 icon: FileText,
               },
             ].map((item, index) => (
-              <div key={index} className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 border border-blue-100">
+              <div key={index} className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-6 border border-blue-100">
                 <div className="flex items-center gap-3 mb-3">
                   <item.icon className="w-6 h-6 text-blue-600" />
                   <h3 className="text-lg font-bold text-gray-900">{item.title}</h3>
@@ -428,7 +428,7 @@ export default function EsignatureLegalityCheckerPage() {
       {/* CTA Section */}
       <section className="py-16 sm:py-24 px-4">
         <div className="max-w-3xl mx-auto">
-          <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 rounded-3xl p-10 md:p-14 text-center shadow-2xl">
+          <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 rounded-3xl p-10 md:p-14 text-center shadow-2xl">
             <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">
               Sign Documents with Confidence
             </h2>
@@ -461,7 +461,7 @@ export default function EsignatureLegalityCheckerPage() {
               >
                 <summary className="flex items-center justify-between cursor-pointer px-6 py-5 font-semibold text-gray-900 text-lg list-none">
                   {faq.q}
-                  <span className="ml-4 text-purple-500 group-open:rotate-45 transition-transform duration-200 text-2xl font-light">
+                  <span className="ml-4 text-emerald-500 group-open:rotate-45 transition-transform duration-200 text-2xl font-light">
                     +
                   </span>
                 </summary>
@@ -491,7 +491,7 @@ export default function EsignatureLegalityCheckerPage() {
               href="/guides/esign-act"
               className="block p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100"
             >
-              <BookOpen className="w-8 h-8 text-purple-600 mx-auto mb-3" />
+              <BookOpen className="w-8 h-8 text-emerald-600 mx-auto mb-3" />
               <h3 className="font-bold text-gray-900 mb-1">ESIGN Act Guide</h3>
               <p className="text-sm text-gray-500">Understanding the US ESIGN Act</p>
             </Link>
@@ -508,7 +508,7 @@ export default function EsignatureLegalityCheckerPage() {
       </section>
 
       {/* Bottom CTA */}
-      <section className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 py-20 px-4">
+      <section className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 py-20 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-6">
             E-Signatures Are Legal. Start Using Them.

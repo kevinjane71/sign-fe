@@ -37,14 +37,14 @@ const steps = [
     title: 'Upload Your Signature',
     description:
       'Upload a photo or scan of your handwritten signature. We support JPEG, PNG, BMP, and TIFF formats. Take a photo with your phone or use a scanned image.',
-    gradient: 'from-blue-500 to-purple-600',
+    gradient: 'from-emerald-500 to-teal-600',
   },
   {
     number: 2,
     title: 'Remove the Background',
     description:
       'Our tool automatically detects and removes the background from your signature image, leaving only your signature strokes on a transparent canvas. Fine-tune the results if needed.',
-    gradient: 'from-purple-500 to-pink-600',
+    gradient: 'from-teal-500 to-cyan-600',
   },
   {
     number: 3,
@@ -68,7 +68,7 @@ const benefits = [
     title: 'Professional Quality',
     description:
       'Our background removal technology preserves the fine details of your handwriting, producing a clean, crisp signature that looks professional in any context.',
-    gradient: 'from-purple-400 to-violet-600',
+    gradient: 'from-emerald-400 to-teal-600',
   },
   {
     icon: Zap,
@@ -165,7 +165,7 @@ export default function SignatureToPngPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 py-16 sm:py-24 px-4">
+      <section className="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 py-16 sm:py-24 px-4">
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, #fff 0%, transparent 50%)' }} />
         <div className="relative max-w-4xl mx-auto text-center">
           <span className="inline-block bg-white/20 text-white text-sm font-semibold px-4 py-1.5 rounded-full mb-6 backdrop-blur-sm">
@@ -300,7 +300,7 @@ export default function SignatureToPngPage() {
           <h2 className="text-3xl md:text-4xl font-extrabold text-center text-gray-900 mb-8">
             Tips for the Best Results
           </h2>
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 md:p-10 border border-blue-100">
+          <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-8 md:p-10 border border-blue-100">
             <ul className="space-y-4 text-gray-700">
               <li className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
@@ -330,7 +330,7 @@ export default function SignatureToPngPage() {
       {/* CTA Section */}
       <section className="py-16 sm:py-24 px-4">
         <div className="max-w-3xl mx-auto">
-          <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 rounded-3xl p-10 md:p-14 text-center shadow-2xl">
+          <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 rounded-3xl p-10 md:p-14 text-center shadow-2xl">
             <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">
               Need More Than a Signature Image?
             </h2>
@@ -363,7 +363,7 @@ export default function SignatureToPngPage() {
               >
                 <summary className="flex items-center justify-between cursor-pointer px-6 py-5 font-semibold text-gray-900 text-lg list-none">
                   {faq.q}
-                  <span className="ml-4 text-purple-500 group-open:rotate-45 transition-transform duration-200 text-2xl font-light">
+                  <span className="ml-4 text-emerald-500 group-open:rotate-45 transition-transform duration-200 text-2xl font-light">
                     +
                   </span>
                 </summary>
@@ -385,7 +385,7 @@ export default function SignatureToPngPage() {
               href="/tools/esignature-generator"
               className="block p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100"
             >
-              <Image className="w-8 h-8 text-purple-600 mx-auto mb-3" />
+              <Image className="w-8 h-8 text-emerald-600 mx-auto mb-3" />
               <h3 className="font-bold text-gray-900 mb-1">E-Signature Generator</h3>
               <p className="text-sm text-gray-500">Draw or type your electronic signature</p>
             </Link>
@@ -402,7 +402,7 @@ export default function SignatureToPngPage() {
       </section>
 
       {/* Bottom CTA */}
-      <section className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 py-20 px-4">
+      <section className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 py-20 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-6">
             Get Your Transparent Signature Today

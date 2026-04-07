@@ -39,7 +39,7 @@ const steps = [
     description:
       'Drag and drop your PDF form or click to browse. We support all standard PDF forms including tax forms, applications, contracts, and registration documents.',
     icon: Upload,
-    gradient: 'from-blue-500 to-purple-600',
+    gradient: 'from-emerald-500 to-teal-600',
   },
   {
     number: 2,
@@ -47,7 +47,7 @@ const steps = [
     description:
       'Click on any field to start typing. Fill in text fields, check boxes, select radio buttons, and add dates. Our smart detection highlights all fillable areas automatically.',
     icon: Edit3,
-    gradient: 'from-purple-500 to-pink-600',
+    gradient: 'from-teal-500 to-cyan-600',
   },
   {
     number: 3,
@@ -86,7 +86,7 @@ const benefits = [
     title: 'Save Hours of Time',
     description:
       'Stop printing, hand-filling, and scanning forms. Complete the entire process digitally in minutes instead of hours.',
-    gradient: 'from-purple-400 to-violet-600',
+    gradient: 'from-emerald-400 to-teal-600',
   },
   {
     icon: Smartphone,
@@ -168,7 +168,7 @@ export default function FillPdfFreePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 py-16 sm:py-24 px-4">
+      <section className="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 py-16 sm:py-24 px-4">
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, #fff 0%, transparent 50%)' }} />
         <div className="relative max-w-4xl mx-auto text-center">
           <span className="inline-block bg-white/20 text-white text-sm font-semibold px-4 py-1.5 rounded-full mb-6 backdrop-blur-sm">
@@ -300,7 +300,7 @@ export default function FillPdfFreePage() {
       {/* CTA Section */}
       <section className="py-16 sm:py-24 px-4">
         <div className="max-w-3xl mx-auto">
-          <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 rounded-3xl p-10 md:p-14 text-center shadow-2xl">
+          <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 rounded-3xl p-10 md:p-14 text-center shadow-2xl">
             <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">
               Need to Sign After Filling?
             </h2>
@@ -333,7 +333,7 @@ export default function FillPdfFreePage() {
               >
                 <summary className="flex items-center justify-between cursor-pointer px-6 py-5 font-semibold text-gray-900 text-lg list-none">
                   {faq.q}
-                  <span className="ml-4 text-purple-500 group-open:rotate-45 transition-transform duration-200 text-2xl font-light">
+                  <span className="ml-4 text-emerald-500 group-open:rotate-45 transition-transform duration-200 text-2xl font-light">
                     +
                   </span>
                 </summary>
@@ -363,7 +363,7 @@ export default function FillPdfFreePage() {
               href="/tools/esignature-generator"
               className="block p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100"
             >
-              <Edit3 className="w-8 h-8 text-purple-600 mx-auto mb-3" />
+              <Edit3 className="w-8 h-8 text-emerald-600 mx-auto mb-3" />
               <h3 className="font-bold text-gray-900 mb-1">E-Signature Generator</h3>
               <p className="text-sm text-gray-500">Create your electronic signature</p>
             </Link>
@@ -380,7 +380,7 @@ export default function FillPdfFreePage() {
       </section>
 
       {/* Bottom CTA */}
-      <section className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 py-20 px-4">
+      <section className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 py-20 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-6">
             Ready to Fill Your PDF Form?
