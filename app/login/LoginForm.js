@@ -349,7 +349,7 @@ export default function LoginForm() {
               <Users className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="font-semibold text-lg">Trusted by 500+ businesses</p>
+              <p className="font-semibold text-lg">Trusted by businesses worldwide</p>
             </div>
           </div>
         </div>

@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 export const metadata = {
   title: 'eSignTap - #1 Affordable E-Signature Platform | Sign Documents Online',
-  description: 'Sign documents online for free. The most affordable DocuSign alternative trusted by 500+ businesses. Save up to 70% on e-signatures. Try free tools - no signup required.',
+  description: 'Sign documents online for free. The most affordable DocuSign alternative. Save up to 70% on e-signatures. Try free tools - no signup required.',
   keywords: 'e-signature, electronic signature, sign documents online, DocuSign alternative, free PDF signing, digital signature, affordable e-signature, document signing software',
   alternates: {
     canonical: 'https://esigntap.com',
@@ -106,50 +106,9 @@ export default function HomePage() {
             </span>
           </div>
 
-          {/* Live stats strip */}
-          <div className="mt-10 grid grid-cols-3 gap-3 sm:gap-6 max-w-2xl mx-auto">
-            {[
-              { value: '2M+', label: 'Documents signed' },
-              { value: '500+', label: 'Happy businesses' },
-              { value: '70%', label: 'Avg. cost savings' },
-            ].map((s) => (
-              <div
-                key={s.label}
-                className="bg-white/70 backdrop-blur rounded-2xl border border-emerald-100 px-3 py-4 sm:py-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
-              >
-                <div className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                  {s.value}
-                </div>
-                <div className="text-[11px] sm:text-xs text-gray-500 font-semibold uppercase tracking-wide mt-1">
-                  {s.label}
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
-      {/* ===================== SOCIAL PROOF BAR ===================== */}
-      <section className="w-full py-10 sm:py-14 bg-gray-50 overflow-hidden">
-        <p className="text-center text-sm font-semibold text-gray-400 uppercase tracking-widest mb-8">
-          Trusted by 500+ businesses worldwide
-        </p>
-        <div className="relative">
-          <div className="flex animate-[marquee_20s_linear_infinite] gap-12 sm:gap-16 whitespace-nowrap">
-            {['TechCorp', 'GlobalHR', 'LegalPro', 'HealthFirst', 'PropMax', 'TechCorp', 'GlobalHR', 'LegalPro', 'HealthFirst', 'PropMax'].map((name, i) => (
-              <span key={i} className="text-2xl sm:text-3xl font-bold text-gray-300 select-none">
-                {name}
-              </span>
-            ))}
-          </div>
-        </div>
-        <style>{`
-          @keyframes marquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-          }
-        `}</style>
-      </section>
 
       {/* ===================== HOW IT WORKS ===================== */}
       <section className="w-full py-16 sm:py-24 px-4">
@@ -532,7 +491,7 @@ export default function HomePage() {
             Ready to Simplify Your Signing?
           </h2>
           <p className="text-lg text-white/80 mb-10 max-w-xl mx-auto">
-            Join 500+ businesses already saving time and money with eSignTap.
+            Start saving time and money on document signing with eSignTap.
           </p>
           <Link
             href="/login"

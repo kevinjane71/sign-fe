@@ -16,19 +16,16 @@ export default function PricingPage() {
         description: "Perfect for trying out eSignTap",
         price: { monthly: 0, annual: 0 },
         features: [
-          "🎁 ALL PRO FEATURES until July 30th!",
-          "50 documents per month (limited time)",
-          "Unlimited signers (limited time)",
-          "All templates & forms (limited time)",
-          "Priority email support (limited time)",
-          "Custom branding (limited time)",
-          "After July 30th: 3 docs/month",
-          "Basic support (permanent)"
+          "3 documents per month",
+          "Up to 2 signers per document",
+          "Basic templates",
+          "Email support",
+          "7-day document storage"
         ],
         limitations: [],
-        buttonText: "Get Free Pro Access",
-        buttonStyle: "bg-green-600 text-white hover:bg-green-700 border-2 border-green-600",
-        popular: true
+        buttonText: "Get Started Free",
+        buttonStyle: "border-2 border-gray-300 text-gray-700 hover:bg-gray-50",
+        popular: false
       },
       {
         name: "Pro",
@@ -77,19 +74,16 @@ export default function PricingPage() {
         description: "Perfect for trying out eSignTap",
         price: { monthly: 0, annual: 0 },
         features: [
-          "🎁 ALL PRO FEATURES until July 30th!",
-          "50 documents per month (limited time)",
-          "Unlimited signers (limited time)",
-          "All templates & forms (limited time)",
-          "Priority email support (limited time)",
-          "Custom branding (limited time)",
-          "After July 30th: 3 docs/month",
-          "Basic support (permanent)"
+          "3 documents per month",
+          "Up to 2 signers per document",
+          "Basic templates",
+          "Email support",
+          "7-day document storage"
         ],
         limitations: [],
-        buttonText: "Get Free Pro Access",
-        buttonStyle: "bg-green-600 text-white hover:bg-green-700 border-2 border-green-600",
-        popular: true
+        buttonText: "Get Started Free",
+        buttonStyle: "border-2 border-gray-300 text-gray-700 hover:bg-gray-50",
+        popular: false
       },
       {
         name: "Pro",
@@ -147,18 +141,6 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Promotional Banner */}
-      <div className="bg-gradient-to-r from-green-600 to-emerald-600 py-3 sm:py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-white font-semibold text-sm sm:text-base">
-              🎉 <span className="font-bold">Limited Time Offer!</span> All Pro features FREE for everyone until July 30th, 2024! 
-              <span className="hidden sm:inline"> No credit card required.</span>
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Hero Section - Made Smaller */}
       <div className="bg-gradient-to-br from-indigo-50 to-purple-50 py-12 sm:py-16">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
@@ -381,17 +363,17 @@ export default function PricingPage() {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 py-16 sm:py-20">
+      <div className="bg-gradient-to-r from-teal-600 to-emerald-600 py-16 sm:py-20">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
             Ready to streamline your workflow?
           </h2>
-          <p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-emerald-100 mb-8 max-w-2xl mx-auto">
             Join thousands of professionals who trust eSignTap for their document signing needs
           </p>
           <button
             onClick={() => router.push('/login')}
-            className="inline-flex items-center space-x-3 bg-white text-indigo-600 px-8 py-4 rounded-2xl font-bold hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 text-lg"
+            className="inline-flex items-center space-x-3 bg-white text-teal-600 px-8 py-4 rounded-2xl font-bold hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 text-lg"
           >
             <span>Start Free Today</span>
             <ArrowRight className="w-5 h-5" />
